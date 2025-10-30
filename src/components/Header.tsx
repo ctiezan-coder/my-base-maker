@@ -1,5 +1,5 @@
-import { Database, Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Database } from "lucide-react";
+import { UserMenu } from "./UserMenu";
 
 export const Header = () => {
   return (
@@ -15,9 +15,7 @@ export const Header = () => {
               <p className="text-xs text-muted-foreground">Base de Données Institutionnelle</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="lg:hidden">
-            <Menu className="w-5 h-5" />
-          </Button>
+          <UserMenu />
         </div>
       </div>
     </header>
