@@ -252,7 +252,6 @@ export type Database = {
           email: string
           full_name: string
           id: string
-          role: string | null
           updated_at: string
           user_id: string
         }
@@ -263,7 +262,6 @@ export type Database = {
           email: string
           full_name: string
           id?: string
-          role?: string | null
           updated_at?: string
           user_id: string
         }
@@ -274,7 +272,6 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
-          role?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -330,15 +327,97 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "manager" | "user"
+      company_legal_form:
+        | "SA"
+        | "SARL"
+        | "SAS"
+        | "SASU"
+        | "EI"
+        | "GIE"
+        | "Autre"
+      company_size: "TPE" | "PME" | "ETI" | "Grande entreprise"
+      document_category:
+        | "Convention exportation"
+        | "Agrément"
+        | "Licence"
+        | "Texte légal"
+        | "Accord partenariat"
+        | "MoU"
+        | "Protocole collaboration"
+        | "Manuel"
+        | "Politique"
+        | "Procédure"
+        | "Formulaire"
+        | "Contrat PPP"
+        | "Contrat stage"
+        | "Fiche de poste"
+        | "Étude marché"
+        | "PTBA"
+        | "TDR"
+        | "Autre"
+      gender: "Homme" | "Femme"
+      media_type:
+        | "Newsletter"
+        | "Magazine"
+        | "Création graphique"
+        | "Film institutionnel"
+        | "Reportage"
+        | "Capsule vidéo"
+        | "Photo"
+        | "Article presse"
+        | "Interview audio"
+        | "Autre"
+      participation_type: "Foires" | "Salons" | "Jamais"
+      priority_level: "1" | "3" | "5"
+      registration_status:
+        | "En attente"
+        | "Confirmée"
+        | "Annulée"
+        | "Présent"
+        | "Absent"
+      support_type: "Financier" | "Non financier" | "Les deux"
+      training_type:
+        | "Formation"
+        | "Atelier"
+        | "Coaching"
+        | "Webinaire"
+        | "Autre"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -465,6 +544,54 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "manager", "user"],
+      company_legal_form: ["SA", "SARL", "SAS", "SASU", "EI", "GIE", "Autre"],
+      company_size: ["TPE", "PME", "ETI", "Grande entreprise"],
+      document_category: [
+        "Convention exportation",
+        "Agrément",
+        "Licence",
+        "Texte légal",
+        "Accord partenariat",
+        "MoU",
+        "Protocole collaboration",
+        "Manuel",
+        "Politique",
+        "Procédure",
+        "Formulaire",
+        "Contrat PPP",
+        "Contrat stage",
+        "Fiche de poste",
+        "Étude marché",
+        "PTBA",
+        "TDR",
+        "Autre",
+      ],
+      gender: ["Homme", "Femme"],
+      media_type: [
+        "Newsletter",
+        "Magazine",
+        "Création graphique",
+        "Film institutionnel",
+        "Reportage",
+        "Capsule vidéo",
+        "Photo",
+        "Article presse",
+        "Interview audio",
+        "Autre",
+      ],
+      participation_type: ["Foires", "Salons", "Jamais"],
+      priority_level: ["1", "3", "5"],
+      registration_status: [
+        "En attente",
+        "Confirmée",
+        "Annulée",
+        "Présent",
+        "Absent",
+      ],
+      support_type: ["Financier", "Non financier", "Les deux"],
+      training_type: ["Formation", "Atelier", "Coaching", "Webinaire", "Autre"],
+    },
   },
 } as const
