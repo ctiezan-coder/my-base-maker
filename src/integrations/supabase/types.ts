@@ -14,6 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
+      companies: {
+        Row: {
+          accompaniment_status: string | null
+          aciex_interaction_history: string | null
+          activity_sector: string | null
+          annual_turnover: number | null
+          certifications: string[] | null
+          city: string | null
+          commercial_events_participation:
+            | Database["public"]["Enums"]["participation_type"]
+            | null
+          company_name: string
+          company_size: Database["public"]["Enums"]["company_size"] | null
+          created_at: string
+          created_by: string | null
+          creation_date: string | null
+          current_export_markets: string[] | null
+          dfe_number: string
+          direction_id: string | null
+          email: string | null
+          export_manager_email: string | null
+          export_manager_name: string | null
+          export_manager_phone: string | null
+          exported_products: string | null
+          has_export_service: boolean | null
+          headquarters_location: string
+          id: string
+          legal_form: Database["public"]["Enums"]["company_legal_form"] | null
+          legal_representative_email: string | null
+          legal_representative_gender:
+            | Database["public"]["Enums"]["gender"]
+            | null
+          legal_representative_name: string | null
+          legal_representative_phone: string | null
+          phone: string | null
+          postal_address: string | null
+          products_services: string | null
+          rccm_number: string
+          support_needed: Database["public"]["Enums"]["support_type"] | null
+          target_export_markets: string[] | null
+          trade_name: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          accompaniment_status?: string | null
+          aciex_interaction_history?: string | null
+          activity_sector?: string | null
+          annual_turnover?: number | null
+          certifications?: string[] | null
+          city?: string | null
+          commercial_events_participation?:
+            | Database["public"]["Enums"]["participation_type"]
+            | null
+          company_name: string
+          company_size?: Database["public"]["Enums"]["company_size"] | null
+          created_at?: string
+          created_by?: string | null
+          creation_date?: string | null
+          current_export_markets?: string[] | null
+          dfe_number: string
+          direction_id?: string | null
+          email?: string | null
+          export_manager_email?: string | null
+          export_manager_name?: string | null
+          export_manager_phone?: string | null
+          exported_products?: string | null
+          has_export_service?: boolean | null
+          headquarters_location: string
+          id?: string
+          legal_form?: Database["public"]["Enums"]["company_legal_form"] | null
+          legal_representative_email?: string | null
+          legal_representative_gender?:
+            | Database["public"]["Enums"]["gender"]
+            | null
+          legal_representative_name?: string | null
+          legal_representative_phone?: string | null
+          phone?: string | null
+          postal_address?: string | null
+          products_services?: string | null
+          rccm_number: string
+          support_needed?: Database["public"]["Enums"]["support_type"] | null
+          target_export_markets?: string[] | null
+          trade_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          accompaniment_status?: string | null
+          aciex_interaction_history?: string | null
+          activity_sector?: string | null
+          annual_turnover?: number | null
+          certifications?: string[] | null
+          city?: string | null
+          commercial_events_participation?:
+            | Database["public"]["Enums"]["participation_type"]
+            | null
+          company_name?: string
+          company_size?: Database["public"]["Enums"]["company_size"] | null
+          created_at?: string
+          created_by?: string | null
+          creation_date?: string | null
+          current_export_markets?: string[] | null
+          dfe_number?: string
+          direction_id?: string | null
+          email?: string | null
+          export_manager_email?: string | null
+          export_manager_name?: string | null
+          export_manager_phone?: string | null
+          exported_products?: string | null
+          has_export_service?: boolean | null
+          headquarters_location?: string
+          id?: string
+          legal_form?: Database["public"]["Enums"]["company_legal_form"] | null
+          legal_representative_email?: string | null
+          legal_representative_gender?:
+            | Database["public"]["Enums"]["gender"]
+            | null
+          legal_representative_name?: string | null
+          legal_representative_phone?: string | null
+          phone?: string | null
+          postal_address?: string | null
+          products_services?: string | null
+          rccm_number?: string
+          support_needed?: Database["public"]["Enums"]["support_type"] | null
+          target_export_markets?: string[] | null
+          trade_name?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       directions: {
         Row: {
           created_at: string
@@ -50,10 +182,14 @@ export type Database = {
           created_at: string
           description: string | null
           direction_id: string
+          document_category:
+            | Database["public"]["Enums"]["document_category"]
+            | null
           file_size: number | null
           file_type: string | null
           file_url: string | null
           id: string
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
           title: string
           updated_at: string
           uploaded_by: string | null
@@ -63,10 +199,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           direction_id: string
+          document_category?:
+            | Database["public"]["Enums"]["document_category"]
+            | null
           file_size?: number | null
           file_type?: string | null
           file_url?: string | null
           id?: string
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
           title: string
           updated_at?: string
           uploaded_by?: string | null
@@ -76,10 +216,14 @@ export type Database = {
           created_at?: string
           description?: string | null
           direction_id?: string
+          document_category?:
+            | Database["public"]["Enums"]["document_category"]
+            | null
           file_size?: number | null
           file_type?: string | null
           file_url?: string | null
           id?: string
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
           title?: string
           updated_at?: string
           uploaded_by?: string | null
@@ -194,8 +338,54 @@ export type Database = {
           },
         ]
       }
+      media_content: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string
+          file_size: number | null
+          file_url: string | null
+          id: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          media_type: Database["public"]["Enums"]["media_type"]
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          media_type?: Database["public"]["Enums"]["media_type"]
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       partnerships: {
         Row: {
+          budget: number | null
+          contact_email: string | null
+          contact_person: string | null
+          contact_phone: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -204,11 +394,16 @@ export type Database = {
           id: string
           partner_name: string
           partner_type: string | null
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
           start_date: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
+          budget?: number | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -217,11 +412,16 @@ export type Database = {
           id?: string
           partner_name: string
           partner_type?: string | null
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
           start_date?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
+          budget?: number | null
+          contact_email?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -230,6 +430,7 @@ export type Database = {
           id?: string
           partner_name?: string
           partner_type?: string | null
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
           start_date?: string | null
           status?: string | null
           updated_at?: string
@@ -283,10 +484,13 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
+          dfe_number: string | null
           direction_id: string
           end_date: string | null
           id: string
           name: string
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
+          rccm_number: string | null
           start_date: string | null
           status: string | null
           updated_at: string
@@ -296,10 +500,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          dfe_number?: string | null
           direction_id: string
           end_date?: string | null
           id?: string
           name: string
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          rccm_number?: string | null
           start_date?: string | null
           status?: string | null
           updated_at?: string
@@ -309,10 +516,13 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
+          dfe_number?: string | null
           direction_id?: string
           end_date?: string | null
           id?: string
           name?: string
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          rccm_number?: string | null
           start_date?: string | null
           status?: string | null
           updated_at?: string
@@ -326,6 +536,147 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trainers: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          organization: string | null
+          phone: string | null
+          specialization: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          organization?: string | null
+          phone?: string | null
+          specialization?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          organization?: string | null
+          phone?: string | null
+          specialization?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      training_registrations: {
+        Row: {
+          attended: boolean | null
+          certificate_issued: boolean | null
+          company_id: string | null
+          created_at: string
+          evaluation_comments: string | null
+          evaluation_score: number | null
+          id: string
+          participant_email: string
+          participant_name: string
+          participant_phone: string | null
+          participant_position: string | null
+          registration_date: string
+          status: Database["public"]["Enums"]["registration_status"] | null
+          training_id: string
+          updated_at: string
+        }
+        Insert: {
+          attended?: boolean | null
+          certificate_issued?: boolean | null
+          company_id?: string | null
+          created_at?: string
+          evaluation_comments?: string | null
+          evaluation_score?: number | null
+          id?: string
+          participant_email: string
+          participant_name: string
+          participant_phone?: string | null
+          participant_position?: string | null
+          registration_date?: string
+          status?: Database["public"]["Enums"]["registration_status"] | null
+          training_id: string
+          updated_at?: string
+        }
+        Update: {
+          attended?: boolean | null
+          certificate_issued?: boolean | null
+          company_id?: string | null
+          created_at?: string
+          evaluation_comments?: string | null
+          evaluation_score?: number | null
+          id?: string
+          participant_email?: string
+          participant_name?: string
+          participant_phone?: string | null
+          participant_position?: string | null
+          registration_date?: string
+          status?: Database["public"]["Enums"]["registration_status"] | null
+          training_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trainings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_participants: number | null
+          description: string | null
+          direction_id: string
+          end_date: string
+          id: string
+          location: string | null
+          max_participants: number | null
+          start_date: string
+          title: string
+          trainer_ids: string[] | null
+          training_type: Database["public"]["Enums"]["training_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_participants?: number | null
+          description?: string | null
+          direction_id: string
+          end_date: string
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          start_date: string
+          title: string
+          trainer_ids?: string[] | null
+          training_type: Database["public"]["Enums"]["training_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_participants?: number | null
+          description?: string | null
+          direction_id?: string
+          end_date?: string
+          id?: string
+          location?: string | null
+          max_participants?: number | null
+          start_date?: string
+          title?: string
+          trainer_ids?: string[] | null
+          training_type?: Database["public"]["Enums"]["training_type"]
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
