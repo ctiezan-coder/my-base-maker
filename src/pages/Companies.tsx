@@ -48,15 +48,15 @@ export default function Companies() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Building2 className="w-8 h-8 text-primary" />
-            Entreprises Exportatrices
+            Opérateurs Économiques
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gestion du répertoire des entreprises accompagnées
+            Base de données unifiée des entreprises accompagnées
           </p>
         </div>
         <Button onClick={() => setDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Nouvelle entreprise
+          Nouvel opérateur
         </Button>
       </div>
 

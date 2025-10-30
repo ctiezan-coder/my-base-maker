@@ -91,7 +91,7 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {company ? "Modifier l'entreprise" : "Nouvelle entreprise"}
+            {company ? "Modifier l'opérateur" : "Nouvel opérateur"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit}>

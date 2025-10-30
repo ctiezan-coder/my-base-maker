@@ -1,0 +1,237 @@
+import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+
+interface PartnershipDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  partnership?: any;
+  onClose: () => void;
+}
+
+export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: PartnershipDialogProps) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState<any>({
+    partner_name: "",
+    partner_type: "",
+    description: "",
+    status: "en négociation",
+    start_date: "",
+    end_date: "",
+    contact_person: "",
+    contact_email: "",
+    contact_phone: "",
+    budget: "",
+    direction_id: "",
+  });
+
+  useEffect(() => {
+    if (partnership) {
+      setFormData({
+        partner_name: partnership.partner_name || "",
+        partner_type: partnership.partner_type || "",
+        description: partnership.description || "",
+        status: partnership.status || "en négociation",
+        start_date: partnership.start_date || "",
+        end_date: partnership.end_date || "",
+        contact_person: partnership.contact_person || "",
+        contact_email: partnership.contact_email || "",
+        contact_phone: partnership.contact_phone || "",
+        budget: partnership.budget?.toString() || "",
+        direction_id: partnership.direction_id || "",
+      });
+    } else {
+      setFormData({
+        partner_name: "",
+        partner_type: "",
+        description: "",
+        status: "en négociation",
+        start_date: "",
+        end_date: "",
+        contact_person: "",
+        contact_email: "",
+        contact_phone: "",
+        budget: "",
+        direction_id: "",
+      });
+    }
+  }, [partnership]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const dataToSave = {
+        ...formData,
+        budget: formData.budget ? parseFloat(formData.budget) : null,
+      };
+
+      if (partnership) {
+        const { error } = await supabase
+          .from("partnerships")
+          .update(dataToSave)
+          .eq("id", partnership.id);
+
+        if (error) throw error;
+        toast({ title: "Partenariat mis à jour avec succès" });
+      } else {
+        const { error } = await supabase
+          .from("partnerships")
+          .insert([dataToSave]);
+
+        if (error) throw error;
+        toast({ title: "Partenariat créé avec succès" });
+      }
+      onClose();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>
+            {partnership ? "Modifier le partenariat" : "Nouveau partenariat"}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="partner_name">Nom du partenaire *</Label>
+              <Input
+                id="partner_name"
+                value={formData.partner_name}
+                onChange={(e) => setFormData({ ...formData, partner_name: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="partner_type">Type de partenaire</Label>
+              <Input
+                id="partner_type"
+                value={formData.partner_type}
+                onChange={(e) => setFormData({ ...formData, partner_type: e.target.value })}
+                placeholder="PTF, Entreprise, ONG..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="status">Statut</Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => setFormData({ ...formData, status: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en négociation">En négociation</SelectItem>
+                  <SelectItem value="actif">Actif</SelectItem>
+                  <SelectItem value="suspendu">Suspendu</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={3}
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact_person">Personne contact</Label>
+              <Input
+                id="contact_person"
+                value={formData.contact_person}
+                onChange={(e) => setFormData({ ...formData, contact_person: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contact_email">Email</Label>
+              <Input
+                id="contact_email"
+                type="email"
+                value={formData.contact_email}
+                onChange={(e) => setFormData({ ...formData, contact_email: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contact_phone">Téléphone</Label>
+              <Input
+                id="contact_phone"
+                value={formData.contact_phone}
+                onChange={(e) => setFormData({ ...formData, contact_phone: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="start_date">Date début</Label>
+              <Input
+                id="start_date"
+                type="date"
+                value={formData.start_date}
+                onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="end_date">Date fin</Label>
+              <Input
+                id="end_date"
+                type="date"
+                value={formData.end_date}
+                onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="budget">Budget (FCFA)</Label>
+              <Input
+                id="budget"
+                type="number"
+                value={formData.budget}
+                onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Annuler
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Enregistrement..." : "Enregistrer"}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

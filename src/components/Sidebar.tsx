@@ -15,15 +15,15 @@ import {
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/" },
-  { icon: Building2, label: "Entreprises", path: "/companies" },
-  { icon: GraduationCap, label: "Formations", path: "/trainings" },
-  { icon: Users, label: "Formateurs", path: "/trainers" },
-  { icon: FileText, label: "Documents", path: "/documents" },
+  { icon: Building2, label: "Opérateurs", path: "/companies" },
   { icon: Handshake, label: "Partenariats", path: "/partnerships" },
   { icon: FolderKanban, label: "Projets", path: "/projects" },
-  { icon: BarChart3, label: "KPIs", path: "/kpis" },
+  { icon: GraduationCap, label: "Formations", path: "/trainings" },
+  { icon: Users, label: "Formateurs", path: "/trainers" },
   { icon: Calendar, label: "Événements", path: "/events" },
+  { icon: FileText, label: "Documents", path: "/documents" },
   { icon: Image, label: "Médias", path: "/media" },
+  { icon: BarChart3, label: "KPIs", path: "/kpis" },
 ];
 
 export function Sidebar() {
