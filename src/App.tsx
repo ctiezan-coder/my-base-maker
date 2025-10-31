@@ -8,9 +8,13 @@ import Dashboard from "./pages/Dashboard";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Companies from "./pages/Companies";
+import Trainings from "./pages/Trainings";
+import Trainers from "./pages/Trainers";
+import Events from "./pages/Events";
 import Partnerships from "./pages/Partnerships";
 import Projects from "./pages/Projects";
-import Trainings from "./pages/Trainings";
+import Documents from "./pages/Documents";
+import Media from "./pages/Media";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,9 +31,13 @@ const App = () => (
             <Route path="/" element={<Dashboard />}>
               <Route index element={<Index />} />
               <Route path="companies" element={<Companies />} />
+              <Route path="trainings" element={<Trainings />} />
+              <Route path="trainers" element={<Trainers />} />
+              <Route path="events" element={<Events />} />
               <Route path="partnerships" element={<Partnerships />} />
               <Route path="projects" element={<Projects />} />
-              <Route path="trainings" element={<Trainings />} />
+              <Route path="documents" element={<Documents />} />
+              <Route path="media" element={<Media />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
