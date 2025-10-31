@@ -108,6 +108,7 @@ export function FolderDialog({ open, onOpenChange, folder, parentFolderId, onClo
             <Select
               value={formData.direction_id}
               onValueChange={(value) => setFormData({ ...formData, direction_id: value })}
+              required
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une direction" />
