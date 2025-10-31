@@ -43,33 +43,67 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
 
   const mapExcelToDatabase = (row: any) => {
     // Nettoyer les valeurs "ND" et vides
-    const cleanValue = (val: any) => {
-      if (!val || val === "ND" || val === "") return null;
-      return val;
+    const cleanValue = (val: any): string | null => {
+      if (!val || val === "ND" || val === "" || val === " ") return null;
+      return String(val).trim();
     };
 
-    // Extraire les emails et téléphones s'ils sont dans le format "code"
-    const extractEmail = (val: any) => {
+    // Extraire les emails valides (ignorer les codes numériques)
+    const extractEmail = (val: any): string | null => {
       if (!val || val === "ND") return null;
+      const strVal = String(val).trim();
       // Si c'est un code numérique, ne pas l'utiliser comme email
-      if (/^\d+$/.test(val)) return null;
-      return val;
+      if (/^\d+$/.test(strVal)) return null;
+      // Vérifier format email basique
+      if (strVal.includes("@")) return strVal;
+      return null;
     };
 
+    // Mapper la forme juridique aux valeurs acceptées
+    const mapLegalForm = (val: any): "SA" | "SARL" | "SAS" | "SASU" | "EI" | "GIE" | "Autre" | null => {
+      const clean = cleanValue(val);
+      if (!clean) return null;
+      const upper = clean.toUpperCase();
+      if (upper === "SA") return "SA";
+      if (upper === "SARL") return "SARL";
+      if (upper === "SAS") return "SAS";
+      if (upper === "SASU") return "SASU";
+      if (upper === "EI") return "EI";
+      if (upper === "GIE") return "GIE";
+      return "Autre";
+    };
+
+    // Générer un RCCM unique basé sur le nom de l'entreprise
+    const generateRCCM = (companyName: string, codeExport: any) => {
+      const cleanCode = cleanValue(codeExport);
+      if (cleanCode && cleanCode !== "ND") return cleanCode;
+      
+      const sanitized = companyName.replace(/[^A-Z0-9]/gi, "").toUpperCase().substring(0, 10);
+      return `RCCM-${sanitized}-${Date.now().toString().slice(-6)}`;
+    };
+
+    const companyName = row["Entreprise"] || "Entreprise sans nom";
+    
     return {
-      company_name: row["Entreprise"] || "",
-      legal_form: cleanValue(row["Statut juridique"]),
-      activity_sector: cleanValue(row["Secteur"]),
-      exported_products: cleanValue(row["Produits principaux"]),
-      current_export_markets: cleanValue(row["Pays d'exportation"]) ? [row["Pays d'exportation"]] : null,
-      legal_representative_name: cleanValue(row["Personne de contact"]),
+      // Onglet Identité
+      company_name: companyName,
+      legal_form: mapLegalForm(row["Statut juridique"]),
+      rccm_number: generateRCCM(companyName, row["Code export"]),
+      dfe_number: `DFE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      headquarters_location: cleanValue(row["Adresse"]) || "Non spécifié",
       email: extractEmail(row["Email"]),
       phone: cleanValue(row["Téléphone"]),
-      headquarters_location: cleanValue(row["Adresse"]) || "Non spécifié",
+      
+      // Onglet Activité
+      activity_sector: cleanValue(row["Secteur"]),
+      exported_products: cleanValue(row["Produits principaux"]),
+      commercial_events_participation: "Jamais" as const,
+      
+      // Champs additionnels de la base
       website: cleanValue(row["Site web"]),
       certifications: cleanValue(row["Certifications"]) ? [row["Certifications"]] : null,
-      rccm_number: cleanValue(row["Code export"]) || `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      dfe_number: `DFE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      current_export_markets: cleanValue(row["Pays d'exportation"]) ? [row["Pays d'exportation"]] : null,
+      legal_representative_name: cleanValue(row["Personne de contact"]),
       accompaniment_status: cleanValue(row["Statut"]),
       aciex_interaction_history: cleanValue(row["Notes"]),
     };
@@ -161,18 +195,20 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
                   <thead className="bg-muted">
                     <tr>
                       <th className="p-2 text-left">Entreprise</th>
+                      <th className="p-2 text-left">Forme juridique</th>
                       <th className="p-2 text-left">Secteur</th>
                       <th className="p-2 text-left">Contact</th>
-                      <th className="p-2 text-left">Email</th>
+                      <th className="p-2 text-left">Statut</th>
                     </tr>
                   </thead>
                   <tbody>
                     {preview.map((row, idx) => (
                       <tr key={idx} className="border-t">
-                        <td className="p-2">{row["Entreprise"]}</td>
+                        <td className="p-2 font-medium">{row["Entreprise"]}</td>
+                        <td className="p-2 text-xs">{row["Statut juridique"] !== "ND" ? row["Statut juridique"] : "-"}</td>
                         <td className="p-2">{row["Secteur"] || "-"}</td>
-                        <td className="p-2">{row["Personne de contact"] || "-"}</td>
-                        <td className="p-2">{row["Email"] || "-"}</td>
+                        <td className="p-2 text-xs">{row["Personne de contact"] || "-"}</td>
+                        <td className="p-2 text-xs">{row["Statut"] || "-"}</td>
                       </tr>
                     ))}
                   </tbody>
