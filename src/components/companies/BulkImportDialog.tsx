@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Upload, FileSpreadsheet, AlertCircle } from "lucide-react";
+import { Upload, FileSpreadsheet, AlertCircle, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -158,11 +158,20 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Téléchargez un fichier Excel (.xlsx) contenant les colonnes : Entreprise, Statut juridique, Secteur, Produits principaux, Pays d'exportation, Personne de contact, Email, Téléphone, Adresse, Site web, Certifications, Code export, Statut, Notes.
-              <br />
-              <a href="/sample-import.xlsx" download className="text-primary hover:underline mt-1 inline-block">
-                📥 Télécharger un fichier exemple
-              </a>
+              <div className="space-y-2">
+                <p>Téléchargez un fichier Excel (.xlsx) contenant les colonnes : Entreprise, Statut juridique, Secteur, Produits principaux, Pays d'exportation, Personne de contact, Email, Téléphone, Adresse, Site web, Certifications, Code export, Statut, Notes.</p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  asChild
+                  className="w-full sm:w-auto"
+                >
+                  <a href="/sample-import.xlsx" download="modele-import-operateurs.xlsx">
+                    <Download className="w-4 h-4 mr-2" />
+                    Télécharger le fichier exemple
+                  </a>
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
 
