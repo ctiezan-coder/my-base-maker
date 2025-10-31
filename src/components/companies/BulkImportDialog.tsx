@@ -42,21 +42,36 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
   };
 
   const mapExcelToDatabase = (row: any) => {
+    // Nettoyer les valeurs "ND" et vides
+    const cleanValue = (val: any) => {
+      if (!val || val === "ND" || val === "") return null;
+      return val;
+    };
+
+    // Extraire les emails et téléphones s'ils sont dans le format "code"
+    const extractEmail = (val: any) => {
+      if (!val || val === "ND") return null;
+      // Si c'est un code numérique, ne pas l'utiliser comme email
+      if (/^\d+$/.test(val)) return null;
+      return val;
+    };
+
     return {
       company_name: row["Entreprise"] || "",
-      legal_form: row["Statut juridique"] !== "ND" ? row["Statut juridique"] : null,
-      activity_sector: row["Secteur"] || null,
-      exported_products: row["Produits principaux"] !== "ND" ? row["Produits principaux"] : null,
-      current_export_markets: row["Pays d'exportation"] !== "ND" ? [row["Pays d'exportation"]] : null,
-      legal_representative_name: row["Personne de contact"] || null,
-      email: row["Email"] || null,
-      phone: row["Téléphone"] || null,
-      headquarters_location: row["Adresse"] || "Non spécifié",
-      website: row["Site web"] || null,
-      certifications: row["Certifications"] !== "ND" && row["Certifications"] ? [row["Certifications"]] : null,
-      rccm_number: row["Code export"] || `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      legal_form: cleanValue(row["Statut juridique"]),
+      activity_sector: cleanValue(row["Secteur"]),
+      exported_products: cleanValue(row["Produits principaux"]),
+      current_export_markets: cleanValue(row["Pays d'exportation"]) ? [row["Pays d'exportation"]] : null,
+      legal_representative_name: cleanValue(row["Personne de contact"]),
+      email: extractEmail(row["Email"]),
+      phone: cleanValue(row["Téléphone"]),
+      headquarters_location: cleanValue(row["Adresse"]) || "Non spécifié",
+      website: cleanValue(row["Site web"]),
+      certifications: cleanValue(row["Certifications"]) ? [row["Certifications"]] : null,
+      rccm_number: cleanValue(row["Code export"]) || `TEMP-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       dfe_number: `DFE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      accompaniment_status: row["Statut"] || null,
+      accompaniment_status: cleanValue(row["Statut"]),
+      aciex_interaction_history: cleanValue(row["Notes"]),
     };
   };
 
@@ -109,7 +124,11 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Téléchargez un fichier Excel (.xlsx) contenant les colonnes : Entreprise, Statut juridique, Secteur, Produits principaux, Pays d'exportation, Personne de contact, Email, Téléphone, Adresse, Site web, Certifications, Code export, Statut.
+              Téléchargez un fichier Excel (.xlsx) contenant les colonnes : Entreprise, Statut juridique, Secteur, Produits principaux, Pays d'exportation, Personne de contact, Email, Téléphone, Adresse, Site web, Certifications, Code export, Statut, Notes.
+              <br />
+              <a href="/sample-import.xlsx" download className="text-primary hover:underline mt-1 inline-block">
+                📥 Télécharger un fichier exemple
+              </a>
             </AlertDescription>
           </Alert>
 
