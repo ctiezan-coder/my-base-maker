@@ -63,9 +63,10 @@ export function FolderDialog({ open, onOpenChange, folder, parentFolderId, onClo
         if (error) throw error;
         toast({ title: "Dossier mis à jour avec succès" });
       } else {
+        const { data: { user } } = await supabase.auth.getUser();
         const { error } = await supabase
           .from("folders")
-          .insert([formData]);
+          .insert([{ ...formData, created_by: user?.id }]);
 
         if (error) throw error;
         toast({ title: "Dossier créé avec succès" });
