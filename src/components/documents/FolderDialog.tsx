@@ -66,7 +66,10 @@ export function FolderDialog({ open, onOpenChange, folder, parentFolderId, onClo
         const { data: { user } } = await supabase.auth.getUser();
         const { error } = await supabase
           .from("folders")
-          .insert([{ ...formData, created_by: user?.id }]);
+          .insert([{ 
+            ...formData,
+            created_by: user?.id 
+          }]);
 
         if (error) throw error;
         toast({ title: "Dossier créé avec succès" });
@@ -108,7 +111,6 @@ export function FolderDialog({ open, onOpenChange, folder, parentFolderId, onClo
             <Select
               value={formData.direction_id}
               onValueChange={(value) => setFormData({ ...formData, direction_id: value })}
-              required
             >
               <SelectTrigger>
                 <SelectValue placeholder="Sélectionner une direction" />
