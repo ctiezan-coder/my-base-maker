@@ -1,15 +1,42 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Mail, Phone } from "lucide-react";
+import { Pencil, Mail, Phone, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
 
 interface CompanyTableProps {
   companies: any[];
   isLoading: boolean;
   onEdit: (company: any) => void;
+  onDelete: (company: any) => void;
 }
 
-export function CompanyTable({ companies, isLoading, onEdit }: CompanyTableProps) {
+export function CompanyTable({ companies, isLoading, onEdit, onDelete }: CompanyTableProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [companyToDelete, setCompanyToDelete] = useState<any>(null);
+
+  const handleDeleteClick = (company: any) => {
+    setCompanyToDelete(company);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (companyToDelete) {
+      onDelete(companyToDelete);
+      setDeleteDialogOpen(false);
+      setCompanyToDelete(null);
+    }
+  };
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -74,14 +101,36 @@ export function CompanyTable({ companies, isLoading, onEdit }: CompanyTableProps
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(company)}>
-                  <Pencil className="w-4 h-4" />
-                </Button>
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(company)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(company)}>
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogDescription>
+              Êtes-vous sûr de vouloir supprimer l'opérateur "{companyToDelete?.company_name}" ? Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -4,13 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Search, Building2 } from "lucide-react";
+import { Plus, Search, Building2, Upload } from "lucide-react";
 import { CompanyDialog } from "@/components/companies/CompanyDialog";
 import { CompanyTable } from "@/components/companies/CompanyTable";
+import { BulkImportDialog } from "@/components/companies/BulkImportDialog";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Companies() {
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
 
   const { data: companies, isLoading, refetch } = useQuery({
@@ -42,6 +46,26 @@ export default function Companies() {
     refetch();
   };
 
+  const handleDelete = async (company: any) => {
+    try {
+      const { error } = await supabase
+        .from("companies")
+        .delete()
+        .eq("id", company.id);
+
+      if (error) throw error;
+
+      toast({ title: "Opérateur supprimé avec succès" });
+      refetch();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -54,10 +78,16 @@ export default function Companies() {
             Base de données unifiée des entreprises accompagnées
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvel opérateur
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            Import en masse
+          </Button>
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvel opérateur
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -79,6 +109,7 @@ export default function Companies() {
             companies={companies || []}
             isLoading={isLoading}
             onEdit={handleEdit}
+            onDelete={handleDelete}
           />
         </CardContent>
       </Card>
@@ -88,6 +119,15 @@ export default function Companies() {
         onOpenChange={setDialogOpen}
         company={selectedCompany}
         onClose={handleCloseDialog}
+      />
+
+      <BulkImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onClose={() => {
+          setImportDialogOpen(false);
+          refetch();
+        }}
       />
     </div>
   );
