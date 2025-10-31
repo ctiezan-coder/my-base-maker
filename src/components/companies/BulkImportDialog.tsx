@@ -19,6 +19,40 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
   const [preview, setPreview] = useState<any[]>([]);
   const [file, setFile] = useState<File | null>(null);
 
+  const downloadSampleFile = () => {
+    // Créer un fichier Excel exemple avec les bonnes colonnes
+    const sampleData = [
+      {
+        "Entreprise": "EXEMPLE SARL",
+        "Statut juridique": "SARL",
+        "Secteur": "Agroalimentaire",
+        "Produits principaux": "Café, Cacao",
+        "Pays d'exportation": "France, Belgique",
+        "Personne de contact": "M. Jean Dupont",
+        "Email": "contact@exemple.com",
+        "Téléphone": "+225 07 00 00 00 00",
+        "Adresse": "Abidjan, Cocody",
+        "Site web": "www.exemple.com",
+        "Certifications": "ISO 9001",
+        "Code export": "RCCM-001",
+        "Statut": "actif",
+        "Notes": "Client depuis 2020"
+      }
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Opérateurs");
+    
+    // Télécharger le fichier
+    XLSX.writeFile(wb, "modele-import-operateurs.xlsx");
+    
+    toast({
+      title: "Fichier téléchargé",
+      description: "Le modèle d'import a été téléchargé avec succès",
+    });
+  };
+
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
@@ -163,13 +197,12 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
                 <Button 
                   variant="outline" 
                   size="sm" 
-                  asChild
+                  onClick={downloadSampleFile}
+                  type="button"
                   className="w-full sm:w-auto"
                 >
-                  <a href="/sample-import.xlsx" download="modele-import-operateurs.xlsx">
-                    <Download className="w-4 h-4 mr-2" />
-                    Télécharger le fichier exemple
-                  </a>
+                  <Download className="w-4 h-4 mr-2" />
+                  Télécharger le fichier exemple
                 </Button>
               </div>
             </AlertDescription>
