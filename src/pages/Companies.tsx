@@ -9,13 +9,14 @@ import { CompanyDialog } from "@/components/companies/CompanyDialog";
 import { CompanyTable } from "@/components/companies/CompanyTable";
 import { BulkImportDialog } from "@/components/companies/BulkImportDialog";
 import { useToast } from "@/hooks/use-toast";
+import type { Company } from "@/types/company";
 
 export default function Companies() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const { data: companies, isLoading, refetch } = useQuery({
     queryKey: ["companies", search],
@@ -35,7 +36,7 @@ export default function Companies() {
     },
   });
 
-  const handleEdit = (company: any) => {
+  const handleEdit = (company: Company) => {
     setSelectedCompany(company);
     setDialogOpen(true);
   };
@@ -46,7 +47,15 @@ export default function Companies() {
     refetch();
   };
 
-  const handleDelete = async (company: any) => {
+  const handleDelete = async (company: Company) => {
+    // Confirmation avant suppression
+    const confirmed = window.confirm(
+      `Êtes-vous sûr de vouloir supprimer l'entreprise "${company.company_name}" ?\n\n` +
+      `Cette action est irréversible.`
+    );
+    
+    if (!confirmed) return;
+
     try {
       const { error } = await supabase
         .from("companies")
@@ -55,13 +64,17 @@ export default function Companies() {
 
       if (error) throw error;
 
-      toast({ title: "Opérateur supprimé avec succès" });
+      toast({ 
+        title: "Opérateur supprimé avec succès",
+        description: `${company.company_name} a été supprimé de la base de données.`
+      });
       refetch();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: error.message,
+        title: "Erreur lors de la suppression",
+        description: errorMessage,
       });
     }
   };
