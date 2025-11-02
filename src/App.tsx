@@ -15,6 +15,7 @@ import Partnerships from "./pages/Partnerships";
 import Projects from "./pages/Projects";
 import Documents from "./pages/Documents";
 import Media from "./pages/Media";
+import Kpis from "./pages/Kpis";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
               <Route path="projects" element={<Projects />} />
               <Route path="documents" element={<Documents />} />
               <Route path="media" element={<Media />} />
+              <Route path="kpis" element={<Kpis />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
