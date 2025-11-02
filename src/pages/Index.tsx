@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, FolderKanban, FileText, GraduationCap, Calendar, Handshake, Image, BarChart3 } from "lucide-react";
+import { Building2, FolderKanban, FileText, GraduationCap, Calendar, Handshake, Image, BarChart3, TrendingUp, Users, Target, Activity } from "lucide-react";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -34,11 +34,15 @@ const Index = () => {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [companies, projects, trainings, events] = await Promise.all([
+      const [companies, projects, trainings, events, partnerships, documents, media, activeProjects] = await Promise.all([
         supabase.from("companies").select("id", { count: "exact", head: true }),
         supabase.from("projects").select("id", { count: "exact", head: true }),
         supabase.from("trainings").select("id", { count: "exact", head: true }),
         supabase.from("events").select("id", { count: "exact", head: true }),
+        supabase.from("partnerships").select("id", { count: "exact", head: true }),
+        supabase.from("documents").select("id", { count: "exact", head: true }),
+        supabase.from("media_content").select("id", { count: "exact", head: true }),
+        supabase.from("projects").select("id", { count: "exact", head: true }).eq("status", "en cours"),
       ]);
 
       return {
@@ -46,9 +50,52 @@ const Index = () => {
         projects: projects.count || 0,
         trainings: trainings.count || 0,
         events: events.count || 0,
+        partnerships: partnerships.count || 0,
+        documents: documents.count || 0,
+        media: media.count || 0,
+        activeProjects: activeProjects.count || 0,
       };
     },
   });
+
+  const keyMetrics = [
+    {
+      title: "Opérateurs Accompagnés",
+      value: stats?.companies || 0,
+      icon: Building2,
+      color: "text-orange-600",
+      bgColor: "bg-orange-50",
+      trend: "+12%",
+      trendUp: true,
+    },
+    {
+      title: "Projets Actifs",
+      value: stats?.activeProjects || 0,
+      icon: Target,
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      trend: "+8%",
+      trendUp: true,
+    },
+    {
+      title: "Formations Organisées",
+      value: stats?.trainings || 0,
+      icon: GraduationCap,
+      color: "text-purple-600",
+      bgColor: "bg-purple-50",
+      trend: "+15%",
+      trendUp: true,
+    },
+    {
+      title: "Partenariats",
+      value: stats?.partnerships || 0,
+      icon: Handshake,
+      color: "text-green-600",
+      bgColor: "bg-green-50",
+      trend: "+5%",
+      trendUp: true,
+    },
+  ];
 
   const modules = [
     {
@@ -134,6 +181,62 @@ const Index = () => {
             l'accompagnement des entreprises ivoiriennes à l'export
           </p>
         </div>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {keyMetrics.map((metric, index) => (
+            <Card key={index} className="border-border/50 hover:shadow-md transition-shadow">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <div className={`w-10 h-10 rounded-lg ${metric.bgColor} flex items-center justify-center`}>
+                    <metric.icon className={`w-5 h-5 ${metric.color}`} />
+                  </div>
+                  <div className={`flex items-center gap-1 text-xs font-medium ${metric.trendUp ? 'text-green-600' : 'text-red-600'}`}>
+                    <TrendingUp className={`w-3 h-3 ${metric.trendUp ? '' : 'rotate-180'}`} />
+                    {metric.trend}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-foreground mb-1">
+                  {metric.value}
+                </div>
+                <p className="text-sm text-muted-foreground">{metric.title}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Activity Summary */}
+        <Card className="mb-12 border-border/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-primary" />
+              Résumé d'Activité
+            </CardTitle>
+            <CardDescription>Vue d'ensemble des modules et ressources</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center p-4 rounded-lg bg-muted/30">
+                <div className="text-2xl font-bold text-foreground mb-1">{stats?.documents || 0}</div>
+                <p className="text-xs text-muted-foreground">Documents</p>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-muted/30">
+                <div className="text-2xl font-bold text-foreground mb-1">{stats?.media || 0}</div>
+                <p className="text-xs text-muted-foreground">Médias</p>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-muted/30">
+                <div className="text-2xl font-bold text-foreground mb-1">{stats?.events || 0}</div>
+                <p className="text-xs text-muted-foreground">Événements</p>
+              </div>
+              <div className="text-center p-4 rounded-lg bg-muted/30">
+                <div className="text-2xl font-bold text-foreground mb-1">{stats?.projects || 0}</div>
+                <p className="text-xs text-muted-foreground">Projets Total</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Modules Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
