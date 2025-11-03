@@ -27,7 +27,12 @@ export default function Companies() {
   const [filters, setFilters] = useState({
     sector: "",
     participation: "all",
-    support: "all",
+    support: {
+      financier: false,
+      nonFinancier: false,
+      autres: false,
+      autresText: "",
+    },
   });
 
   const { data: companiesData, isLoading, refetch } = useQuery({
@@ -54,8 +59,15 @@ export default function Companies() {
         query = query.eq("commercial_events_participation", filters.participation as any);
       }
 
-      if (filters.support !== "all") {
-        query = query.eq("support_needed", filters.support as any);
+      if (filters.support.financier || filters.support.nonFinancier || filters.support.autres) {
+        const supportValues = [];
+        if (filters.support.financier) supportValues.push("Financier");
+        if (filters.support.nonFinancier) supportValues.push("Non financier");
+        if (filters.support.autres && filters.support.autresText) {
+          query = query.ilike("support_needed", `%${filters.support.autresText}%`);
+        } else if (supportValues.length > 0) {
+          query = query.in("support_needed", supportValues);
+        }
       }
 
       const { data, error, count } = await query;
@@ -152,7 +164,16 @@ export default function Companies() {
   };
 
   const resetFilters = () => {
-    setFilters({ sector: "", participation: "all", support: "all" });
+    setFilters({ 
+      sector: "", 
+      participation: "all", 
+      support: {
+        financier: false,
+        nonFinancier: false,
+        autres: false,
+        autresText: "",
+      }
+    });
     setCurrentPage(1);
   };
 
@@ -244,23 +265,72 @@ export default function Companies() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Type d'accompagnement</label>
-                  <Select
-                    value={filters.support}
-                    onValueChange={(value) => {
-                      setFilters({ ...filters, support: value });
-                      setCurrentPage(1);
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Tous" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Tous</SelectItem>
-                      <SelectItem value="Financier">Financier</SelectItem>
-                      <SelectItem value="Non financier">Non financier</SelectItem>
-                      <SelectItem value="Les deux">Les deux</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="space-y-3 p-3 border rounded-lg bg-background">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="financier"
+                        checked={filters.support.financier}
+                        onChange={(e) => {
+                          setFilters({ 
+                            ...filters, 
+                            support: { ...filters.support, financier: e.target.checked }
+                          });
+                          setCurrentPage(1);
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <label htmlFor="financier" className="text-sm cursor-pointer">Financier</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="nonFinancier"
+                        checked={filters.support.nonFinancier}
+                        onChange={(e) => {
+                          setFilters({ 
+                            ...filters, 
+                            support: { ...filters.support, nonFinancier: e.target.checked }
+                          });
+                          setCurrentPage(1);
+                        }}
+                        className="w-4 h-4"
+                      />
+                      <label htmlFor="nonFinancier" className="text-sm cursor-pointer">Non financier</label>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="autres"
+                          checked={filters.support.autres}
+                          onChange={(e) => {
+                            setFilters({ 
+                              ...filters, 
+                              support: { ...filters.support, autres: e.target.checked }
+                            });
+                            setCurrentPage(1);
+                          }}
+                          className="w-4 h-4"
+                        />
+                        <label htmlFor="autres" className="text-sm cursor-pointer">Autres</label>
+                      </div>
+                      {filters.support.autres && (
+                        <Input
+                          placeholder="Précisez..."
+                          value={filters.support.autresText}
+                          onChange={(e) => {
+                            setFilters({ 
+                              ...filters, 
+                              support: { ...filters.support, autresText: e.target.value }
+                            });
+                            setCurrentPage(1);
+                          }}
+                          className="ml-6"
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
                 <div className="col-span-full flex justify-end">
                   <Button variant="ghost" onClick={resetFilters}>
@@ -270,7 +340,7 @@ export default function Companies() {
               </div>
             )}
 
-            {(filters.sector || (filters.participation !== "all") || (filters.support !== "all")) && (
+            {(filters.sector || (filters.participation !== "all") || filters.support.financier || filters.support.nonFinancier || filters.support.autres) && (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-muted-foreground">Filtres actifs:</span>
                 {filters.sector && (
@@ -283,9 +353,19 @@ export default function Companies() {
                     Participation: {filters.participation}
                   </Badge>
                 )}
-                {filters.support !== "all" && (
+                {filters.support.financier && (
                   <Badge variant="secondary" className="gap-1">
-                    Accompagnement: {filters.support}
+                    Accompagnement: Financier
+                  </Badge>
+                )}
+                {filters.support.nonFinancier && (
+                  <Badge variant="secondary" className="gap-1">
+                    Accompagnement: Non financier
+                  </Badge>
+                )}
+                {filters.support.autres && (
+                  <Badge variant="secondary" className="gap-1">
+                    Accompagnement: {filters.support.autresText || "Autres"}
                   </Badge>
                 )}
               </div>
