@@ -64,6 +64,7 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
             <TableHead>Produits exportés</TableHead>
             <TableHead>Contact</TableHead>
             <TableHead>Participation événements</TableHead>
+            <TableHead>Type d'accompagnement</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -105,6 +106,11 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
                 <Badge variant={company.commercial_events_participation === "Jamais" ? "secondary" : "default"}>
                   {company.commercial_events_participation || "Non défini"}
                 </Badge>
+              </TableCell>
+              <TableCell>
+                <span className="text-sm">
+                  {company.support_needed || "-"}
+                </span>
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
