@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Plus, Search, Building2, Upload, Download, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import * as XLSX from "xlsx";
 import { CompanyDialog } from "@/components/companies/CompanyDialog";
 import { CompanyTable } from "@/components/companies/CompanyTable";
@@ -267,53 +268,53 @@ export default function Companies() {
                   <label className="text-sm font-medium">Type d'accompagnement</label>
                   <div className="space-y-3 p-3 border rounded-lg bg-background">
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="financier"
+                      <Checkbox
+                        id="filter-financier"
                         checked={filters.support.financier}
-                        onChange={(e) => {
+                        onCheckedChange={(checked) => {
                           setFilters({ 
                             ...filters, 
-                            support: { ...filters.support, financier: e.target.checked }
+                            support: { ...filters.support, financier: checked as boolean }
                           });
                           setCurrentPage(1);
                         }}
-                        className="w-4 h-4"
                       />
-                      <label htmlFor="financier" className="text-sm cursor-pointer">Financier</label>
+                      <label htmlFor="filter-financier" className="text-sm cursor-pointer font-normal">
+                        Financier
+                      </label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        id="nonFinancier"
+                      <Checkbox
+                        id="filter-nonFinancier"
                         checked={filters.support.nonFinancier}
-                        onChange={(e) => {
+                        onCheckedChange={(checked) => {
                           setFilters({ 
                             ...filters, 
-                            support: { ...filters.support, nonFinancier: e.target.checked }
+                            support: { ...filters.support, nonFinancier: checked as boolean }
                           });
                           setCurrentPage(1);
                         }}
-                        className="w-4 h-4"
                       />
-                      <label htmlFor="nonFinancier" className="text-sm cursor-pointer">Non financier</label>
+                      <label htmlFor="filter-nonFinancier" className="text-sm cursor-pointer font-normal">
+                        Non financier
+                      </label>
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          id="autres"
+                        <Checkbox
+                          id="filter-autres"
                           checked={filters.support.autres}
-                          onChange={(e) => {
+                          onCheckedChange={(checked) => {
                             setFilters({ 
                               ...filters, 
-                              support: { ...filters.support, autres: e.target.checked }
+                              support: { ...filters.support, autres: checked as boolean }
                             });
                             setCurrentPage(1);
                           }}
-                          className="w-4 h-4"
                         />
-                        <label htmlFor="autres" className="text-sm cursor-pointer">Autres</label>
+                        <label htmlFor="filter-autres" className="text-sm cursor-pointer font-normal">
+                          Autres
+                        </label>
                       </div>
                       {filters.support.autres && (
                         <Input
