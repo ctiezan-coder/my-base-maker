@@ -62,6 +62,12 @@ export function DocumentDialog({ open, onOpenChange, document, onClose }: Docume
     setLoading(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("Vous devez être connecté pour créer un document");
+      }
+
       if (document) {
         const { error } = await supabase
           .from("documents")
@@ -73,7 +79,7 @@ export function DocumentDialog({ open, onOpenChange, document, onClose }: Docume
       } else {
         const { error } = await supabase
           .from("documents")
-          .insert([formData]);
+          .insert([{ ...formData, uploaded_by: user.id }]);
 
         if (error) throw error;
         toast({ title: "Document créé avec succès" });

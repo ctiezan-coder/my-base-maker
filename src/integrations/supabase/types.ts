@@ -833,6 +833,10 @@ export type Database = {
         | "PTBA"
         | "TDR"
         | "Autre"
+        | "Rapport"
+        | "Contrat"
+        | "Note"
+        | "Présentation"
       gender: "Homme" | "Femme"
       media_type:
         | "Newsletter"
@@ -1009,6 +1013,10 @@ export const Constants = {
         "PTBA",
         "TDR",
         "Autre",
+        "Rapport",
+        "Contrat",
+        "Note",
+        "Présentation",
       ],
       gender: ["Homme", "Femme"],
       media_type: [

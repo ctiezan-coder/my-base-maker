@@ -65,6 +65,12 @@ export function FileUploadDialog({ open, onOpenChange, folderId, onClose }: File
     setLoading(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error("Vous devez être connecté pour uploader un document");
+      }
+
       // Upload du fichier vers Supabase Storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -90,6 +96,7 @@ export function FileUploadDialog({ open, onOpenChange, folderId, onClose }: File
           file_type: fileExt,
           file_size: file.size,
           folder_id: folderId,
+          uploaded_by: user.id,
         }]);
 
       if (dbError) throw dbError;
