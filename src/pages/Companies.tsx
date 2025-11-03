@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Search, Building2, Upload } from "lucide-react";
+import { Plus, Search, Building2, Upload, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import { CompanyDialog } from "@/components/companies/CompanyDialog";
 import { CompanyTable } from "@/components/companies/CompanyTable";
 import { BulkImportDialog } from "@/components/companies/BulkImportDialog";
@@ -79,6 +80,47 @@ export default function Companies() {
     }
   };
 
+  const handleExportExcel = () => {
+    if (!companies || companies.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Aucune donnée à exporter",
+        description: "La liste des entreprises est vide",
+      });
+      return;
+    }
+
+    const exportData = companies.map(company => ({
+      "Entreprise": company.company_name,
+      "Forme juridique": company.legal_form || "N/A",
+      "RCCM": company.rccm_number,
+      "DFE": company.dfe_number,
+      "Secteur": company.activity_sector || "N/A",
+      "Produits": company.exported_products || "N/A",
+      "Ville": company.city || "N/A",
+      "Adresse": company.headquarters_location || "N/A",
+      "Email": company.email || "N/A",
+      "Téléphone": company.phone || "N/A",
+      "Site web": company.website || "N/A",
+      "Contact": company.legal_representative_name || "N/A",
+      "Email contact": company.legal_representative_email || "N/A",
+      "Tél. contact": company.legal_representative_phone || "N/A",
+      "Statut": company.accompaniment_status || "N/A",
+      "Date création": company.created_at ? new Date(company.created_at).toLocaleDateString('fr-FR') : "N/A",
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Entreprises");
+    
+    XLSX.writeFile(wb, `entreprises-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+    
+    toast({
+      title: "Export réussi",
+      description: `${companies.length} entreprises exportées`,
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -92,6 +134,10 @@ export default function Companies() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExportExcel} disabled={!companies || companies.length === 0}>
+            <Download className="w-4 h-4 mr-2" />
+            Exporter Excel
+          </Button>
           <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
             <Upload className="w-4 h-4 mr-2" />
             Import en masse
