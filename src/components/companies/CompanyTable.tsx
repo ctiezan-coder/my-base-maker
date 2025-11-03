@@ -60,9 +60,10 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
           <TableRow>
             <TableHead>Raison sociale</TableHead>
             <TableHead>RCCM</TableHead>
-            <TableHead>Secteur</TableHead>
+            <TableHead>Secteur d'activité</TableHead>
+            <TableHead>Produits exportés</TableHead>
             <TableHead>Contact</TableHead>
-            <TableHead>Statut export</TableHead>
+            <TableHead>Participation événements</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -79,6 +80,11 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
               </TableCell>
               <TableCell className="font-mono text-sm">{company.rccm_number}</TableCell>
               <TableCell>{company.activity_sector || "-"}</TableCell>
+              <TableCell>
+                <span className="text-sm max-w-[200px] truncate block" title={company.exported_products || "-"}>
+                  {company.exported_products || "-"}
+                </span>
+              </TableCell>
               <TableCell>
                 <div className="space-y-1">
                   {company.email && (
