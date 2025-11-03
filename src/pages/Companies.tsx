@@ -26,8 +26,8 @@ export default function Companies() {
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     sector: "",
-    participation: "",
-    support: "",
+    participation: "all",
+    support: "all",
   });
 
   const { data: companiesData, isLoading, refetch } = useQuery({
@@ -50,11 +50,11 @@ export default function Companies() {
         query = query.ilike("activity_sector", `%${filters.sector}%`);
       }
 
-      if (filters.participation) {
+      if (filters.participation !== "all") {
         query = query.eq("commercial_events_participation", filters.participation as any);
       }
 
-      if (filters.support) {
+      if (filters.support !== "all") {
         query = query.eq("support_needed", filters.support as any);
       }
 
@@ -152,7 +152,7 @@ export default function Companies() {
   };
 
   const resetFilters = () => {
-    setFilters({ sector: "", participation: "", support: "" });
+    setFilters({ sector: "", participation: "all", support: "all" });
     setCurrentPage(1);
   };
 
@@ -235,7 +235,7 @@ export default function Companies() {
                       <SelectValue placeholder="Tous" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tous</SelectItem>
+                      <SelectItem value="all">Tous</SelectItem>
                       <SelectItem value="Jamais">Jamais</SelectItem>
                       <SelectItem value="Occasionnellement">Occasionnellement</SelectItem>
                       <SelectItem value="Régulièrement">Régulièrement</SelectItem>
@@ -256,7 +256,7 @@ export default function Companies() {
                       <SelectValue placeholder="Tous" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Tous</SelectItem>
+                      <SelectItem value="all">Tous</SelectItem>
                       <SelectItem value="Information">Information</SelectItem>
                       <SelectItem value="Formation">Formation</SelectItem>
                       <SelectItem value="Financement">Financement</SelectItem>
@@ -273,7 +273,7 @@ export default function Companies() {
               </div>
             )}
 
-            {(filters.sector || filters.participation || filters.support) && (
+            {(filters.sector || (filters.participation !== "all") || (filters.support !== "all")) && (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-muted-foreground">Filtres actifs:</span>
                 {filters.sector && (
@@ -281,12 +281,12 @@ export default function Companies() {
                     Secteur: {filters.sector}
                   </Badge>
                 )}
-                {filters.participation && (
+                {filters.participation !== "all" && (
                   <Badge variant="secondary" className="gap-1">
                     Participation: {filters.participation}
                   </Badge>
                 )}
-                {filters.support && (
+                {filters.support !== "all" && (
                   <Badge variant="secondary" className="gap-1">
                     Accompagnement: {filters.support}
                   </Badge>
