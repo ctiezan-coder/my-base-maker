@@ -237,9 +237,8 @@ export default function Companies() {
                     <SelectContent>
                       <SelectItem value="all">Tous</SelectItem>
                       <SelectItem value="Jamais">Jamais</SelectItem>
-                      <SelectItem value="Occasionnellement">Occasionnellement</SelectItem>
-                      <SelectItem value="Régulièrement">Régulièrement</SelectItem>
-                      <SelectItem value="Fréquemment">Fréquemment</SelectItem>
+                      <SelectItem value="Foires">Foires</SelectItem>
+                      <SelectItem value="Salons">Salons</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -257,11 +256,9 @@ export default function Companies() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">Tous</SelectItem>
-                      <SelectItem value="Information">Information</SelectItem>
-                      <SelectItem value="Formation">Formation</SelectItem>
-                      <SelectItem value="Financement">Financement</SelectItem>
-                      <SelectItem value="Accompagnement technique">Accompagnement technique</SelectItem>
-                      <SelectItem value="Mise en relation">Mise en relation</SelectItem>
+                      <SelectItem value="Financier">Financier</SelectItem>
+                      <SelectItem value="Non financier">Non financier</SelectItem>
+                      <SelectItem value="Les deux">Les deux</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
