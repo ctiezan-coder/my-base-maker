@@ -20,8 +20,8 @@ export const companySchema = z.object({
   
   dfe_number: z.string()
     .trim()
-    .min(1, { message: "Le numéro DFE est requis" })
-    .max(50, { message: "Le numéro DFE ne peut pas dépasser 50 caractères" }),
+    .min(1, { message: "Le compte contribuables est requis" })
+    .max(50, { message: "Le compte contribuables ne peut pas dépasser 50 caractères" }),
   
   legal_form: z.enum([
     'SARL',

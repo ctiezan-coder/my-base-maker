@@ -137,7 +137,7 @@ export default function Companies() {
       "Entreprise": company.company_name,
       "Forme juridique": company.legal_form || "N/A",
       "RCCM": company.rccm_number,
-      "DFE": company.dfe_number,
+      "Compte Contribuables": company.dfe_number,
       "Secteur": company.activity_sector || "N/A",
       "Produits": company.exported_products || "N/A",
       "Ville": company.city || "N/A",

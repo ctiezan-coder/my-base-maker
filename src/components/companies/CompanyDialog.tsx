@@ -183,7 +183,7 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dfe_number">Numéro DFE *</Label>
+                  <Label htmlFor="dfe_number">Compte Contribuables *</Label>
                   <Input
                     id="dfe_number"
                     value={formData.dfe_number}
