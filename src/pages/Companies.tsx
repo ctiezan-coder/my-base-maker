@@ -3,14 +3,18 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Search, Building2, Upload, Download } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Plus, Search, Building2, Upload, Download, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import * as XLSX from "xlsx";
 import { CompanyDialog } from "@/components/companies/CompanyDialog";
 import { CompanyTable } from "@/components/companies/CompanyTable";
 import { BulkImportDialog } from "@/components/companies/BulkImportDialog";
 import { useToast } from "@/hooks/use-toast";
 import type { Company } from "@/types/company";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+
+const ITEMS_PER_PAGE = 15;
 
 export default function Companies() {
   const { toast } = useToast();
@@ -18,24 +22,50 @@ export default function Companies() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    sector: "",
+    participation: "",
+    support: "",
+  });
 
-  const { data: companies, isLoading, refetch } = useQuery({
-    queryKey: ["companies", search],
+  const { data: companiesData, isLoading, refetch } = useQuery({
+    queryKey: ["companies", search, currentPage, filters],
     queryFn: async () => {
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+
       let query = supabase
         .from("companies")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
       if (search) {
         query = query.or(`company_name.ilike.%${search}%,rccm_number.ilike.%${search}%,email.ilike.%${search}%`);
       }
 
-      const { data, error } = await query;
+      if (filters.sector) {
+        query = query.ilike("activity_sector", `%${filters.sector}%`);
+      }
+
+      if (filters.participation) {
+        query = query.eq("commercial_events_participation", filters.participation as any);
+      }
+
+      if (filters.support) {
+        query = query.eq("support_needed", filters.support as any);
+      }
+
+      const { data, error, count } = await query;
       if (error) throw error;
-      return data;
+      return { companies: data, total: count || 0 };
     },
   });
+
+  const companies = companiesData?.companies || [];
+  const totalPages = Math.ceil((companiesData?.total || 0) / ITEMS_PER_PAGE);
 
   const handleEdit = (company: Company) => {
     setSelectedCompany(company);
@@ -121,6 +151,11 @@ export default function Companies() {
     });
   };
 
+  const resetFilters = () => {
+    setFilters({ sector: "", participation: "", support: "" });
+    setCurrentPage(1);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -151,16 +186,113 @@ export default function Companies() {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                placeholder="Rechercher par nom, RCCM ou email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
+          <div className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  placeholder="Rechercher par nom, RCCM ou email..."
+                  value={search}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-10"
+                />
+              </div>
+              <Button
+                variant={showFilters ? "default" : "outline"}
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filtres
+              </Button>
             </div>
+
+            {showFilters && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/50">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Secteur d'activité</label>
+                  <Input
+                    placeholder="Ex: Cosmétiques"
+                    value={filters.sector}
+                    onChange={(e) => {
+                      setFilters({ ...filters, sector: e.target.value });
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Participation événements</label>
+                  <Select
+                    value={filters.participation}
+                    onValueChange={(value) => {
+                      setFilters({ ...filters, participation: value });
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tous" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Tous</SelectItem>
+                      <SelectItem value="Jamais">Jamais</SelectItem>
+                      <SelectItem value="Occasionnellement">Occasionnellement</SelectItem>
+                      <SelectItem value="Régulièrement">Régulièrement</SelectItem>
+                      <SelectItem value="Fréquemment">Fréquemment</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Type d'accompagnement</label>
+                  <Select
+                    value={filters.support}
+                    onValueChange={(value) => {
+                      setFilters({ ...filters, support: value });
+                      setCurrentPage(1);
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tous" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Tous</SelectItem>
+                      <SelectItem value="Information">Information</SelectItem>
+                      <SelectItem value="Formation">Formation</SelectItem>
+                      <SelectItem value="Financement">Financement</SelectItem>
+                      <SelectItem value="Accompagnement technique">Accompagnement technique</SelectItem>
+                      <SelectItem value="Mise en relation">Mise en relation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="col-span-full flex justify-end">
+                  <Button variant="ghost" onClick={resetFilters}>
+                    Réinitialiser les filtres
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {(filters.sector || filters.participation || filters.support) && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm text-muted-foreground">Filtres actifs:</span>
+                {filters.sector && (
+                  <Badge variant="secondary" className="gap-1">
+                    Secteur: {filters.sector}
+                  </Badge>
+                )}
+                {filters.participation && (
+                  <Badge variant="secondary" className="gap-1">
+                    Participation: {filters.participation}
+                  </Badge>
+                )}
+                {filters.support && (
+                  <Badge variant="secondary" className="gap-1">
+                    Accompagnement: {filters.support}
+                  </Badge>
+                )}
+              </div>
+            )}
           </div>
         </CardHeader>
         <CardContent>
@@ -170,6 +302,58 @@ export default function Companies() {
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
+          
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-muted-foreground">
+                Page {currentPage} sur {totalPages} ({companiesData?.total || 0} entreprises)
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Précédent
+                </Button>
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                      >
+                        {pageNum}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Suivant
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
