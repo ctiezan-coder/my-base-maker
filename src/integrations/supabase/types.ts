@@ -435,6 +435,42 @@ export type Database = {
         }
         Relationships: []
       }
+      partnership_projects: {
+        Row: {
+          created_at: string
+          id: string
+          partnership_id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          partnership_id: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          partnership_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_projects_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partnerships: {
         Row: {
           budget: number | null

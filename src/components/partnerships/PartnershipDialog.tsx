@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PartnershipDialogProps {
@@ -18,6 +20,7 @@ interface PartnershipDialogProps {
 export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: PartnershipDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({
     partner_name: "",
     partner_type: "",
@@ -30,6 +33,32 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
     contact_phone: "",
     budget: "",
     direction_id: "",
+  });
+
+  const { data: projects = [] } = useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: linkedProjects = [] } = useQuery({
+    queryKey: ["partnership-projects", partnership?.id],
+    queryFn: async () => {
+      if (!partnership?.id) return [];
+      const { data, error } = await supabase
+        .from("partnership_projects")
+        .select("project_id")
+        .eq("partnership_id", partnership.id);
+      if (error) throw error;
+      return data.map(p => p.project_id);
+    },
+    enabled: !!partnership?.id,
   });
 
   useEffect(() => {
@@ -47,6 +76,7 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
         budget: partnership.budget?.toString() || "",
         direction_id: partnership.direction_id || "",
       });
+      setSelectedProjects(linkedProjects);
     } else {
       setFormData({
         partner_name: "",
@@ -61,8 +91,9 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
         budget: "",
         direction_id: "",
       });
+      setSelectedProjects([]);
     }
-  }, [partnership]);
+  }, [partnership, linkedProjects]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +105,8 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
         budget: formData.budget ? parseFloat(formData.budget) : null,
       };
 
+      let partnershipId: string;
+
       if (partnership) {
         const { error } = await supabase
           .from("partnerships")
@@ -81,15 +114,41 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
           .eq("id", partnership.id);
 
         if (error) throw error;
-        toast({ title: "Partenariat mis à jour avec succès" });
+        partnershipId = partnership.id;
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("partnerships")
-          .insert([dataToSave]);
+          .insert([dataToSave])
+          .select()
+          .single();
 
         if (error) throw error;
-        toast({ title: "Partenariat créé avec succès" });
+        partnershipId = data.id;
       }
+
+      // Delete existing project links
+      await supabase
+        .from("partnership_projects")
+        .delete()
+        .eq("partnership_id", partnershipId);
+
+      // Insert new project links
+      if (selectedProjects.length > 0) {
+        const projectLinks = selectedProjects.map(projectId => ({
+          partnership_id: partnershipId,
+          project_id: projectId,
+        }));
+
+        const { error: linkError } = await supabase
+          .from("partnership_projects")
+          .insert(projectLinks);
+
+        if (linkError) throw linkError;
+      }
+
+      toast({ 
+        title: partnership ? "Partenariat mis à jour avec succès" : "Partenariat créé avec succès"
+      });
       onClose();
     } catch (error: any) {
       toast({
@@ -219,6 +278,37 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
                 value={formData.budget}
                 onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
               />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Projets liés</Label>
+            <div className="border rounded-md p-4 space-y-2 max-h-48 overflow-y-auto">
+              {projects.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Aucun projet disponible</p>
+              ) : (
+                projects.map((project) => (
+                  <div key={project.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`project-${project.id}`}
+                      checked={selectedProjects.includes(project.id)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setSelectedProjects([...selectedProjects, project.id]);
+                        } else {
+                          setSelectedProjects(selectedProjects.filter(id => id !== project.id));
+                        }
+                      }}
+                    />
+                    <Label
+                      htmlFor={`project-${project.id}`}
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      {project.name}
+                    </Label>
+                  </div>
+                ))
+              )}
             </div>
           </div>
 
