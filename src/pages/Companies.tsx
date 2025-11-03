@@ -42,10 +42,10 @@ export default function Companies() {
     setDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
+  const handleCloseDialog = async () => {
     setSelectedCompany(null);
     setDialogOpen(false);
-    refetch();
+    await refetch();
   };
 
   const handleDelete = async (company: Company) => {

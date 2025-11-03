@@ -74,6 +74,9 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
         if (error) throw error;
         toast({ title: "Entreprise créée avec succès" });
       }
+      
+      // Attendre un peu avant de fermer pour s'assurer que la mise à jour est propagée
+      await new Promise(resolve => setTimeout(resolve, 300));
       onClose();
     } catch (error: any) {
       toast({
