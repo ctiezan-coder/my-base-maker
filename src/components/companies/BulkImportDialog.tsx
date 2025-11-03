@@ -82,15 +82,27 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
       return String(val).trim();
     };
 
-    // Extraire les emails valides (ignorer les codes numériques)
-    const extractEmail = (val: any): string | null => {
-      if (!val || val === "ND") return null;
+    // Extraire email et téléphone d'une colonne mixte (format: "email Tel : phone")
+    const extractEmailAndPhone = (val: any): { email: string | null; phone: string | null } => {
+      if (!val || val === "ND") return { email: null, phone: null };
       const strVal = String(val).trim();
-      // Si c'est un code numérique, ne pas l'utiliser comme email
-      if (/^\d+$/.test(strVal)) return null;
-      // Vérifier format email basique
-      if (strVal.includes("@")) return strVal;
-      return null;
+      
+      let email = null;
+      let phone = null;
+      
+      // Extraire l'email (avant "Tel :")
+      const emailMatch = strVal.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+      if (emailMatch) {
+        email = emailMatch[1];
+      }
+      
+      // Extraire le téléphone (après "Tel :")
+      const phoneMatch = strVal.match(/Tel\s*:\s*([+0-9\s\/()-]+)/i);
+      if (phoneMatch) {
+        phone = phoneMatch[1].trim();
+      }
+      
+      return { email, phone };
     };
 
     // Mapper la forme juridique aux valeurs acceptées
@@ -118,27 +130,44 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
 
     const companyName = row["Entreprise"] || "Entreprise sans nom";
     
+    // Extraire email et téléphone de la colonne "Email" qui peut contenir les deux
+    const { email: emailFromEmailCol, phone: phoneFromEmailCol } = extractEmailAndPhone(row["Email"]);
+    
+    // Utiliser le téléphone de la colonne "Téléphone" ou celui extrait de "Email"
+    const finalPhone = cleanValue(row["Téléphone"]) || phoneFromEmailCol;
+    
+    // Extraire aussi le contact et son téléphone de "Personne de contact"
+    const { email: contactEmail, phone: contactPhone } = extractEmailAndPhone(row["Personne de contact"]);
+    const contactName = cleanValue(row["Personne de contact"])?.replace(/Tel\s*:.*$/i, '').trim() || null;
+    
     return {
       // Onglet Identité
       company_name: companyName,
-      legal_form: mapLegalForm(row["Statut juridique"]),
+      legal_form: mapLegalForm(row["Statut juridique"]) || "Autre",
       rccm_number: generateRCCM(companyName, row["Code export"]),
       dfe_number: `DFE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      headquarters_location: cleanValue(row["Adresse"]) || "Non spécifié",
-      email: extractEmail(row["Email"]),
-      phone: cleanValue(row["Téléphone"]),
+      headquarters_location: cleanValue(row["Adresse"]) || "Abidjan, Côte d'Ivoire",
+      email: emailFromEmailCol,
+      phone: finalPhone || "+225 00 00 00 00 00",
+      city: cleanValue(row["Adresse"])?.split(",")[0] || "Abidjan",
+      
+      // Représentant légal / Contact
+      legal_representative_name: contactName || "Non spécifié",
+      legal_representative_email: contactEmail || emailFromEmailCol,
+      legal_representative_phone: contactPhone || finalPhone,
       
       // Onglet Activité
-      activity_sector: cleanValue(row["Secteur"]),
-      exported_products: cleanValue(row["Produits principaux"]),
+      activity_sector: cleanValue(row["Secteur"]) || "Non spécifié",
+      exported_products: cleanValue(row["Produits principaux"]) || "À définir",
       commercial_events_participation: "Jamais" as const,
       
       // Champs additionnels de la base
       website: cleanValue(row["Site web"]),
-      certifications: cleanValue(row["Certifications"]) ? [row["Certifications"]] : null,
-      current_export_markets: cleanValue(row["Pays d'exportation"]) ? [row["Pays d'exportation"]] : null,
-      legal_representative_name: cleanValue(row["Personne de contact"]),
-      accompaniment_status: cleanValue(row["Statut"]),
+      certifications: cleanValue(row["Certifications"]) ? [row["Certifications"]] : [],
+      current_export_markets: cleanValue(row["Pays d'exportation"]) ? 
+        row["Pays d'exportation"].split(/[,;]/).map((m: string) => m.trim()).filter(Boolean) : 
+        [],
+      accompaniment_status: cleanValue(row["Statut"]) || "En cours",
       aciex_interaction_history: cleanValue(row["Notes"]),
     };
   };
