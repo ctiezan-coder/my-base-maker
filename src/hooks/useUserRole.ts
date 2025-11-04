@@ -15,11 +15,18 @@ export function useUserRole() {
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.id)
-        .single();
+        .eq('user_id', user.id);
 
       if (error) throw error;
-      return data?.role as AppRole | null;
+      
+      // If multiple roles, return the highest privilege
+      if (data && data.length > 0) {
+        if (data.some(r => r.role === 'admin')) return 'admin';
+        if (data.some(r => r.role === 'manager')) return 'manager';
+        return 'user';
+      }
+      
+      return null;
     },
     enabled: !!user,
   });
