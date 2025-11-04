@@ -204,7 +204,7 @@ export function UserManagementTable() {
                 <TableCell>
                   {userData.user_id !== user?.id ? (
                     <Select
-                      value={userData.direction || ""}
+                      value={userData.direction || undefined}
                       onValueChange={(value) =>
                         updateDirectionMutation.mutate({
                           userId: userData.user_id,
@@ -216,7 +216,6 @@ export function UserManagementTable() {
                         <SelectValue placeholder="Aucune direction" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Aucune direction</SelectItem>
                         {directions?.map((dir) => (
                           <SelectItem key={dir.id} value={dir.name}>
                             {dir.name}

@@ -176,12 +176,11 @@ export function CreateUserDialog() {
 
           <div className="space-y-2">
             <Label htmlFor="direction">Direction (optionnel)</Label>
-            <Select value={direction} onValueChange={setDirection}>
+            <Select value={direction || undefined} onValueChange={(value) => setDirection(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionner une direction" />
+                <SelectValue placeholder="Aucune direction" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Aucune direction</SelectItem>
                 {directions?.map((dir) => (
                   <SelectItem key={dir.id} value={dir.name}>
                     {dir.name}
