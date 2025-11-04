@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_connections: {
+        Row: {
+          company_id: string | null
+          connection_date: string
+          contract_duration_years: number | null
+          contract_value: number
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          destination_country: string
+          direction_id: string | null
+          id: string
+          jobs_created: number | null
+          partner_name: string
+          pme_name: string
+          sector: string
+          social_impact: string | null
+          status: Database["public"]["Enums"]["connection_status"]
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          connection_date?: string
+          contract_duration_years?: number | null
+          contract_value: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          destination_country: string
+          direction_id?: string | null
+          id?: string
+          jobs_created?: number | null
+          partner_name: string
+          pme_name: string
+          sector: string
+          social_impact?: string | null
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          connection_date?: string
+          contract_duration_years?: number | null
+          contract_value?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          destination_country?: string
+          direction_id?: string | null
+          id?: string
+          jobs_created?: number | null
+          partner_name?: string
+          pme_name?: string
+          sector?: string
+          social_impact?: string | null
+          status?: Database["public"]["Enums"]["connection_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           accompaniment_status: string | null
@@ -301,6 +369,69 @@ export type Database = {
           },
         ]
       }
+      export_opportunities: {
+        Row: {
+          compatibility_score: number | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          deadline: string
+          description: string
+          destination_city: string | null
+          destination_country: string
+          direction_id: string | null
+          estimated_value: number
+          id: string
+          region: Database["public"]["Enums"]["market_region"]
+          requirements: string[] | null
+          sector: string
+          status: Database["public"]["Enums"]["opportunity_status"] | null
+          title: string
+          updated_at: string
+          volume: string
+        }
+        Insert: {
+          compatibility_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline: string
+          description: string
+          destination_city?: string | null
+          destination_country: string
+          direction_id?: string | null
+          estimated_value: number
+          id?: string
+          region: Database["public"]["Enums"]["market_region"]
+          requirements?: string[] | null
+          sector: string
+          status?: Database["public"]["Enums"]["opportunity_status"] | null
+          title: string
+          updated_at?: string
+          volume: string
+        }
+        Update: {
+          compatibility_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline?: string
+          description?: string
+          destination_city?: string | null
+          destination_country?: string
+          direction_id?: string | null
+          estimated_value?: number
+          id?: string
+          region?: Database["public"]["Enums"]["market_region"]
+          requirements?: string[] | null
+          sector?: string
+          status?: Database["public"]["Enums"]["opportunity_status"] | null
+          title?: string
+          updated_at?: string
+          volume?: string
+        }
+        Relationships: []
+      }
       folders: {
         Row: {
           created_at: string
@@ -392,6 +523,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_statistics: {
+        Row: {
+          active_markets: number | null
+          average_deal_days: number | null
+          business_connections_count: number | null
+          conversion_rate: number | null
+          created_at: string
+          direction_id: string | null
+          export_value_billions: number
+          id: string
+          intra_african_trade_percent: number | null
+          pme_count: number | null
+          total_value_generated: number | null
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          active_markets?: number | null
+          average_deal_days?: number | null
+          business_connections_count?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          direction_id?: string | null
+          export_value_billions: number
+          id?: string
+          intra_african_trade_percent?: number | null
+          pme_count?: number | null
+          total_value_generated?: number | null
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          active_markets?: number | null
+          average_deal_days?: number | null
+          business_connections_count?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          direction_id?: string | null
+          export_value_billions?: number
+          id?: string
+          intra_african_trade_percent?: number | null
+          pme_count?: number | null
+          total_value_generated?: number | null
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
       }
       media_content: {
         Row: {
@@ -535,6 +714,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      potential_markets: {
+        Row: {
+          country: string
+          created_at: string
+          demand_description: string | null
+          direction_id: string | null
+          growth_rate: number | null
+          id: string
+          key_products: string[] | null
+          market_potential: string
+          market_size_billion: number | null
+          region: Database["public"]["Enums"]["market_region"]
+          requirements: string[] | null
+          risk_level: Database["public"]["Enums"]["risk_level"] | null
+          sector: string
+          updated_at: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          demand_description?: string | null
+          direction_id?: string | null
+          growth_rate?: number | null
+          id?: string
+          key_products?: string[] | null
+          market_potential: string
+          market_size_billion?: number | null
+          region: Database["public"]["Enums"]["market_region"]
+          requirements?: string[] | null
+          risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          sector: string
+          updated_at?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          demand_description?: string | null
+          direction_id?: string | null
+          growth_rate?: number | null
+          id?: string
+          key_products?: string[] | null
+          market_potential?: string
+          market_size_billion?: number | null
+          region?: Database["public"]["Enums"]["market_region"]
+          requirements?: string[] | null
+          risk_level?: Database["public"]["Enums"]["risk_level"] | null
+          sector?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -814,6 +1044,11 @@ export type Database = {
         | "GIE"
         | "Autre"
       company_size: "TPE" | "PME" | "ETI" | "Grande entreprise"
+      connection_status:
+        | "En négociation"
+        | "Contrat signé"
+        | "En cours"
+        | "Terminé"
       document_category:
         | "Convention exportation"
         | "Agrément"
@@ -838,6 +1073,14 @@ export type Database = {
         | "Note"
         | "Présentation"
       gender: "Homme" | "Femme"
+      market_region:
+        | "Europe"
+        | "Afrique"
+        | "ZLECAf"
+        | "Asie"
+        | "Moyen-Orient"
+        | "Amérique du Nord"
+        | "Amérique du Sud"
       media_type:
         | "Newsletter"
         | "Magazine"
@@ -849,6 +1092,12 @@ export type Database = {
         | "Article presse"
         | "Interview audio"
         | "Autre"
+      opportunity_status:
+        | "URGENT"
+        | "NOUVEAU"
+        | "RECOMMANDÉ"
+        | "EN_COURS"
+        | "FERMÉ"
       participation_type: "Foires" | "Salons" | "Jamais"
       priority_level: "1" | "3" | "5"
       registration_status:
@@ -857,6 +1106,7 @@ export type Database = {
         | "Annulée"
         | "Présent"
         | "Absent"
+      risk_level: "Faible" | "Modéré" | "Élevé"
       support_type: "Financier" | "Non financier" | "Les deux"
       training_type:
         | "Formation"
@@ -994,6 +1244,12 @@ export const Constants = {
       app_role: ["admin", "manager", "user"],
       company_legal_form: ["SA", "SARL", "SAS", "SASU", "EI", "GIE", "Autre"],
       company_size: ["TPE", "PME", "ETI", "Grande entreprise"],
+      connection_status: [
+        "En négociation",
+        "Contrat signé",
+        "En cours",
+        "Terminé",
+      ],
       document_category: [
         "Convention exportation",
         "Agrément",
@@ -1019,6 +1275,15 @@ export const Constants = {
         "Présentation",
       ],
       gender: ["Homme", "Femme"],
+      market_region: [
+        "Europe",
+        "Afrique",
+        "ZLECAf",
+        "Asie",
+        "Moyen-Orient",
+        "Amérique du Nord",
+        "Amérique du Sud",
+      ],
       media_type: [
         "Newsletter",
         "Magazine",
@@ -1031,6 +1296,13 @@ export const Constants = {
         "Interview audio",
         "Autre",
       ],
+      opportunity_status: [
+        "URGENT",
+        "NOUVEAU",
+        "RECOMMANDÉ",
+        "EN_COURS",
+        "FERMÉ",
+      ],
       participation_type: ["Foires", "Salons", "Jamais"],
       priority_level: ["1", "3", "5"],
       registration_status: [
@@ -1040,6 +1312,7 @@ export const Constants = {
         "Présent",
         "Absent",
       ],
+      risk_level: ["Faible", "Modéré", "Élevé"],
       support_type: ["Financier", "Non financier", "Les deux"],
       training_type: ["Formation", "Atelier", "Coaching", "Webinaire", "Autre"],
     },

@@ -16,6 +16,7 @@ import Projects from "./pages/Projects";
 import Documents from "./pages/Documents";
 import Media from "./pages/Media";
 import Kpis from "./pages/Kpis";
+import MarketDevelopment from "./pages/MarketDevelopment";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
               <Route path="documents" element={<Documents />} />
               <Route path="media" element={<Media />} />
               <Route path="kpis" element={<Kpis />} />
+              <Route path="market-development" element={<MarketDevelopment />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

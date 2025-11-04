@@ -11,11 +11,13 @@ import {
   BarChart3,
   Calendar,
   Image,
+  Globe,
 } from "lucide-react";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/" },
   { icon: Building2, label: "Opérateurs", path: "/companies" },
+  { icon: Globe, label: "Marchés Export", path: "/market-development" },
   { icon: Handshake, label: "Partenariats", path: "/partnerships" },
   { icon: FolderKanban, label: "Projets", path: "/projects" },
   { icon: GraduationCap, label: "Formations", path: "/trainings" },
