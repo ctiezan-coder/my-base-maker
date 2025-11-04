@@ -7,7 +7,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-12 w-auto" />
+            <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-10 w-auto object-contain" />
             <div>
               <h1 className="text-xl font-bold text-foreground">ACIEX</h1>
               <p className="text-xs text-muted-foreground">Base de Données Institutionnelle</p>
