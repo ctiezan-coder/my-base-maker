@@ -21,6 +21,9 @@ export function UserMenu() {
   const navigate = useNavigate();
   const { data: userRole, isLoading } = useUserRole();
 
+  console.log("UserMenu - User:", user?.email);
+  console.log("UserMenu - Role:", userRole);
+
   const handleSignOut = async () => {
     await signOut();
     toast({
@@ -29,11 +32,15 @@ export function UserMenu() {
     });
   };
 
-  if (!user) return null;
+  if (!user) {
+    console.log("UserMenu - No user, returning null");
+    return null;
+  }
 
   const initials = user.email?.substring(0, 2).toUpperCase() || "U";
   const isAdmin = userRole === 'admin';
-  const isManager = userRole === 'manager' || userRole === 'admin';
+
+  console.log("UserMenu - Rendering with isAdmin:", isAdmin);
 
   return (
     <DropdownMenu>
