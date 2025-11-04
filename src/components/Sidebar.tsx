@@ -12,7 +12,9 @@ import {
   Calendar,
   Image,
   Globe,
+  Shield,
 } from "lucide-react";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/" },
@@ -29,6 +31,9 @@ const menuItems = [
 ];
 
 export function Sidebar() {
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
+
   return (
     <aside className="w-64 border-r border-border bg-card/50 min-h-[calc(100vh-4rem)] p-4">
       <nav className="space-y-2">
@@ -49,6 +54,23 @@ export function Sidebar() {
             {item.label}
           </NavLink>
         ))}
+        
+        {isAdmin && (
+          <NavLink
+            to="/admin"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                isActive
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              )
+            }
+          >
+            <Shield className="w-5 h-5" />
+            Administration
+          </NavLink>
+        )}
       </nav>
     </aside>
   );
