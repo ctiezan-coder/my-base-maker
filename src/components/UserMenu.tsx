@@ -12,15 +12,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, User, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useUserRole, useHasRole } from "@/hooks/useUserRole";
+import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { data: userRole } = useUserRole();
-  const isAdmin = useHasRole('admin');
+  const { data: userRole, isLoading } = useUserRole();
 
   const handleSignOut = async () => {
     await signOut();
@@ -33,6 +32,8 @@ export function UserMenu() {
   if (!user) return null;
 
   const initials = user.email?.substring(0, 2).toUpperCase() || "U";
+  const isAdmin = userRole === 'admin';
+  const isManager = userRole === 'manager' || userRole === 'admin';
 
   return (
     <DropdownMenu>
@@ -54,7 +55,7 @@ export function UserMenu() {
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
-            {userRole && (
+            {!isLoading && userRole && (
               <Badge variant={userRole === 'admin' ? 'destructive' : 'default'} className="w-fit mt-1">
                 {userRole}
               </Badge>
