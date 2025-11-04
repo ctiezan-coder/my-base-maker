@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import { Building2 } from 'lucide-react';
+import logo from '@/assets/logo.jpg';
 
 const loginSchema = z.object({
   email: z.string().email('Email invalide'),
@@ -125,9 +125,7 @@ export default function Auth() {
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="space-y-2 text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-primary flex items-center justify-center">
-              <Building2 className="w-8 h-8 text-white" />
-            </div>
+            <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-24 w-auto" />
           </div>
           <CardTitle className="text-2xl">ACIEX</CardTitle>
           <CardDescription>
