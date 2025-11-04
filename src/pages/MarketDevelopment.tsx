@@ -92,6 +92,12 @@ export default function MarketDevelopment() {
     },
   });
 
+  // Calculate stats
+  const totalConnections = connections.length;
+  const signedContracts = connections.filter(c => c.status === "Contrat signé").length;
+  const totalValue = connections.reduce((sum, c) => sum + Number(c.contract_value), 0);
+  const conversionRate = totalConnections > 0 ? ((signedContracts / totalConnections) * 100).toFixed(0) : 0;
+
   const handleCloseDialog = () => {
     setDialogOpen(false);
     setSelectedOpportunity(undefined);
@@ -241,6 +247,32 @@ export default function MarketDevelopment() {
               </TabsContent>
 
               <TabsContent value="connections" className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                  <div className="bg-card p-6 rounded-lg border">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                      Mises en Relation
+                    </h3>
+                    <p className="text-3xl font-bold">{totalConnections}</p>
+                    <p className="text-sm text-muted-foreground">Total</p>
+                  </div>
+                  <div className="bg-card p-6 rounded-lg border">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                      Taux de Conversion
+                    </h3>
+                    <p className="text-3xl font-bold text-green-600">{conversionRate}%</p>
+                    <p className="text-sm text-muted-foreground">Contrats signés</p>
+                  </div>
+                  <div className="bg-card p-6 rounded-lg border">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-2">
+                      Valeur Générée
+                    </h3>
+                    <p className="text-3xl font-bold text-blue-600">
+                      {(totalValue / 1000000).toFixed(1)} M€
+                    </p>
+                    <p className="text-sm text-muted-foreground">Contrats totaux</p>
+                  </div>
+                </div>
+
                 {loadingConnections ? (
                   <p>Chargement...</p>
                 ) : (
