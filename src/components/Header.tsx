@@ -1,11 +1,24 @@
 import { UserMenu } from "./UserMenu";
 import logo from "@/assets/aciex-logo.jpg";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 export const Header = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
-  console.log("Header - User:", user?.email);
+  const handleSignOut = async () => {
+    await signOut();
+    toast({
+      title: "Déconnexion",
+      description: "Vous avez été déconnecté avec succès",
+    });
+    navigate('/auth');
+  };
   
   return (
     <header className="border-b border-border/50 bg-card/50 backdrop-blur-lg sticky top-0 z-50">
@@ -19,7 +32,13 @@ export const Header = () => {
             </div>
           </div>
           {user ? (
-            <UserMenu />
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground">{user.email}</span>
+              <Button onClick={handleSignOut} variant="outline" size="sm">
+                <LogOut className="mr-2 h-4 w-4" />
+                Se déconnecter
+              </Button>
+            </div>
           ) : (
             <div className="text-sm text-muted-foreground">Non connecté</div>
           )}
