@@ -9,12 +9,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOut, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { LogOut, User, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole, useHasRole } from "@/hooks/useUserRole";
+import { useNavigate } from "react-router-dom";
 
 export function UserMenu() {
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { data: userRole } = useUserRole();
+  const isAdmin = useHasRole('admin');
 
   const handleSignOut = async () => {
     await signOut();
@@ -48,6 +54,11 @@ export function UserMenu() {
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
+            {userRole && (
+              <Badge variant={userRole === 'admin' ? 'destructive' : 'default'} className="w-fit mt-1">
+                {userRole}
+              </Badge>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -55,6 +66,12 @@ export function UserMenu() {
           <User className="mr-2 h-4 w-4" />
           <span>Profil</span>
         </DropdownMenuItem>
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => navigate('/admin')}>
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Administration</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
