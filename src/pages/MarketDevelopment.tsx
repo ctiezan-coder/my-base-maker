@@ -14,14 +14,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MarketStatsCards } from "@/components/market/MarketStatsCards";
 import { OpportunityCard } from "@/components/market/OpportunityCard";
 import { MarketCard } from "@/components/market/MarketCard";
 import { ConnectionsTable } from "@/components/market/ConnectionsTable";
 import { OpportunityDialog } from "@/components/market/OpportunityDialog";
 import { ApplicationDialog } from "@/components/market/ApplicationDialog";
-import { ApplicationsList } from "@/components/market/ApplicationsList";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
 export default function MarketDevelopment() {
@@ -145,42 +142,12 @@ export default function MarketDevelopment() {
               </div>
             </div>
 
-            <Tabs defaultValue="dashboard" className="space-y-6">
+            <Tabs defaultValue="opportunities" className="space-y-6">
               <TabsList>
-                <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
                 <TabsTrigger value="opportunities">Opportunités</TabsTrigger>
                 <TabsTrigger value="markets">Marchés Potentiels</TabsTrigger>
                 <TabsTrigger value="connections">Mises en Relation</TabsTrigger>
               </TabsList>
-
-              <TabsContent value="dashboard" className="space-y-6">
-                <MarketStatsCards
-                  pmeCount={400}
-                  exportValue={65}
-                  activeMarkets={54}
-                  connections={1250}
-                />
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="bg-card p-6 rounded-lg border">
-                    <h3 className="font-semibold mb-2">Taux de Conversion</h3>
-                    <p className="text-3xl font-bold text-green-600">{conversionRate}%</p>
-                    <p className="text-sm text-muted-foreground">Contrats signés</p>
-                  </div>
-                  <div className="bg-card p-6 rounded-lg border">
-                    <h3 className="font-semibold mb-2">Valeur Générée</h3>
-                    <p className="text-3xl font-bold text-blue-600">
-                      {(totalValue / 1000000).toFixed(1)} M€
-                    </p>
-                    <p className="text-sm text-muted-foreground">Contrats totaux</p>
-                  </div>
-                  <div className="bg-card p-6 rounded-lg border">
-                    <h3 className="font-semibold mb-2">Délai Moyen</h3>
-                    <p className="text-3xl font-bold text-orange-600">45 j</p>
-                    <p className="text-sm text-muted-foreground">Contact → Contrat</p>
-                  </div>
-                </div>
-              </TabsContent>
 
               <TabsContent value="opportunities" className="space-y-6">
                 <div className="flex flex-col sm:flex-row gap-4">
