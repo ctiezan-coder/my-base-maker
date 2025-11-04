@@ -1,33 +1,26 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Package, TrendingUp, Send, Eye } from "lucide-react";
+import { MapPin, Calendar, Package, TrendingUp, Building2 } from "lucide-react";
 import { ExportOpportunity } from "@/types/market-development";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { CompanyApplications } from "./CompanyApplications";
 
 interface OpportunityCardProps {
   opportunity: ExportOpportunity;
   onApply?: (id: string) => void;
-  onViewApplications?: (id: string) => void;
+  showApplications?: boolean;
 }
 
-export const OpportunityCard = ({ opportunity, onApply, onViewApplications }: OpportunityCardProps) => {
-  // Fetch application count
-  const { data: applicationCount = 0 } = useQuery({
-    queryKey: ["application-count", opportunity.id],
-    queryFn: async () => {
-      const { count, error } = await supabase
-        .from("opportunity_applications")
-        .select("*", { count: "exact", head: true })
-        .eq("opportunity_id", opportunity.id);
+export const OpportunityCard = ({ 
+  opportunity, 
+  onApply,
+  showApplications = false 
+}: OpportunityCardProps) => {
+  const [showApps, setShowApps] = useState(false);
 
-      if (error) throw error;
-      return count || 0;
-    },
-  });
   const getStatusColor = (status?: string) => {
     switch (status) {
       case "URGENT":
@@ -114,26 +107,32 @@ export const OpportunityCard = ({ opportunity, onApply, onViewApplications }: Op
       )}
 
       <div className="flex gap-2">
+        {showApplications && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowApps(!showApps)}
+            className="flex-1"
+          >
+            <Building2 className="mr-2 h-4 w-4" />
+            {showApps ? "Masquer" : "Voir"} candidatures
+          </Button>
+        )}
         {onApply && (
           <Button
             onClick={() => onApply(opportunity.id)}
             className="flex-1"
           >
-            <Send className="mr-2 h-4 w-4" />
-            Candidater une PME
-          </Button>
-        )}
-        {onViewApplications && applicationCount > 0 && (
-          <Button
-            variant="outline"
-            onClick={() => onViewApplications(opportunity.id)}
-            className="flex-1"
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            Voir candidatures ({applicationCount})
+            Postuler une PME
           </Button>
         )}
       </div>
+
+      {showApps && showApplications && (
+        <div className="mt-4 pt-4 border-t">
+          <CompanyApplications opportunityId={opportunity.id} />
+        </div>
+      )}
     </Card>
   );
 };

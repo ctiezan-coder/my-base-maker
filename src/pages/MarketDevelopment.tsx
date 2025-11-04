@@ -29,10 +29,12 @@ export default function MarketDevelopment() {
   const [sectorFilter, setSectorFilter] = useState<string>("all");
   const [regionFilter, setRegionFilter] = useState<string | "all">("all");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<ExportOpportunity | undefined>();
   const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
-  const [applicationsListDialogOpen, setApplicationsListDialogOpen] = useState(false);
-  const [selectedOpportunityForApplication, setSelectedOpportunityForApplication] = useState<ExportOpportunity | undefined>();
+  const [selectedOpportunity, setSelectedOpportunity] = useState<ExportOpportunity | undefined>();
+  const [selectedOpportunityForApplication, setSelectedOpportunityForApplication] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   // Fetch opportunities
   const { data: opportunities = [], isLoading: loadingOpportunities, refetch: refetchOpportunities } = useQuery({
@@ -113,28 +115,18 @@ export default function MarketDevelopment() {
   const handleApply = (opportunityId: string) => {
     const opportunity = opportunities.find(o => o.id === opportunityId);
     if (opportunity) {
-      setSelectedOpportunityForApplication(opportunity);
+      setSelectedOpportunityForApplication({
+        id: opportunity.id,
+        title: opportunity.title,
+      });
       setApplicationDialogOpen(true);
-    }
-  };
-
-  const handleViewApplications = (opportunityId: string) => {
-    const opportunity = opportunities.find(o => o.id === opportunityId);
-    if (opportunity) {
-      setSelectedOpportunityForApplication(opportunity);
-      setApplicationsListDialogOpen(true);
     }
   };
 
   const handleCloseApplicationDialog = () => {
     setApplicationDialogOpen(false);
-    setSelectedOpportunityForApplication(undefined);
+    setSelectedOpportunityForApplication(null);
     refetchOpportunities();
-  };
-
-  const handleCloseApplicationsListDialog = () => {
-    setApplicationsListDialogOpen(false);
-    setSelectedOpportunityForApplication(undefined);
   };
 
   return (
@@ -244,7 +236,7 @@ export default function MarketDevelopment() {
                         key={opportunity.id}
                         opportunity={opportunity}
                         onApply={handleApply}
-                        onViewApplications={handleViewApplications}
+                        showApplications={true}
                       />
                     ))}
                   </div>
@@ -333,24 +325,13 @@ export default function MarketDevelopment() {
       />
 
       {selectedOpportunityForApplication && (
-        <>
-          <ApplicationDialog
-            open={applicationDialogOpen}
-            onOpenChange={setApplicationDialogOpen}
-            opportunityId={selectedOpportunityForApplication.id}
-            opportunityTitle={selectedOpportunityForApplication.title}
-            onClose={handleCloseApplicationDialog}
-          />
-
-          <Dialog open={applicationsListDialogOpen} onOpenChange={setApplicationsListDialogOpen}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{selectedOpportunityForApplication.title}</DialogTitle>
-              </DialogHeader>
-              <ApplicationsList opportunityId={selectedOpportunityForApplication.id} />
-            </DialogContent>
-          </Dialog>
-        </>
+        <ApplicationDialog
+          open={applicationDialogOpen}
+          onOpenChange={setApplicationDialogOpen}
+          opportunityId={selectedOpportunityForApplication.id}
+          opportunityTitle={selectedOpportunityForApplication.title}
+          onClose={handleCloseApplicationDialog}
+        />
       )}
     </div>
   );

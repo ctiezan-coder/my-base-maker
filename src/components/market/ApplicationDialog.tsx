@@ -31,7 +31,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Company } from "@/types/company";
 
 const formSchema = z.object({
-  company_id: z.string().min(1, "Veuillez sélectionner une PME"),
+  company_id: z.string().min(1, "La PME est requise"),
   notes: z.string().optional(),
 });
 
@@ -53,39 +53,22 @@ export const ApplicationDialog = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      notes: "",
-    },
-  });
-
   // Fetch companies
   const { data: companies = [] } = useQuery({
     queryKey: ["companies-for-application"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("companies")
-        .select("id, company_name, activity_sector, exported_products")
+        .select("id, company_name, activity_sector")
         .order("company_name");
 
       if (error) throw error;
-      return data as Company[];
+      return data;
     },
   });
 
-  // Check existing applications
-  const { data: existingApplications = [] } = useQuery({
-    queryKey: ["existing-applications", opportunityId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("opportunity_applications")
-        .select("company_id")
-        .eq("opportunity_id", opportunityId);
-
-      if (error) throw error;
-      return data.map(app => app.company_id);
-    },
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -103,18 +86,18 @@ export const ApplicationDialog = ({
         .insert([{
           opportunity_id: opportunityId,
           company_id: values.company_id,
-          notes: values.notes || null,
-          status: "En attente",
+          notes: values.notes,
           created_by: user.id,
         }]);
 
-      if (error) throw error;
-      
-      toast({ 
-        title: "Candidature envoyée avec succès",
-        description: "La PME a été ajoutée à l'opportunité"
-      });
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error("Cette PME a déjà postulé à cette opportunité");
+        }
+        throw error;
+      }
 
+      toast({ title: "Candidature enregistrée avec succès" });
       onClose();
       form.reset();
     } catch (error: any) {
@@ -128,18 +111,12 @@ export const ApplicationDialog = ({
     }
   };
 
-  const availableCompanies = companies.filter(
-    company => !existingApplications.includes(company.id)
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>Candidater à l'opportunité</DialogTitle>
-          <p className="text-sm text-muted-foreground mt-2">
-            {opportunityTitle}
-          </p>
+          <DialogTitle>Postuler à l'opportunité</DialogTitle>
+          <p className="text-sm text-muted-foreground">{opportunityTitle}</p>
         </DialogHeader>
 
         <Form {...form}>
@@ -149,30 +126,20 @@ export const ApplicationDialog = ({
               name="company_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sélectionner une PME</FormLabel>
+                  <FormLabel>PME candidate</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Choisir une entreprise" />
+                        <SelectValue placeholder="Sélectionner une PME" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {availableCompanies.length === 0 ? (
-                        <div className="p-2 text-sm text-muted-foreground">
-                          Toutes les PME ont déjà postulé
-                        </div>
-                      ) : (
-                        availableCompanies.map((company) => (
-                          <SelectItem key={company.id} value={company.id}>
-                            <div>
-                              <div className="font-medium">{company.company_name}</div>
-                              <div className="text-xs text-muted-foreground">
-                                {company.activity_sector}
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
+                      {companies.map((company: any) => (
+                        <SelectItem key={company.id} value={company.id}>
+                          {company.company_name}
+                          {company.activity_sector && ` - ${company.activity_sector}`}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -189,8 +156,8 @@ export const ApplicationDialog = ({
                   <FormControl>
                     <Textarea 
                       {...field} 
-                      rows={3}
-                      placeholder="Informations complémentaires..."
+                      rows={4}
+                      placeholder="Informations complémentaires sur la candidature..."
                     />
                   </FormControl>
                   <FormMessage />
@@ -210,10 +177,7 @@ export const ApplicationDialog = ({
               >
                 Annuler
               </Button>
-              <Button 
-                type="submit" 
-                disabled={loading || availableCompanies.length === 0}
-              >
+              <Button type="submit" disabled={loading}>
                 {loading ? "Envoi..." : "Envoyer la candidature"}
               </Button>
             </div>
