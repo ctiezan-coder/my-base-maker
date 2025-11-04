@@ -1,22 +1,18 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useHasRole } from '@/hooks/useUserRole';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Users, Lock } from 'lucide-react';
+import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
+import { UserManagementTable } from '@/components/admin/UserManagementTable';
 
 export default function Admin() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const isAdmin = useHasRole('admin');
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isAdmin) {
@@ -49,58 +45,18 @@ export default function Admin() {
     enabled: isAdmin,
   });
 
-  const updateRoleMutation = useMutation({
-    mutationFn: async ({ userId, newRole }: { userId: string; newRole: string }) => {
-      // Delete existing role
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
-
-      // Insert new role
-      const { error } = await supabase
-        .from('user_roles')
-        .insert([{ user_id: userId, role: newRole as any }]);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
-      toast({
-        title: 'Rôle mis à jour',
-        description: 'Le rôle de l\'utilisateur a été modifié avec succès',
-      });
-    },
-    onError: () => {
-      toast({
-        variant: 'destructive',
-        title: 'Erreur',
-        description: 'Impossible de modifier le rôle',
-      });
-    },
-  });
-
   if (!isAdmin) return null;
-
-  const getRoleBadgeVariant = (role: string) => {
-    if (role === 'admin') return 'destructive';
-    if (role === 'manager') return 'default';
-    return 'secondary';
-  };
-
-  const getRoleIcon = (role: string) => {
-    if (role === 'admin') return <Shield className="w-4 h-4" />;
-    if (role === 'manager') return <Lock className="w-4 h-4" />;
-    return <Users className="w-4 h-4" />;
-  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Administration</h1>
-        <p className="text-muted-foreground mt-2">
-          Gérez les utilisateurs et leurs permissions
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Administration</h1>
+          <p className="text-muted-foreground mt-2">
+            Gérez les utilisateurs, leurs rôles et permissions
+          </p>
+        </div>
+        <CreateUserDialog />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -141,58 +97,10 @@ export default function Admin() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Gestion des rôles</CardTitle>
-          <CardDescription>
-            Modifiez les rôles et permissions des utilisateurs
-          </CardDescription>
+          <CardTitle>Gestion des utilisateurs</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {users?.map((profile) => (
-              <div
-                key={profile.id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    {getRoleIcon(profile.role)}
-                    <div>
-                      <p className="font-medium">{profile.full_name}</p>
-                      <p className="text-sm text-muted-foreground">{profile.email}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <Badge variant={getRoleBadgeVariant(profile.role)}>
-                    {profile.role}
-                  </Badge>
-                  {profile.user_id !== user?.id && (
-                    <Select
-                      defaultValue={profile.role}
-                      onValueChange={(value) =>
-                        updateRoleMutation.mutate({
-                          userId: profile.user_id,
-                          newRole: value,
-                        })
-                      }
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="user">Utilisateur</SelectItem>
-                        <SelectItem value="manager">Manager</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                  {profile.user_id === user?.id && (
-                    <span className="text-xs text-muted-foreground">(Vous)</span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <UserManagementTable />
         </CardContent>
       </Card>
 
