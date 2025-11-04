@@ -214,6 +214,51 @@ export type Database = {
         }
         Relationships: []
       }
+      company_market_interests: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          interest_level: string | null
+          market_id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          interest_level?: string | null
+          market_id: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          interest_level?: string | null
+          market_id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_market_interests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_market_interests_market_id_fkey"
+            columns: ["market_id"]
+            isOneToOne: false
+            referencedRelation: "potential_markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       directions: {
         Row: {
           created_at: string
@@ -613,6 +658,57 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      opportunity_applications: {
+        Row: {
+          application_date: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          opportunity_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          application_date?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          application_date?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          opportunity_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_applications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "export_opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       partnership_projects: {
         Row: {

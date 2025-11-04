@@ -19,6 +19,9 @@ import { OpportunityCard } from "@/components/market/OpportunityCard";
 import { MarketCard } from "@/components/market/MarketCard";
 import { ConnectionsTable } from "@/components/market/ConnectionsTable";
 import { OpportunityDialog } from "@/components/market/OpportunityDialog";
+import { ApplicationDialog } from "@/components/market/ApplicationDialog";
+import { ApplicationsList } from "@/components/market/ApplicationsList";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
 export default function MarketDevelopment() {
@@ -27,6 +30,9 @@ export default function MarketDevelopment() {
   const [regionFilter, setRegionFilter] = useState<string | "all">("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<ExportOpportunity | undefined>();
+  const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
+  const [applicationsListDialogOpen, setApplicationsListDialogOpen] = useState(false);
+  const [selectedOpportunityForApplication, setSelectedOpportunityForApplication] = useState<ExportOpportunity | undefined>();
 
   // Fetch opportunities
   const { data: opportunities = [], isLoading: loadingOpportunities, refetch: refetchOpportunities } = useQuery({
@@ -102,6 +108,33 @@ export default function MarketDevelopment() {
   const handleEdit = (opportunity: ExportOpportunity) => {
     setSelectedOpportunity(opportunity);
     setDialogOpen(true);
+  };
+
+  const handleApply = (opportunityId: string) => {
+    const opportunity = opportunities.find(o => o.id === opportunityId);
+    if (opportunity) {
+      setSelectedOpportunityForApplication(opportunity);
+      setApplicationDialogOpen(true);
+    }
+  };
+
+  const handleViewApplications = (opportunityId: string) => {
+    const opportunity = opportunities.find(o => o.id === opportunityId);
+    if (opportunity) {
+      setSelectedOpportunityForApplication(opportunity);
+      setApplicationsListDialogOpen(true);
+    }
+  };
+
+  const handleCloseApplicationDialog = () => {
+    setApplicationDialogOpen(false);
+    setSelectedOpportunityForApplication(undefined);
+    refetchOpportunities();
+  };
+
+  const handleCloseApplicationsListDialog = () => {
+    setApplicationsListDialogOpen(false);
+    setSelectedOpportunityForApplication(undefined);
   };
 
   return (
@@ -210,7 +243,8 @@ export default function MarketDevelopment() {
                       <OpportunityCard
                         key={opportunity.id}
                         opportunity={opportunity}
-                        onApply={(id) => console.log("Apply to", id)}
+                        onApply={handleApply}
+                        onViewApplications={handleViewApplications}
                       />
                     ))}
                   </div>
@@ -297,6 +331,27 @@ export default function MarketDevelopment() {
         opportunity={selectedOpportunity}
         onClose={handleCloseDialog}
       />
+
+      {selectedOpportunityForApplication && (
+        <>
+          <ApplicationDialog
+            open={applicationDialogOpen}
+            onOpenChange={setApplicationDialogOpen}
+            opportunityId={selectedOpportunityForApplication.id}
+            opportunityTitle={selectedOpportunityForApplication.title}
+            onClose={handleCloseApplicationDialog}
+          />
+
+          <Dialog open={applicationsListDialogOpen} onOpenChange={setApplicationsListDialogOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{selectedOpportunityForApplication.title}</DialogTitle>
+              </DialogHeader>
+              <ApplicationsList opportunityId={selectedOpportunityForApplication.id} />
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }
