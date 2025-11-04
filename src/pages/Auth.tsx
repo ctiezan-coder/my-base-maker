@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import logo from '@/assets/logo.jpg';
+import logo from '@/assets/aciex-logo.jpg';
 
 const loginSchema = z.object({
   email: z.string().email('Email invalide'),

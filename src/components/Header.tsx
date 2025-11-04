@@ -1,5 +1,5 @@
 import { UserMenu } from "./UserMenu";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/aciex-logo.jpg";
 
 export const Header = () => {
   return (
