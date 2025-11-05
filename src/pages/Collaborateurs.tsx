@@ -18,11 +18,13 @@ import {
   Bell,
   AlertCircle,
   Info,
-  Plus
+  Plus,
+  Download,
+  MessageSquare
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Section = 'mes-pme' | 'opportunites' | 'taches' | 'rapports';
+type Section = 'mes-pme' | 'opportunites' | 'taches' | 'rapports' | 'chat';
 
 export default function Collaborateurs() {
   const { user } = useAuth();
@@ -314,6 +316,14 @@ export default function Collaborateurs() {
               <FileText className="mr-2 h-4 w-4" />
               Rapports
             </Button>
+            <Button
+              variant={activeSection === 'chat' ? 'default' : 'ghost'}
+              className="w-full justify-start"
+              onClick={() => setActiveSection('chat')}
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Assistant IA
+            </Button>
           </nav>
 
           {/* Upcoming Events */}
@@ -492,10 +502,134 @@ export default function Collaborateurs() {
           {/* RAPPORTS Section */}
           {activeSection === 'rapports' && (
             <div className="space-y-6">
-              <h2 className="text-3xl font-bold">Rapports</h2>
-              <Card>
-                <CardContent className="p-6 text-center text-muted-foreground">
-                  Section rapports en construction
+              <h2 className="text-3xl font-bold">Rapports d'activité</h2>
+
+              <div className="grid gap-6">
+                {/* Rapports disponibles */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Générer un rapport</CardTitle>
+                    <CardDescription>
+                      Créez des rapports personnalisés sur vos activités
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                        <FileText className="h-6 w-6" />
+                        <div className="text-center">
+                          <p className="font-semibold">Rapport mensuel</p>
+                          <p className="text-xs text-muted-foreground">Activités du mois</p>
+                        </div>
+                      </Button>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                        <Building2 className="h-6 w-6" />
+                        <div className="text-center">
+                          <p className="font-semibold">Rapport PME</p>
+                          <p className="text-xs text-muted-foreground">Par entreprise</p>
+                        </div>
+                      </Button>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                        <Sparkles className="h-6 w-6" />
+                        <div className="text-center">
+                          <p className="font-semibold">Rapport opportunités</p>
+                          <p className="text-xs text-muted-foreground">Matches et résultats</p>
+                        </div>
+                      </Button>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                        <CheckSquare className="h-6 w-6" />
+                        <div className="text-center">
+                          <p className="font-semibold">Rapport tâches</p>
+                          <p className="text-xs text-muted-foreground">Suivi et performance</p>
+                        </div>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Rapports récents */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Rapports récents</CardTitle>
+                    <CardDescription>Vos derniers rapports générés</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
+                        <div className="flex items-center gap-4">
+                          <FileText className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="font-semibold">Rapport mensuel - Octobre 2025</p>
+                            <p className="text-sm text-muted-foreground">Généré le 01/11/2025</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
+                        <div className="flex items-center gap-4">
+                          <Building2 className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="font-semibold">Rapport PME - BioKarité CI</p>
+                            <p className="text-sm text-muted-foreground">Généré le 28/10/2025</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger
+                        </Button>
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
+                        <div className="flex items-center gap-4">
+                          <Sparkles className="h-8 w-8 text-primary" />
+                          <div>
+                            <p className="font-semibold">Rapport opportunités - Q3 2025</p>
+                            <p className="text-sm text-muted-foreground">Généré le 15/10/2025</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Download className="h-4 w-4 mr-2" />
+                          Télécharger
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
+
+          {/* CHAT Section */}
+          {activeSection === 'chat' && (
+            <div className="space-y-6">
+              <h2 className="text-3xl font-bold">Assistant IA</h2>
+              <Card className="h-[calc(100vh-300px)]">
+                <CardContent className="p-6 flex flex-col h-full">
+                  <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+                    {/* Messages d'exemple */}
+                    <div className="flex gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback>AI</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 bg-accent p-3 rounded-lg">
+                        <p className="text-sm">
+                          Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui ?
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Posez votre question..."
+                      className="flex-1"
+                    />
+                    <Button>
+                      Envoyer
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
