@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AddPmeDialog } from "@/components/collaborateurs/AddPmeDialog";
 import { OpportunityMatchesDialog } from "@/components/collaborateurs/OpportunityMatchesDialog";
 import { ReportDialog } from "@/components/collaborateurs/ReportDialog";
+import { useChatMessages } from "@/hooks/useChatMessages";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,7 @@ export default function Collaborateurs() {
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
   const [chatMessage, setChatMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Dialog states
   const [showAddPmeDialog, setShowAddPmeDialog] = useState(false);
@@ -49,6 +51,14 @@ export default function Collaborateurs() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportType, setReportType] = useState<ReportType>("monthly");
+
+  // Chat functionality
+  const { messages, isLoading: isLoadingMessages, sendMessage, isSending } = useChatMessages(selectedCollaborators);
+
+  // Auto-scroll to bottom of messages
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   // Charger les collaborateurs depuis la base de données
   const { data: collaboratorsData, isLoading: isLoadingCollaborators } = useQuery({
@@ -736,50 +746,66 @@ export default function Collaborateurs() {
                       <div className="space-y-4">
                         {selectedCollaborators.length > 0 ? (
                           <>
-                            {/* Message de bienvenue */}
-                            <div className="text-center py-4">
-                              <p className="text-sm text-muted-foreground">
-                                Début de la conversation
-                              </p>
-                              <Separator className="my-4" />
-                            </div>
-
-                            {/* Messages d'exemple */}
-                            <div className="flex gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src="https://ui-avatars.com/api/?name=Marie+Kouassi&background=f97316&color=fff" />
-                                <AvatarFallback>MK</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-sm font-semibold">Marie Kouassi</p>
-                                  <p className="text-xs text-muted-foreground">10:30</p>
-                                </div>
-                                <div className="bg-accent p-3 rounded-lg">
-                                  <p className="text-sm">
-                                    Bonjour ! J'ai terminé la préparation du dossier BioKarité.
-                                  </p>
-                                </div>
+                            {messages.length === 0 ? (
+                              <div className="text-center py-4">
+                                <p className="text-sm text-muted-foreground">
+                                  Début de la conversation
+                                </p>
+                                <Separator className="my-4" />
                               </div>
-                            </div>
+                            ) : (
+                              messages.map((msg) => {
+                                const isOwn = msg.sender_id === user?.id;
+                                const senderName = msg.sender_profile?.full_name || msg.sender_profile?.email || 'Utilisateur';
+                                const messageTime = new Date(msg.created_at).toLocaleTimeString('fr-FR', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                });
 
-                            <div className="flex gap-3 justify-end">
-                              <div className="flex-1 flex flex-col items-end">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-xs text-muted-foreground">10:32</p>
-                                  <p className="text-sm font-semibold">Vous</p>
-                                </div>
-                                <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                                  <p className="text-sm">
-                                    Excellent ! Pouvez-vous me l'envoyer pour révision ?
-                                  </p>
-                                </div>
-                              </div>
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://ui-avatars.com/api/?name=${user?.email}`} />
-                                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                            </div>
+                                return (
+                                  <div 
+                                    key={msg.id} 
+                                    className={`flex gap-3 ${isOwn ? 'justify-end' : ''}`}
+                                  >
+                                    {!isOwn && (
+                                      <Avatar className="h-8 w-8">
+                                        <AvatarImage src={`https://ui-avatars.com/api/?name=${senderName}`} />
+                                        <AvatarFallback>{senderName.charAt(0).toUpperCase()}</AvatarFallback>
+                                      </Avatar>
+                                    )}
+                                    <div className={`flex-1 flex flex-col ${isOwn ? 'items-end' : ''}`}>
+                                      <div className="flex items-center gap-2 mb-1">
+                                        {isOwn ? (
+                                          <>
+                                            <p className="text-xs text-muted-foreground">{messageTime}</p>
+                                            <p className="text-sm font-semibold">Vous</p>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <p className="text-sm font-semibold">{senderName}</p>
+                                            <p className="text-xs text-muted-foreground">{messageTime}</p>
+                                          </>
+                                        )}
+                                      </div>
+                                      <div className={`p-3 rounded-lg max-w-[80%] ${
+                                        isOwn 
+                                          ? 'bg-primary text-primary-foreground' 
+                                          : 'bg-accent'
+                                      }`}>
+                                        <p className="text-sm">{msg.message}</p>
+                                      </div>
+                                    </div>
+                                    {isOwn && (
+                                      <Avatar className="h-8 w-8">
+                                        <AvatarImage src={`https://ui-avatars.com/api/?name=${user?.email}`} />
+                                        <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                                      </Avatar>
+                                    )}
+                                  </div>
+                                );
+                              })
+                            )}
+                            <div ref={messagesEndRef} />
                           </>
                         ) : (
                           <div className="flex items-center justify-center h-full text-center p-8">
@@ -802,19 +828,25 @@ export default function Collaborateurs() {
                             placeholder="Tapez votre message..."
                             value={chatMessage}
                             onChange={(e) => setChatMessage(e.target.value)}
+                            disabled={isSending}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
+                              if (e.key === 'Enter' && !e.shiftKey && chatMessage.trim()) {
                                 e.preventDefault();
-                                // Logique d'envoi de message à implémenter
+                                sendMessage(chatMessage.trim());
                                 setChatMessage("");
                               }
                             }}
                           />
-                          <Button onClick={() => {
-                            console.log('Envoyer message:', chatMessage);
-                            setChatMessage("");
-                          }}>
-                            Envoyer
+                          <Button 
+                            onClick={() => {
+                              if (chatMessage.trim()) {
+                                sendMessage(chatMessage.trim());
+                                setChatMessage("");
+                              }
+                            }}
+                            disabled={isSending || !chatMessage.trim()}
+                          >
+                            {isSending ? 'Envoi...' : 'Envoyer'}
                           </Button>
                         </div>
                       </>

@@ -82,6 +82,30 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          receiver_ids: string[]
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          receiver_ids: string[]
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          receiver_ids?: string[]
+          sender_id?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           accompaniment_status: string | null
