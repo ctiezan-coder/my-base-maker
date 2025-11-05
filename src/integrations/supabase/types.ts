@@ -867,6 +867,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           direction: string | null
+          direction_id: string | null
           email: string
           full_name: string
           id: string
@@ -877,6 +878,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           direction?: string | null
+          direction_id?: string | null
           email: string
           full_name: string
           id?: string
@@ -887,13 +889,22 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           direction?: string | null
+          direction_id?: string | null
           email?: string
           full_name?: string
           id?: string
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
@@ -1095,6 +1106,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_role_assignments: {
+        Row: {
+          created_at: string
+          direction_id: string
+          id: string
+          module: Database["public"]["Enums"]["app_module"]
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          direction_id: string
+          id?: string
+          module: Database["public"]["Enums"]["app_module"]
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          direction_id?: string
+          id?: string
+          module?: Database["public"]["Enums"]["app_module"]
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_role_assignments_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1121,6 +1170,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      has_module_permission: {
+        Args: {
+          _direction_id: string
+          _module: Database["public"]["Enums"]["app_module"]
+          _required_role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1130,6 +1188,17 @@ export type Database = {
       }
     }
     Enums: {
+      app_module:
+        | "companies"
+        | "projects"
+        | "documents"
+        | "events"
+        | "trainings"
+        | "kpis"
+        | "market_development"
+        | "partnerships"
+        | "media"
+        | "collaborators"
       app_role: "admin" | "manager" | "user"
       company_legal_form:
         | "SA"
@@ -1337,6 +1406,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_module: [
+        "companies",
+        "projects",
+        "documents",
+        "events",
+        "trainings",
+        "kpis",
+        "market_development",
+        "partnerships",
+        "media",
+        "collaborators",
+      ],
       app_role: ["admin", "manager", "user"],
       company_legal_form: ["SA", "SARL", "SAS", "SASU", "EI", "GIE", "Autre"],
       company_size: ["TPE", "PME", "ETI", "Grande entreprise"],
