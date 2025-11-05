@@ -1,5 +1,10 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { AddPmeDialog } from "@/components/collaborateurs/AddPmeDialog";
+import { OpportunityMatchesDialog } from "@/components/collaborateurs/OpportunityMatchesDialog";
+import { ReportDialog } from "@/components/collaborateurs/ReportDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +33,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type Section = 'mes-pme' | 'opportunites' | 'taches' | 'rapports' | 'chat';
+type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
 
 export default function Collaborateurs() {
   const { user } = useAuth();
@@ -36,15 +42,36 @@ export default function Collaborateurs() {
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
   const [chatMessage, setChatMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Dialog states
+  const [showAddPmeDialog, setShowAddPmeDialog] = useState(false);
+  const [showMatchesDialog, setShowMatchesDialog] = useState(false);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportType, setReportType] = useState<ReportType>("monthly");
 
-  // Liste des collaborateurs disponibles
-  const collaborators = [
-    { id: "1", name: "Marie Kouassi", role: "Conseiller Export", online: true },
-    { id: "2", name: "Ibrahim Diallo", role: "Directeur Commercial", online: true },
-    { id: "3", name: "Fatou Koné", role: "Conseiller Export Senior", online: false },
-    { id: "4", name: "Seydou Traoré", role: "Responsable Partenariats", online: true },
-    { id: "5", name: "Aminata Sanogo", role: "Chargée de Projets", online: false },
-  ];
+  // Charger les collaborateurs depuis la base de données
+  const { data: collaboratorsData, isLoading: isLoadingCollaborators } = useQuery({
+    queryKey: ['collaborators'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('full_name');
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Liste des collaborateurs depuis la base de données
+  const collaborators = collaboratorsData?.map((profile) => ({
+    id: profile.id,
+    name: profile.full_name,
+    email: profile.email,
+    role: profile.direction || "Collaborateur",
+    online: Math.random() > 0.5 // Simulation du statut en ligne
+  })) || [];
 
   const notifications = [
     {
@@ -377,7 +404,7 @@ export default function Collaborateurs() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold">Mes PME accompagnées</h2>
-                <Button onClick={() => console.log('Ouvrir dialogue ajout PME')}>
+                <Button onClick={() => setShowAddPmeDialog(true)}>
                   <Plus className="mr-2 h-4 w-4" />
                   Ajouter une PME
                 </Button>
@@ -467,7 +494,10 @@ export default function Collaborateurs() {
                           <Calendar className="mr-2 h-4 w-4" />
                           Échéance: {opp.deadline}
                         </div>
-                        <Button size="sm" className="ml-auto" onClick={() => console.log('Voir matches pour opportunité', opp.id)}>
+                        <Button size="sm" className="ml-auto" onClick={() => {
+                          setSelectedOpportunity(opp);
+                          setShowMatchesDialog(true);
+                        }}>
                           Voir les matches
                         </Button>
                       </div>
@@ -532,28 +562,40 @@ export default function Collaborateurs() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport mensuel')}>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => {
+                        setReportType("monthly");
+                        setShowReportDialog(true);
+                      }}>
                         <FileText className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport mensuel</p>
                           <p className="text-xs text-muted-foreground">Activités du mois</p>
                         </div>
                       </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport PME')}>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => {
+                        setReportType("pme");
+                        setShowReportDialog(true);
+                      }}>
                         <Building2 className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport PME</p>
                           <p className="text-xs text-muted-foreground">Par entreprise</p>
                         </div>
                       </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport opportunités')}>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => {
+                        setReportType("opportunities");
+                        setShowReportDialog(true);
+                      }}>
                         <Sparkles className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport opportunités</p>
                           <p className="text-xs text-muted-foreground">Matches et résultats</p>
                         </div>
                       </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport tâches')}>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => {
+                        setReportType("tasks");
+                        setShowReportDialog(true);
+                      }}>
                         <CheckSquare className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport tâches</p>
@@ -784,6 +826,19 @@ export default function Collaborateurs() {
           )}
         </main>
       </div>
+
+      {/* Dialogues */}
+      <AddPmeDialog open={showAddPmeDialog} onOpenChange={setShowAddPmeDialog} />
+      <OpportunityMatchesDialog 
+        open={showMatchesDialog} 
+        onOpenChange={setShowMatchesDialog}
+        opportunity={selectedOpportunity}
+      />
+      <ReportDialog 
+        open={showReportDialog} 
+        onOpenChange={setShowReportDialog}
+        reportType={reportType}
+      />
     </div>
   );
 }
