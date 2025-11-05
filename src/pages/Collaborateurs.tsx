@@ -4,6 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { 
   Building2, 
   Sparkles, 
@@ -30,6 +33,17 @@ export default function Collaborateurs() {
   const { user } = useAuth();
   const [activeSection, setActiveSection] = useState<Section>('mes-pme');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
+  const [chatMessage, setChatMessage] = useState("");
+
+  // Liste des collaborateurs disponibles
+  const collaborators = [
+    { id: "1", name: "Marie Kouassi", role: "Conseiller Export", online: true },
+    { id: "2", name: "Ibrahim Diallo", role: "Directeur Commercial", online: true },
+    { id: "3", name: "Fatou Koné", role: "Conseiller Export Senior", online: false },
+    { id: "4", name: "Seydou Traoré", role: "Responsable Partenariats", online: true },
+    { id: "5", name: "Aminata Sanogo", role: "Chargée de Projets", online: false },
+  ];
 
   const notifications = [
     {
@@ -322,7 +336,7 @@ export default function Collaborateurs() {
               onClick={() => setActiveSection('chat')}
             >
               <MessageSquare className="mr-2 h-4 w-4" />
-              Assistant IA
+              Tchat
             </Button>
           </nav>
 
@@ -604,34 +618,162 @@ export default function Collaborateurs() {
           {/* CHAT Section */}
           {activeSection === 'chat' && (
             <div className="space-y-6">
-              <h2 className="text-3xl font-bold">Assistant IA</h2>
-              <Card className="h-[calc(100vh-300px)]">
-                <CardContent className="p-6 flex flex-col h-full">
-                  <div className="flex-1 overflow-y-auto mb-4 space-y-4">
-                    {/* Messages d'exemple */}
-                    <div className="flex gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback>AI</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 bg-accent p-3 rounded-lg">
-                        <p className="text-sm">
-                          Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui ?
-                        </p>
+              <div className="flex items-center justify-between">
+                <h2 className="text-3xl font-bold">Tchat</h2>
+                <Badge variant="secondary">
+                  {selectedCollaborators.length} participant{selectedCollaborators.length !== 1 ? 's' : ''} sélectionné{selectedCollaborators.length !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* Liste des collaborateurs */}
+                <Card className="lg:col-span-1">
+                  <CardHeader>
+                    <CardTitle className="text-base">Collaborateurs</CardTitle>
+                    <CardDescription>Sélectionnez vos contacts</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[500px] pr-4">
+                      <div className="space-y-4">
+                        {collaborators.map((collab) => (
+                          <div key={collab.id} className="flex items-start space-x-3">
+                            <Checkbox
+                              id={collab.id}
+                              checked={selectedCollaborators.includes(collab.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setSelectedCollaborators([...selectedCollaborators, collab.id]);
+                                } else {
+                                  setSelectedCollaborators(
+                                    selectedCollaborators.filter((id) => id !== collab.id)
+                                  );
+                                }
+                              }}
+                            />
+                            <div className="flex-1">
+                              <label
+                                htmlFor={collab.id}
+                                className="flex items-center gap-2 cursor-pointer"
+                              >
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium leading-none">
+                                      {collab.name}
+                                    </p>
+                                    {collab.online && (
+                                      <span className="h-2 w-2 rounded-full bg-green-500" />
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    {collab.role}
+                                  </p>
+                                </div>
+                              </label>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Posez votre question..."
-                      className="flex-1"
-                    />
-                    <Button>
-                      Envoyer
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Zone de chat */}
+                <Card className="lg:col-span-3 h-[calc(100vh-300px)]">
+                  <CardHeader>
+                    <CardTitle className="text-base">
+                      {selectedCollaborators.length === 0
+                        ? "Sélectionnez des collaborateurs pour commencer"
+                        : `Discussion avec ${selectedCollaborators.length} personne${selectedCollaborators.length !== 1 ? 's' : ''}`}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex flex-col h-full pb-6">
+                    <ScrollArea className="flex-1 pr-4 mb-4">
+                      <div className="space-y-4">
+                        {selectedCollaborators.length > 0 ? (
+                          <>
+                            {/* Message de bienvenue */}
+                            <div className="text-center py-4">
+                              <p className="text-sm text-muted-foreground">
+                                Début de la conversation
+                              </p>
+                              <Separator className="my-4" />
+                            </div>
+
+                            {/* Messages d'exemple */}
+                            <div className="flex gap-3">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src="https://ui-avatars.com/api/?name=Marie+Kouassi&background=f97316&color=fff" />
+                                <AvatarFallback>MK</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="text-sm font-semibold">Marie Kouassi</p>
+                                  <p className="text-xs text-muted-foreground">10:30</p>
+                                </div>
+                                <div className="bg-accent p-3 rounded-lg">
+                                  <p className="text-sm">
+                                    Bonjour ! J'ai terminé la préparation du dossier BioKarité.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex gap-3 justify-end">
+                              <div className="flex-1 flex flex-col items-end">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className="text-xs text-muted-foreground">10:32</p>
+                                  <p className="text-sm font-semibold">Vous</p>
+                                </div>
+                                <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
+                                  <p className="text-sm">
+                                    Excellent ! Pouvez-vous me l'envoyer pour révision ?
+                                  </p>
+                                </div>
+                              </div>
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={`https://ui-avatars.com/api/?name=${user?.email}`} />
+                                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                              </Avatar>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-center p-8">
+                            <div>
+                              <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                              <p className="text-muted-foreground">
+                                Sélectionnez un ou plusieurs collaborateurs pour démarrer une discussion
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </ScrollArea>
+
+                    {selectedCollaborators.length > 0 && (
+                      <>
+                        <Separator className="mb-4" />
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Tapez votre message..."
+                            value={chatMessage}
+                            onChange={(e) => setChatMessage(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                // Logique d'envoi de message à implémenter
+                                setChatMessage("");
+                              }
+                            }}
+                          />
+                          <Button onClick={() => setChatMessage("")}>
+                            Envoyer
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           )}
         </main>
