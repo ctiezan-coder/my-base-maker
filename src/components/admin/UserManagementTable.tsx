@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Users, Lock, Trash2, Edit } from "lucide-react";
+import { RoleAssignmentDialog } from "./RoleAssignmentDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -257,15 +258,20 @@ export function UserManagementTable() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {userData.user_id !== user?.id && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setDeleteUserId(userData.user_id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {userData.user_id !== user?.id && (
+                      <>
+                        <RoleAssignmentDialog userId={userData.user_id} userEmail={userData.email} />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setDeleteUserId(userData.user_id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
