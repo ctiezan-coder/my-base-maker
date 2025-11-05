@@ -1,204 +1,182 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Building2, 
-  Sparkles, 
-  CheckSquare, 
-  FileText, 
-  CalendarClock,
   Users,
-  MapPin,
-  User,
-  Calendar,
   Search,
   Bell,
   AlertCircle,
   Info,
-  Plus,
-  Download,
-  MessageSquare
+  MessageSquare,
+  Briefcase,
+  Target,
+  FileText,
+  Calendar,
+  TrendingUp
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Section = 'mes-pme' | 'opportunites' | 'taches' | 'rapports' | 'chat';
-
 export default function Collaborateurs() {
   const { user } = useAuth();
-  const [activeSection, setActiveSection] = useState<Section>('mes-pme');
   const [showNotifications, setShowNotifications] = useState(false);
-  const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
-  const [chatMessage, setChatMessage] = useState("");
 
-  // Liste des collaborateurs disponibles
-  const collaborators = [
-    { id: "1", name: "Marie Kouassi", role: "Conseiller Export", online: true },
-    { id: "2", name: "Ibrahim Diallo", role: "Directeur Commercial", online: true },
-    { id: "3", name: "Fatou Koné", role: "Conseiller Export Senior", online: false },
-    { id: "4", name: "Seydou Traoré", role: "Responsable Partenariats", online: true },
-    { id: "5", name: "Aminata Sanogo", role: "Chargée de Projets", online: false },
-  ];
+  // Fetch user's profile to get their direction
+  const { data: profile } = useQuery({
+    queryKey: ['userProfile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  // Fetch directions
+  const { data: directions, isLoading: directionsLoading } = useQuery({
+    queryKey: ['directions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('directions')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Get the initial direction ID based on user's direction name
+  const initialDirectionId = directions?.find(d => d.name === profile?.direction)?.id;
+  const [selectedDirection, setSelectedDirection] = useState<string | undefined>(initialDirectionId);
+
+  // Update selectedDirection when initialDirectionId changes
+  useEffect(() => {
+    if (initialDirectionId && !selectedDirection) {
+      setSelectedDirection(initialDirectionId);
+    }
+  }, [initialDirectionId, selectedDirection]);
+
+  // Fetch team members from the same direction
+  const { data: teamMembers } = useQuery({
+    queryKey: ['teamMembers', selectedDirection || profile?.direction],
+    queryFn: async () => {
+      const directionName = selectedDirection 
+        ? directions?.find(d => d.id === selectedDirection)?.name
+        : profile?.direction;
+      
+      if (!directionName) return [];
+      
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('direction', directionName);
+      
+      if (profilesError) throw profilesError;
+
+      // Fetch roles for these users
+      const userIds = profiles?.map(p => p.user_id) || [];
+      const { data: roles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*')
+        .in('user_id', userIds);
+      
+      if (rolesError) throw rolesError;
+
+      return profiles?.map(profile => ({
+        ...profile,
+        role: roles?.find(r => r.user_id === profile.user_id)?.role || 'user'
+      }));
+    },
+    enabled: !!(selectedDirection || profile?.direction),
+  });
+
+  // Fetch companies for the selected direction
+  const { data: companies } = useQuery({
+    queryKey: ['directionCompanies', selectedDirection],
+    queryFn: async () => {
+      const directionId = selectedDirection;
+      if (!directionId) return [];
+      
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('direction_id', directionId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedDirection,
+  });
+
+  // Fetch projects for the selected direction
+  const { data: projects } = useQuery({
+    queryKey: ['directionProjects', selectedDirection],
+    queryFn: async () => {
+      const directionId = selectedDirection;
+      if (!directionId) return [];
+      
+      const { data, error } = await supabase
+        .from('projects')
+        .select('*')
+        .eq('direction_id', directionId)
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedDirection,
+  });
 
   const notifications = [
     {
       type: "alert",
-      title: "Contrat Bio Karité - Signature imminente",
-      description: "Le contrat avec Nature&Sens France nécessite votre validation finale",
-      time: "2025-11-04 14:30",
+      title: "Nouvelle tâche assignée",
+      description: "Révision du dossier export pour BioKarité CI",
+      time: "Il y a 30 min",
       unread: true
     },
     {
       type: "info",
-      title: "Nouvelle opportunité - Belgique",
-      description: "Distributeur chocolat premium correspond à 3 de vos PME",
-      time: "2025-11-04 10:15",
+      title: "Réunion d'équipe",
+      description: "Réunion hebdomadaire demain à 10h",
+      time: "Il y a 2h",
       unread: true
     },
-    {
-      type: "warning",
-      title: "Échéance rapport mensuel",
-      description: "Rapport mensuel activités dû dans 2 jours",
-      time: "2025-11-04 09:00",
-      unread: false
-    }
   ];
 
-  const pmeList = [
-    {
-      id: 1,
-      name: "Cacao Excellence CI",
-      sector: "Agroalimentaire • Cacao transformé",
-      status: "En prospection",
-      market: "Suisse",
-      contact: "Yao Marie, DG",
-      nextMeeting: "15/11/2025",
-      progress: 65
-    },
-    {
-      id: 2,
-      name: "BioKarité Côte d'Ivoire",
-      sector: "Cosmétique • Produits naturels",
-      status: "Négociation",
-      market: "France",
-      contact: "Koné Fatou, CEO",
-      nextMeeting: "10/11/2025",
-      progress: 80
-    },
-    {
-      id: 3,
-      name: "Textile Africain Premium",
-      sector: "Mode • Textile artisanal",
-      status: "Prospection",
-      market: "Allemagne",
-      contact: "Diallo Ibrahim, Fondateur",
-      nextMeeting: "20/11/2025",
-      progress: 45
-    },
-    {
-      id: 4,
-      name: "Anacarde Export Plus",
-      sector: "Agroalimentaire • Noix de cajou",
-      status: "Actif",
-      market: "Belgique",
-      contact: "Traoré Seydou, DG",
-      nextMeeting: "12/11/2025",
-      progress: 90
-    }
-  ];
+  const getDirectionIcon = (iconName: string | null) => {
+    const icons: Record<string, any> = {
+      'Handshake': Briefcase,
+      'TrendingUp': TrendingUp,
+      'Calendar': Calendar,
+      'Megaphone': MessageSquare,
+      'Globe': Target,
+      'Brain': Info,
+      'Scale': FileText,
+      'UserCog': Users,
+    };
+    const Icon = icons[iconName || 'Building2'] || Building2;
+    return <Icon className="h-5 w-5" />;
+  };
 
-  const opportunities = [
-    {
-      id: 1,
-      title: "Distributeur Bio - Belgique",
-      description: "Recherche fournisseurs cacao & karité bio certifiés",
-      country: "Belgique",
-      sector: "Agroalimentaire",
-      deadline: "20/11/2025",
-      matches: 2
-    },
-    {
-      id: 2,
-      title: "Chaîne retail - Suisse",
-      description: "Partenariat chocolat premium équitable",
-      country: "Suisse",
-      sector: "Distribution",
-      deadline: "30/11/2025",
-      matches: 1
-    },
-    {
-      id: 3,
-      title: "Marque cosmétique - France",
-      description: "Sourcing karité brut certifié bio",
-      country: "France",
-      sector: "Cosmétique",
-      deadline: "15/12/2025",
-      matches: 3
-    }
-  ];
-
-  const tasks = [
-    {
-      id: 1,
-      title: "Valider contrat BioKarité",
-      pme: "BioKarité CI",
-      deadline: "08/11/2025",
-      priority: "Urgent"
-    },
-    {
-      id: 2,
-      title: "Préparer dossier certification",
-      pme: "Cacao Excellence",
-      deadline: "12/11/2025",
-      priority: "Important"
-    },
-    {
-      id: 3,
-      title: "Rapport mensuel activités",
-      pme: "Toutes PME",
-      deadline: "15/11/2025",
-      priority: "Normal"
-    },
-    {
-      id: 4,
-      title: "Suivi post-mission Ghana",
-      pme: "Anacarde Export",
-      deadline: "18/11/2025",
-      priority: "Normal"
-    }
-  ];
-
-  const events = [
-    {
-      date: "12",
-      month: "Nov",
-      title: "Webinaire ZLECAf",
-      location: "En ligne",
-      participants: 50,
-      type: "Webinaire"
-    },
-    {
-      date: "18",
-      month: "Nov",
-      title: "Formation Export - FDFP",
-      location: "Maison de la Formation",
-      participants: 25,
-      type: "Formation"
-    },
-    {
-      date: "25",
-      month: "Nov",
-      title: "Mission commerciale Ghana",
-      location: "Accra, Ghana",
-      participants: 8,
-      type: "Mission"
-    }
-  ];
+  const currentDirection = selectedDirection 
+    ? directions?.find(d => d.id === selectedDirection)
+    : directions?.find(d => d.name === profile?.direction);
 
   return (
     <div className="min-h-screen bg-background">
@@ -207,7 +185,9 @@ export default function Collaborateurs() {
         <div className="flex items-center justify-between px-6 py-4">
           <div>
             <h1 className="text-2xl font-bold">Espace Collaborateurs</h1>
-            <p className="text-sm text-muted-foreground">Gestion de votre portefeuille PME</p>
+            <p className="text-sm text-muted-foreground">
+              {currentDirection?.name || 'Aucune direction assignée'}
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
@@ -216,7 +196,7 @@ export default function Collaborateurs() {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Rechercher PME, opportunité..."
+                placeholder="Rechercher..."
                 className="pl-10 w-80"
               />
             </div>
@@ -253,12 +233,13 @@ export default function Collaborateurs() {
                         <div className="flex items-start gap-3">
                           <div className={`p-2 rounded-full ${
                             notif.type === 'alert' ? 'bg-destructive/10' :
-                            notif.type === 'info' ? 'bg-primary/10' :
-                            'bg-yellow-100'
+                            'bg-primary/10'
                           }`}>
-                            {notif.type === 'alert' && <AlertCircle className="h-4 w-4 text-destructive" />}
-                            {notif.type === 'info' && <Info className="h-4 w-4 text-primary" />}
-                            {notif.type === 'warning' && <CheckSquare className="h-4 w-4 text-yellow-600" />}
+                            {notif.type === 'alert' ? (
+                              <AlertCircle className="h-4 w-4 text-destructive" />
+                            ) : (
+                              <Info className="h-4 w-4 text-primary" />
+                            )}
                           </div>
                           <div className="flex-1">
                             <p className="font-semibold text-sm">{notif.title}</p>
@@ -280,503 +261,200 @@ export default function Collaborateurs() {
                 <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="hidden md:block">
-                <p className="font-semibold text-sm">{user?.email}</p>
-                <p className="text-xs text-muted-foreground">Conseiller Export</p>
+                <p className="font-semibold text-sm">{profile?.full_name}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-64 border-r bg-card min-h-[calc(100vh-73px)] p-4">
-          <nav className="space-y-2">
-            <Button
-              variant={activeSection === 'mes-pme' ? 'default' : 'ghost'}
-              className="w-full justify-start"
-              onClick={() => setActiveSection('mes-pme')}
-            >
-              <Building2 className="mr-2 h-4 w-4" />
-              Mes PME ({pmeList.length})
-            </Button>
-            <Button
-              variant={activeSection === 'opportunites' ? 'default' : 'ghost'}
-              className="w-full justify-start"
-              onClick={() => setActiveSection('opportunites')}
-            >
-              <Sparkles className="mr-2 h-4 w-4" />
-              Opportunités
-              <Badge variant="secondary" className="ml-auto">
-                {opportunities.length}
-              </Badge>
-            </Button>
-            <Button
-              variant={activeSection === 'taches' ? 'default' : 'ghost'}
-              className="w-full justify-start"
-              onClick={() => setActiveSection('taches')}
-            >
-              <CheckSquare className="mr-2 h-4 w-4" />
-              Mes tâches
-              <Badge variant="destructive" className="ml-auto">
-                {tasks.length}
-              </Badge>
-            </Button>
-            <Button
-              variant={activeSection === 'rapports' ? 'default' : 'ghost'}
-              className="w-full justify-start"
-              onClick={() => setActiveSection('rapports')}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              Rapports
-            </Button>
-            <Button
-              variant={activeSection === 'chat' ? 'default' : 'ghost'}
-              className="w-full justify-start"
-              onClick={() => setActiveSection('chat')}
-            >
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Tchat
-            </Button>
-          </nav>
+      <div className="p-6">
+        {/* Direction Selector for Admins */}
+        <Tabs value={selectedDirection} onValueChange={setSelectedDirection} className="space-y-6">
+          <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-2 bg-transparent">
+            {directions?.map((direction) => (
+              <TabsTrigger 
+                key={direction.id} 
+                value={direction.id}
+                className="flex items-center gap-2"
+              >
+                {getDirectionIcon(direction.icon_name)}
+                <span className="hidden md:inline">{direction.name}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-          {/* Upcoming Events */}
-          <div className="mt-8">
-            <h3 className="font-bold text-sm mb-4 flex items-center">
-              <CalendarClock className="mr-2 h-4 w-4" />
-              Prochains événements
-            </h3>
-            <div className="space-y-3">
-              {events.map((event, idx) => (
-                <div key={idx} className="flex items-start gap-3 p-3 bg-accent rounded-lg">
-                  <div className="bg-primary/10 rounded-lg p-2 text-center min-w-[50px]">
-                    <p className="text-xl font-bold text-primary">{event.date}</p>
-                    <p className="text-xs text-muted-foreground">{event.month}</p>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-xs truncate">{event.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{event.location}</p>
-                    <div className="flex items-center mt-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3 mr-1" />
-                      {event.participants}
+          {directions?.map((direction) => (
+            <TabsContent key={direction.id} value={direction.id} className="space-y-6">
+              {/* Direction Overview */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    {getDirectionIcon(direction.icon_name)}
+                    {direction.name}
+                  </CardTitle>
+                  <CardDescription>{direction.description}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-primary/10 rounded-lg">
+                        <Users className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{teamMembers?.length || 0}</p>
+                        <p className="text-sm text-muted-foreground">Collaborateurs</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-primary/10 rounded-lg">
+                        <Building2 className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{companies?.length || 0}</p>
+                        <p className="text-sm text-muted-foreground">Entreprises</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-primary/10 rounded-lg">
+                        <Target className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{projects?.length || 0}</p>
+                        <p className="text-sm text-muted-foreground">Projets actifs</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 p-6">
-          {/* MES PME Section */}
-          {activeSection === 'mes-pme' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold">Mes PME accompagnées</h2>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Ajouter une PME
-                </Button>
-              </div>
+                </CardContent>
+              </Card>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {pmeList.map((pme) => (
-                  <Card key={pme.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle>{pme.name}</CardTitle>
-                          <CardDescription>{pme.sector}</CardDescription>
-                        </div>
-                        <Badge variant={
-                          pme.status === 'Actif' ? 'default' :
-                          pme.status === 'Négociation' ? 'secondary' :
-                          'outline'
-                        }>
-                          {pme.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3 mb-4">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="mr-2 h-4 w-4 text-primary" />
-                          Marché cible: <strong className="ml-1">{pme.market}</strong>
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <User className="mr-2 h-4 w-4 text-primary" />
-                          Contact: <strong className="ml-1">{pme.contact}</strong>
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="mr-2 h-4 w-4 text-primary" />
-                          Prochain RDV: <strong className="ml-1">{pme.nextMeeting}</strong>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Progression</span>
-                          <span className="font-bold text-primary">{pme.progress}%</span>
-                        </div>
-                        <div className="w-full bg-secondary rounded-full h-3">
-                          <div 
-                            className="bg-gradient-to-r from-primary to-green-600 h-3 rounded-full transition-all"
-                            style={{ width: `${pme.progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* OPPORTUNITES Section */}
-          {activeSection === 'opportunites' && (
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold">Opportunités disponibles</h2>
-
-              <div className="grid gap-6">
-                {opportunities.map((opp) => (
-                  <Card key={opp.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle>{opp.title}</CardTitle>
-                          <CardDescription>{opp.description}</CardDescription>
-                        </div>
-                        <Badge>{opp.matches} PME</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-6 text-sm">
-                        <div className="flex items-center text-muted-foreground">
-                          <MapPin className="mr-2 h-4 w-4" />
-                          {opp.country}
-                        </div>
-                        <div className="flex items-center text-muted-foreground">
-                          <Building2 className="mr-2 h-4 w-4" />
-                          {opp.sector}
-                        </div>
-                        <div className="flex items-center text-muted-foreground">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Échéance: {opp.deadline}
-                        </div>
-                        <Button size="sm" className="ml-auto">
-                          Voir les matches
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TACHES Section */}
-          {activeSection === 'taches' && (
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold">Mes tâches</h2>
-
-              <div className="grid gap-4">
-                {tasks.map((task) => (
-                  <Card key={task.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <CheckSquare className="h-5 w-5 text-muted-foreground" />
-                          <div>
-                            <p className="font-semibold">{task.title}</p>
-                            <p className="text-sm text-muted-foreground">{task.pme}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <Badge variant={
-                            task.priority === 'Urgent' ? 'destructive' :
-                            task.priority === 'Important' ? 'default' :
-                            'secondary'
-                          }>
-                            {task.priority}
-                          </Badge>
-                          <div className="text-sm text-muted-foreground">
-                            <Calendar className="inline mr-1 h-4 w-4" />
-                            {task.deadline}
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* RAPPORTS Section */}
-          {activeSection === 'rapports' && (
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold">Rapports d'activité</h2>
-
-              <div className="grid gap-6">
-                {/* Rapports disponibles */}
+                {/* Team Members */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Générer un rapport</CardTitle>
-                    <CardDescription>
-                      Créez des rapports personnalisés sur vos activités
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                        <FileText className="h-6 w-6" />
-                        <div className="text-center">
-                          <p className="font-semibold">Rapport mensuel</p>
-                          <p className="text-xs text-muted-foreground">Activités du mois</p>
-                        </div>
-                      </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                        <Building2 className="h-6 w-6" />
-                        <div className="text-center">
-                          <p className="font-semibold">Rapport PME</p>
-                          <p className="text-xs text-muted-foreground">Par entreprise</p>
-                        </div>
-                      </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                        <Sparkles className="h-6 w-6" />
-                        <div className="text-center">
-                          <p className="font-semibold">Rapport opportunités</p>
-                          <p className="text-xs text-muted-foreground">Matches et résultats</p>
-                        </div>
-                      </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
-                        <CheckSquare className="h-6 w-6" />
-                        <div className="text-center">
-                          <p className="font-semibold">Rapport tâches</p>
-                          <p className="text-xs text-muted-foreground">Suivi et performance</p>
-                        </div>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Rapports récents */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Rapports récents</CardTitle>
-                    <CardDescription>Vos derniers rapports générés</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
-                        <div className="flex items-center gap-4">
-                          <FileText className="h-8 w-8 text-primary" />
-                          <div>
-                            <p className="font-semibold">Rapport mensuel - Octobre 2025</p>
-                            <p className="text-sm text-muted-foreground">Généré le 01/11/2025</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Download className="h-4 w-4 mr-2" />
-                          Télécharger
-                        </Button>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
-                        <div className="flex items-center gap-4">
-                          <Building2 className="h-8 w-8 text-primary" />
-                          <div>
-                            <p className="font-semibold">Rapport PME - BioKarité CI</p>
-                            <p className="text-sm text-muted-foreground">Généré le 28/10/2025</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Download className="h-4 w-4 mr-2" />
-                          Télécharger
-                        </Button>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent transition-colors">
-                        <div className="flex items-center gap-4">
-                          <Sparkles className="h-8 w-8 text-primary" />
-                          <div>
-                            <p className="font-semibold">Rapport opportunités - Q3 2025</p>
-                            <p className="text-sm text-muted-foreground">Généré le 15/10/2025</p>
-                          </div>
-                        </div>
-                        <Button size="sm" variant="ghost">
-                          <Download className="h-4 w-4 mr-2" />
-                          Télécharger
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {/* CHAT Section */}
-          {activeSection === 'chat' && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold">Tchat</h2>
-                <Badge variant="secondary">
-                  {selectedCollaborators.length} participant{selectedCollaborators.length !== 1 ? 's' : ''} sélectionné{selectedCollaborators.length !== 1 ? 's' : ''}
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                {/* Liste des collaborateurs */}
-                <Card className="lg:col-span-1">
-                  <CardHeader>
-                    <CardTitle className="text-base">Collaborateurs</CardTitle>
-                    <CardDescription>Sélectionnez vos contacts</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ScrollArea className="h-[500px] pr-4">
-                      <div className="space-y-4">
-                        {collaborators.map((collab) => (
-                          <div key={collab.id} className="flex items-start space-x-3">
-                            <Checkbox
-                              id={collab.id}
-                              checked={selectedCollaborators.includes(collab.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedCollaborators([...selectedCollaborators, collab.id]);
-                                } else {
-                                  setSelectedCollaborators(
-                                    selectedCollaborators.filter((id) => id !== collab.id)
-                                  );
-                                }
-                              }}
-                            />
-                            <div className="flex-1">
-                              <label
-                                htmlFor={collab.id}
-                                className="flex items-center gap-2 cursor-pointer"
-                              >
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <p className="text-sm font-medium leading-none">
-                                      {collab.name}
-                                    </p>
-                                    {collab.online && (
-                                      <span className="h-2 w-2 rounded-full bg-green-500" />
-                                    )}
-                                  </div>
-                                  <p className="text-xs text-muted-foreground mt-1">
-                                    {collab.role}
-                                  </p>
-                                </div>
-                              </label>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </CardContent>
-                </Card>
-
-                {/* Zone de chat */}
-                <Card className="lg:col-span-3 h-[calc(100vh-300px)]">
-                  <CardHeader>
-                    <CardTitle className="text-base">
-                      {selectedCollaborators.length === 0
-                        ? "Sélectionnez des collaborateurs pour commencer"
-                        : `Discussion avec ${selectedCollaborators.length} personne${selectedCollaborators.length !== 1 ? 's' : ''}`}
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Équipe
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="flex flex-col h-full pb-6">
-                    <ScrollArea className="flex-1 pr-4 mb-4">
-                      <div className="space-y-4">
-                        {selectedCollaborators.length > 0 ? (
-                          <>
-                            {/* Message de bienvenue */}
-                            <div className="text-center py-4">
-                              <p className="text-sm text-muted-foreground">
-                                Début de la conversation
-                              </p>
-                              <Separator className="my-4" />
+                  <CardContent>
+                    <ScrollArea className="h-[400px] pr-4">
+                      <div className="space-y-3">
+                        {teamMembers?.map((member) => (
+                          <div key={member.id} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-accent transition-colors">
+                            <Avatar>
+                              <AvatarImage src={member.avatar_url || `https://ui-avatars.com/api/?name=${member.full_name}`} />
+                              <AvatarFallback>{member.full_name?.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <p className="font-semibold text-sm">{member.full_name}</p>
+                              <p className="text-xs text-muted-foreground">{member.email}</p>
                             </div>
-
-                            {/* Messages d'exemple */}
-                            <div className="flex gap-3">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src="https://ui-avatars.com/api/?name=Marie+Kouassi&background=f97316&color=fff" />
-                                <AvatarFallback>MK</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-sm font-semibold">Marie Kouassi</p>
-                                  <p className="text-xs text-muted-foreground">10:30</p>
-                                </div>
-                                <div className="bg-accent p-3 rounded-lg">
-                                  <p className="text-sm">
-                                    Bonjour ! J'ai terminé la préparation du dossier BioKarité.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="flex gap-3 justify-end">
-                              <div className="flex-1 flex flex-col items-end">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className="text-xs text-muted-foreground">10:32</p>
-                                  <p className="text-sm font-semibold">Vous</p>
-                                </div>
-                                <div className="bg-primary text-primary-foreground p-3 rounded-lg max-w-[80%]">
-                                  <p className="text-sm">
-                                    Excellent ! Pouvez-vous me l'envoyer pour révision ?
-                                  </p>
-                                </div>
-                              </div>
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={`https://ui-avatars.com/api/?name=${user?.email}`} />
-                                <AvatarFallback>{user?.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                              </Avatar>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-center p-8">
-                            <div>
-                              <MessageSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                              <p className="text-muted-foreground">
-                                Sélectionnez un ou plusieurs collaborateurs pour démarrer une discussion
-                              </p>
-                            </div>
+                            <Badge variant="outline">
+                              {member.role}
+                            </Badge>
                           </div>
+                        ))}
+                        {(!teamMembers || teamMembers.length === 0) && (
+                          <p className="text-center text-muted-foreground py-8">
+                            Aucun collaborateur dans cette direction
+                          </p>
                         )}
                       </div>
                     </ScrollArea>
+                  </CardContent>
+                </Card>
 
-                    {selectedCollaborators.length > 0 && (
-                      <>
-                        <Separator className="mb-4" />
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Tapez votre message..."
-                            value={chatMessage}
-                            onChange={(e) => setChatMessage(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !e.shiftKey) {
-                                e.preventDefault();
-                                // Logique d'envoi de message à implémenter
-                                setChatMessage("");
-                              }
-                            }}
-                          />
-                          <Button onClick={() => setChatMessage("")}>
-                            Envoyer
-                          </Button>
+                {/* Recent Companies */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      Entreprises récentes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ScrollArea className="h-[400px] pr-4">
+                      <div className="space-y-3">
+                        {companies?.map((company) => (
+                          <div key={company.id} className="p-3 rounded-lg border hover:bg-accent transition-colors">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <p className="font-semibold text-sm">{company.company_name}</p>
+                                <p className="text-xs text-muted-foreground">{company.activity_sector}</p>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                {company.company_size || 'N/A'}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground line-clamp-2">
+                              {company.products_services}
+                            </p>
+                          </div>
+                        ))}
+                        {(!companies || companies.length === 0) && (
+                          <p className="text-center text-muted-foreground py-8">
+                            Aucune entreprise enregistrée
+                          </p>
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </CardContent>
+                </Card>
+
+                {/* Recent Projects */}
+                <Card className="lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Target className="h-5 w-5" />
+                      Projets en cours
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {projects?.map((project) => (
+                        <div key={project.id} className="p-4 rounded-lg border hover:bg-accent transition-colors">
+                          <div className="flex items-start justify-between mb-2">
+                            <div className="flex-1">
+                              <p className="font-semibold">{project.name}</p>
+                              <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                                {project.description}
+                              </p>
+                            </div>
+                            <Badge variant={
+                              project.status === 'en cours' ? 'default' :
+                              project.status === 'terminé' ? 'secondary' :
+                              'outline'
+                            }>
+                              {project.status}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {project.start_date ? new Date(project.start_date).toLocaleDateString('fr-FR') : 'N/A'}
+                            </div>
+                            {project.budget && (
+                              <div>
+                                Budget: {project.budget.toLocaleString('fr-FR')} FCFA
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </>
-                    )}
+                      ))}
+                      {(!projects || projects.length === 0) && (
+                        <p className="text-center text-muted-foreground py-8 col-span-2">
+                          Aucun projet en cours
+                        </p>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
-            </div>
-          )}
-        </main>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
     </div>
   );
