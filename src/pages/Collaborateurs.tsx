@@ -35,6 +35,7 @@ export default function Collaborateurs() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
   const [chatMessage, setChatMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Liste des collaborateurs disponibles
   const collaborators = [
@@ -218,6 +219,8 @@ export default function Collaborateurs() {
                 type="text"
                 placeholder="Rechercher PME, opportunité..."
                 className="pl-10 w-80"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
@@ -374,7 +377,7 @@ export default function Collaborateurs() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold">Mes PME accompagnées</h2>
-                <Button>
+                <Button onClick={() => console.log('Ouvrir dialogue ajout PME')}>
                   <Plus className="mr-2 h-4 w-4" />
                   Ajouter une PME
                 </Button>
@@ -464,7 +467,7 @@ export default function Collaborateurs() {
                           <Calendar className="mr-2 h-4 w-4" />
                           Échéance: {opp.deadline}
                         </div>
-                        <Button size="sm" className="ml-auto">
+                        <Button size="sm" className="ml-auto" onClick={() => console.log('Voir matches pour opportunité', opp.id)}>
                           Voir les matches
                         </Button>
                       </div>
@@ -529,28 +532,28 @@ export default function Collaborateurs() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport mensuel')}>
                         <FileText className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport mensuel</p>
                           <p className="text-xs text-muted-foreground">Activités du mois</p>
                         </div>
                       </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport PME')}>
                         <Building2 className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport PME</p>
                           <p className="text-xs text-muted-foreground">Par entreprise</p>
                         </div>
                       </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport opportunités')}>
                         <Sparkles className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport opportunités</p>
                           <p className="text-xs text-muted-foreground">Matches et résultats</p>
                         </div>
                       </Button>
-                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2">
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => console.log('Générer rapport tâches')}>
                         <CheckSquare className="h-6 w-6" />
                         <div className="text-center">
                           <p className="font-semibold">Rapport tâches</p>
@@ -577,7 +580,7 @@ export default function Collaborateurs() {
                             <p className="text-sm text-muted-foreground">Généré le 01/11/2025</p>
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => console.log('Télécharger rapport mensuel')}>
                           <Download className="h-4 w-4 mr-2" />
                           Télécharger
                         </Button>
@@ -590,7 +593,7 @@ export default function Collaborateurs() {
                             <p className="text-sm text-muted-foreground">Généré le 28/10/2025</p>
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => console.log('Télécharger rapport PME BioKarité')}>
                           <Download className="h-4 w-4 mr-2" />
                           Télécharger
                         </Button>
@@ -603,7 +606,7 @@ export default function Collaborateurs() {
                             <p className="text-sm text-muted-foreground">Généré le 15/10/2025</p>
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => console.log('Télécharger rapport opportunités')}>
                           <Download className="h-4 w-4 mr-2" />
                           Télécharger
                         </Button>
@@ -765,7 +768,10 @@ export default function Collaborateurs() {
                               }
                             }}
                           />
-                          <Button onClick={() => setChatMessage("")}>
+                          <Button onClick={() => {
+                            console.log('Envoyer message:', chatMessage);
+                            setChatMessage("");
+                          }}>
                             Envoyer
                           </Button>
                         </div>
