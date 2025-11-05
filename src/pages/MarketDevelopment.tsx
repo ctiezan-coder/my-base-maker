@@ -17,6 +17,7 @@ import { MarketCard } from "@/components/market/MarketCard";
 import { ConnectionsTable } from "@/components/market/ConnectionsTable";
 import { OpportunityDialog } from "@/components/market/OpportunityDialog";
 import { ApplicationDialog } from "@/components/market/ApplicationDialog";
+import { WebMarketSearch } from "@/components/market/WebMarketSearch";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
 export default function MarketDevelopment() {
@@ -134,6 +135,7 @@ export default function MarketDevelopment() {
           <TabsTrigger value="opportunities">Opportunités</TabsTrigger>
           <TabsTrigger value="markets">Marchés Potentiels</TabsTrigger>
           <TabsTrigger value="connections">Mises en Relation</TabsTrigger>
+          <TabsTrigger value="web-search">Recherche Web</TabsTrigger>
         </TabsList>
 
         <TabsContent value="opportunities" className="space-y-6">
@@ -239,6 +241,10 @@ export default function MarketDevelopment() {
           ) : (
             <ConnectionsTable connections={connections} />
           )}
+        </TabsContent>
+
+        <TabsContent value="web-search" className="space-y-6">
+          <WebMarketSearch />
         </TabsContent>
       </Tabs>
 
