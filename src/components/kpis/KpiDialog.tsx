@@ -59,7 +59,7 @@ export function KpiDialog({ open, onOpenChange, kpi, onClose }: KpiDialogProps) 
         kpi_value: 0,
         period: new Date().toISOString().split('T')[0],
         target_value: null,
-        unit: "",
+        unit: "CFA",
         notes: "",
         direction_id: "",
       });
