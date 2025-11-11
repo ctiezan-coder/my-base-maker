@@ -19,6 +19,7 @@ import Kpis from "./pages/Kpis";
 import MarketDevelopment from "./pages/MarketDevelopment";
 import Admin from "./pages/Admin";
 import Collaborateurs from "./pages/Collaborateurs";
+import Imputations from "./pages/Imputations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="media" element={<Media />} />
               <Route path="kpis" element={<Kpis />} />
               <Route path="market-development" element={<MarketDevelopment />} />
+              <Route path="imputations" element={<Imputations />} />
               <Route path="admin" element={<Admin />} />
               <Route path="collaborateurs" element={<Collaborateurs />} />
             </Route>

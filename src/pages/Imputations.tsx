@@ -1,0 +1,252 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImputationDialog } from "@/components/imputations/ImputationDialog";
+import { ImputationTable } from "@/components/imputations/ImputationTable";
+import { Plus, Search, Download, FileText, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import type { Imputation } from "@/types/imputation";
+
+export default function Imputations() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterEtat, setFilterEtat] = useState<string>("all");
+  const [filterDirection, setFilterDirection] = useState<string>("all");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedImputation, setSelectedImputation] = useState<Imputation | null>(null);
+
+  const { data: imputations = [], isLoading } = useQuery({
+    queryKey: ['imputations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('imputations')
+        .select('*')
+        .order('date_reception', { ascending: false });
+      if (error) throw error;
+      return data as Imputation[];
+    },
+  });
+
+  const { data: directions } = useQuery({
+    queryKey: ['directions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('directions')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const filteredImputations = imputations.filter((imputation) => {
+    const matchesSearch =
+      imputation.provenance.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      imputation.objet.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      imputation.imputation.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesEtat = filterEtat === "all" || imputation.etat === filterEtat;
+    
+    const matchesDirection =
+      filterDirection === "all" || imputation.direction_id === filterDirection;
+
+    return matchesSearch && matchesEtat && matchesDirection;
+  });
+
+  const stats = {
+    total: imputations.length,
+    enAttente: imputations.filter((i) => i.etat === "En attente").length,
+    enCours: imputations.filter((i) => i.etat === "En cours").length,
+    terminees: imputations.filter((i) => i.etat === "Terminé").length,
+  };
+
+  const handleEdit = (imputation: Imputation) => {
+    setSelectedImputation(imputation);
+    setDialogOpen(true);
+  };
+
+  const handleNew = () => {
+    setSelectedImputation(null);
+    setDialogOpen(true);
+  };
+
+  const exportToCSV = () => {
+    const headers = [
+      "Date réception",
+      "Provenance",
+      "Objet",
+      "Imputation",
+      "Date imputation",
+      "Date réalisation",
+      "Observations",
+      "État",
+    ];
+
+    const rows = filteredImputations.map((imp) => [
+      imp.date_reception,
+      imp.provenance,
+      imp.objet,
+      imp.imputation,
+      imp.date_imputation || "",
+      imp.date_realisation || "",
+      imp.observations || "",
+      imp.etat,
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((cell) => `"${cell.toString().replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `imputations_${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>Chargement...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 p-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Gestion des Imputations</h1>
+          <p className="text-muted-foreground">
+            Suivi des documents entrants et de leur traitement
+          </p>
+        </div>
+        <Button onClick={handleNew}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nouvelle Imputation
+        </Button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Total</CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.total}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">En attente</CardTitle>
+            <AlertCircle className="h-4 w-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.enAttente}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">En cours</CardTitle>
+            <Clock className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.enCours}</div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Terminées</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.terminees}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par provenance, objet ou direction..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9"
+                />
+              </div>
+            </div>
+
+            <Select value={filterEtat} onValueChange={setFilterEtat}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Tous les états" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les états</SelectItem>
+                <SelectItem value="En attente">En attente</SelectItem>
+                <SelectItem value="En cours">En cours</SelectItem>
+                <SelectItem value="Terminé">Terminé</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterDirection} onValueChange={setFilterDirection}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Toutes les directions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les directions</SelectItem>
+                {directions?.map((direction) => (
+                  <SelectItem key={direction.id} value={direction.id}>
+                    {direction.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Button variant="outline" onClick={exportToCSV}>
+              <Download className="mr-2 h-4 w-4" />
+              Exporter CSV
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Table */}
+      <Card>
+        <CardContent className="pt-6">
+          <ImputationTable
+            imputations={filteredImputations}
+            onEdit={handleEdit}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Dialog */}
+      <ImputationDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        imputation={selectedImputation}
+      />
+    </div>
+  );
+}
