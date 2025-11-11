@@ -546,6 +546,62 @@ export type Database = {
           },
         ]
       }
+      imputations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          date_imputation: string | null
+          date_realisation: string | null
+          date_reception: string
+          direction_id: string | null
+          etat: string
+          id: string
+          imputation: string
+          objet: string
+          observations: string | null
+          provenance: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          date_imputation?: string | null
+          date_realisation?: string | null
+          date_reception: string
+          direction_id?: string | null
+          etat?: string
+          id?: string
+          imputation: string
+          objet: string
+          observations?: string | null
+          provenance: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          date_imputation?: string | null
+          date_realisation?: string | null
+          date_reception?: string
+          direction_id?: string | null
+          etat?: string
+          id?: string
+          imputation?: string
+          objet?: string
+          observations?: string | null
+          provenance?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imputations_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kpi_tracking: {
         Row: {
           created_at: string
