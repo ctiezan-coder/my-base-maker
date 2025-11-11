@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -22,6 +23,8 @@ export default function Imputations() {
   const [filterDirection, setFilterDirection] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedImputation, setSelectedImputation] = useState<Imputation | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: imputations = [], isLoading } = useQuery({
     queryKey: ['imputations'],
@@ -46,6 +49,53 @@ export default function Imputations() {
       return data;
     },
   });
+
+  // Real-time notifications for new imputations and status changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('imputations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'imputations'
+        },
+        (payload) => {
+          const newImputation = payload.new as Imputation;
+          toast({
+            title: "Nouvelle imputation",
+            description: `Une nouvelle imputation de "${newImputation.provenance}" a été créée.`,
+          });
+          queryClient.invalidateQueries({ queryKey: ['imputations'] });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'imputations'
+        },
+        (payload) => {
+          const updatedImputation = payload.new as Imputation;
+          const oldImputation = payload.old as Imputation;
+          
+          if (updatedImputation.etat !== oldImputation.etat) {
+            toast({
+              title: "État mis à jour",
+              description: `L'imputation "${updatedImputation.objet}" est maintenant "${updatedImputation.etat}".`,
+            });
+          }
+          queryClient.invalidateQueries({ queryKey: ['imputations'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [toast, queryClient]);
 
   const filteredImputations = imputations.filter((imputation) => {
     const matchesSearch =
