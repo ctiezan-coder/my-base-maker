@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,10 +34,25 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
     support_needed: "",
   });
 
+  const [supportOptions, setSupportOptions] = useState({
+    financier: false,
+    nonFinancier: false,
+    autres: false,
+    autresText: "",
+  });
 
   useEffect(() => {
     if (company) {
       setFormData(company);
+      // Parse support_needed to checkboxes
+      if (company.support_needed) {
+        setSupportOptions({
+          financier: company.support_needed.includes("Financier"),
+          nonFinancier: company.support_needed.includes("Non financier"),
+          autres: !company.support_needed.includes("Financier") && !company.support_needed.includes("Non financier") && company.support_needed !== "",
+          autresText: !company.support_needed.includes("Financier") && !company.support_needed.includes("Non financier") ? company.support_needed : "",
+        });
+      }
     } else {
       setFormData({
         company_name: "",
@@ -52,6 +67,12 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
         commercial_events_participation: "Jamais",
         support_needed: "",
       });
+      setSupportOptions({
+        financier: false,
+        nonFinancier: false,
+        autres: false,
+        autresText: "",
+      });
     }
   }, [company]);
 
@@ -60,9 +81,15 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
     setLoading(true);
 
     try {
+      // Build support_needed string from checkboxes
+      const supportValues = [];
+      if (supportOptions.financier) supportValues.push("Financier");
+      if (supportOptions.nonFinancier) supportValues.push("Non financier");
+      if (supportOptions.autres && supportOptions.autresText) supportValues.push(supportOptions.autresText);
+      
       const dataToSave = {
         ...formData,
-        support_needed: formData.support_needed || null,
+        support_needed: supportValues.join(", ") || null,
       };
 
       if (company) {
@@ -235,23 +262,60 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
             </TabsContent>
 
             <TabsContent value="support" className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="support_needed">Type d'accompagnement souhaité</Label>
-                <Select
-                  value={formData.support_needed}
-                  onValueChange={(value) => setFormData({ ...formData, support_needed: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionner un type d'accompagnement" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Information">Information</SelectItem>
-                    <SelectItem value="Formation">Formation</SelectItem>
-                    <SelectItem value="Financement">Financement</SelectItem>
-                    <SelectItem value="Accompagnement technique">Accompagnement technique</SelectItem>
-                    <SelectItem value="Mise en relation">Mise en relation</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="space-y-4">
+                <Label>Type d'accompagnement</Label>
+                <div className="space-y-3 p-4 border rounded-lg">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="financier"
+                      checked={supportOptions.financier}
+                      onCheckedChange={(checked) => 
+                        setSupportOptions({ ...supportOptions, financier: checked as boolean })
+                      }
+                    />
+                    <label htmlFor="financier" className="text-sm cursor-pointer font-normal">
+                      Financier
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="nonFinancier"
+                      checked={supportOptions.nonFinancier}
+                      onCheckedChange={(checked) => 
+                        setSupportOptions({ ...supportOptions, nonFinancier: checked as boolean })
+                      }
+                    />
+                    <label htmlFor="nonFinancier" className="text-sm cursor-pointer font-normal">
+                      Non financier
+                    </label>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="autres"
+                        checked={supportOptions.autres}
+                        onCheckedChange={(checked) => 
+                          setSupportOptions({ ...supportOptions, autres: checked as boolean })
+                        }
+                      />
+                      <label htmlFor="autres" className="text-sm cursor-pointer font-normal">
+                        Autres
+                      </label>
+                    </div>
+                    {supportOptions.autres && (
+                      <Input
+                        placeholder="Précisez le type d'accompagnement..."
+                        value={supportOptions.autresText}
+                        onChange={(e) => 
+                          setSupportOptions({ ...supportOptions, autresText: e.target.value })
+                        }
+                        className="ml-6"
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
