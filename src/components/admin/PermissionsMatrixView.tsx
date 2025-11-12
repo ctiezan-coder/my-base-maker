@@ -20,7 +20,7 @@ import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators' | 'imputations' | 'suivi_evaluation';
+type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators';
 type AppRole = 'admin' | 'manager' | 'user';
 
 const MODULES: { value: AppModule; label: string }[] = [
@@ -34,8 +34,6 @@ const MODULES: { value: AppModule; label: string }[] = [
   { value: 'partnerships', label: 'Partenariats' },
   { value: 'media', label: 'Médias' },
   { value: 'collaborators', label: 'Collaborateurs' },
-  { value: 'imputations', label: 'Imputations' },
-  { value: 'suivi_evaluation', label: 'Suivi & Évaluation' },
 ];
 
 const getRoleBadgeVariant = (role: AppRole | null) => {

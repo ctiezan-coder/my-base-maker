@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { UserPlus, Briefcase, Eye, Shield } from "lucide-react";
 
-type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators' | 'imputations' | 'suivi_evaluation';
+type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators';
 type AppRole = 'admin' | 'manager' | 'user';
 
 interface PermissionTemplate {
@@ -40,8 +40,6 @@ const TEMPLATES: PermissionTemplate[] = [
       partnerships: 'manager',
       media: 'manager',
       collaborators: 'manager',
-      imputations: 'manager',
-      suivi_evaluation: 'manager',
     },
   },
   {
@@ -55,7 +53,6 @@ const TEMPLATES: PermissionTemplate[] = [
       events: 'user',
       trainings: 'user',
       collaborators: 'user',
-      imputations: 'user',
     },
   },
   {
@@ -67,7 +64,6 @@ const TEMPLATES: PermissionTemplate[] = [
       projects: 'user',
       documents: 'user',
       kpis: 'user',
-      suivi_evaluation: 'user',
     },
   },
   {
@@ -78,18 +74,6 @@ const TEMPLATES: PermissionTemplate[] = [
       media: 'manager',
       events: 'manager',
       partnerships: 'manager',
-      companies: 'user',
-    },
-  },
-  {
-    name: "Manager Administratif",
-    description: "Gestion imputations et suivi",
-    icon: Briefcase,
-    permissions: {
-      imputations: 'manager',
-      suivi_evaluation: 'manager',
-      documents: 'manager',
-      projects: 'user',
       companies: 'user',
     },
   },
@@ -147,7 +131,7 @@ export function PermissionTemplates() {
       if (assignments.length > 0) {
         const { error } = await supabase
           .from('user_role_assignments')
-          .insert(assignments as any);
+          .insert(assignments);
         if (error) throw error;
       }
 
@@ -159,7 +143,7 @@ export function PermissionTemplates() {
           target_user_id: selectedUser,
           action: `Appliqué le template: ${template.name}`,
           direction_id: selectedDirection,
-        } as any);
+        });
       }
     },
     onSuccess: () => {

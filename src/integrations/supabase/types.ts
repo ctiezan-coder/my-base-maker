@@ -1466,8 +1466,6 @@ export type Database = {
         | "partnerships"
         | "media"
         | "collaborators"
-        | "imputations"
-        | "suivi_evaluation"
       app_role: "admin" | "manager" | "user"
       company_legal_form:
         | "SA"
@@ -1686,8 +1684,6 @@ export const Constants = {
         "partnerships",
         "media",
         "collaborators",
-        "imputations",
-        "suivi_evaluation",
       ],
       app_role: ["admin", "manager", "user"],
       company_legal_form: ["SA", "SARL", "SAS", "SASU", "EI", "GIE", "Autre"],
