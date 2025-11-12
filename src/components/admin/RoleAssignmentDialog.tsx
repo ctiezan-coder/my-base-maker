@@ -138,7 +138,7 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
       if (assignments.length > 0) {
         const { error } = await supabase
           .from('user_role_assignments')
-          .insert(assignments);
+          .insert(assignments as any);
         if (error) throw error;
       }
 
@@ -161,7 +161,7 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
         });
 
         if (historyEntries.length > 0) {
-          await supabase.from('permission_history').insert(historyEntries);
+          await supabase.from('permission_history').insert(historyEntries as any);
         }
       }
     },

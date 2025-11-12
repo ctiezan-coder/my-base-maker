@@ -147,7 +147,7 @@ export function PermissionTemplates() {
       if (assignments.length > 0) {
         const { error } = await supabase
           .from('user_role_assignments')
-          .insert(assignments);
+          .insert(assignments as any);
         if (error) throw error;
       }
 
@@ -159,7 +159,7 @@ export function PermissionTemplates() {
           target_user_id: selectedUser,
           action: `Appliqué le template: ${template.name}`,
           direction_id: selectedDirection,
-        });
+        } as any);
       }
     },
     onSuccess: () => {
