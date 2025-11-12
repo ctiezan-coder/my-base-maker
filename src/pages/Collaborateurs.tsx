@@ -419,7 +419,7 @@ export default function Collaborateurs() {
                     <SelectTrigger>
                       <SelectValue placeholder="Filtrer par statut" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-50 bg-popover">
                       <SelectItem value="all">Tous les statuts</SelectItem>
                       {uniqueStatuses.map((status) => (
                         <SelectItem key={status} value={status}>
@@ -434,7 +434,7 @@ export default function Collaborateurs() {
                     <SelectTrigger>
                       <SelectValue placeholder="Filtrer par secteur" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-50 bg-popover">
                       <SelectItem value="all">Tous les secteurs</SelectItem>
                       {uniqueSectors.map((sector) => (
                         <SelectItem key={sector} value={sector}>

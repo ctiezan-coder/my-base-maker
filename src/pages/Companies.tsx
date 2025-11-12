@@ -27,7 +27,7 @@ export default function Companies() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
-    sector: "",
+    sector: "all",
     participation: "all",
     support: {
       financier: false,
@@ -53,7 +53,7 @@ export default function Companies() {
         query = query.or(`company_name.ilike.%${search}%,rccm_number.ilike.%${search}%,email.ilike.%${search}%`);
       }
 
-      if (filters.sector) {
+      if (filters.sector !== "all") {
         query = query.eq("activity_sector", filters.sector);
       }
 
@@ -167,7 +167,7 @@ export default function Companies() {
 
   const resetFilters = () => {
     setFilters({ 
-      sector: "", 
+      sector: "all", 
       participation: "all", 
       support: {
         financier: false,
@@ -246,8 +246,8 @@ export default function Companies() {
                     <SelectTrigger>
                       <SelectValue placeholder="Tous les secteurs" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Tous les secteurs</SelectItem>
+                    <SelectContent className="z-50 bg-popover">
+                      <SelectItem value="all">Tous les secteurs</SelectItem>
                       {ACTIVITY_SECTORS.map((sector) => (
                         <SelectItem key={sector} value={sector}>
                           {sector}
@@ -268,7 +268,7 @@ export default function Companies() {
                     <SelectTrigger>
                       <SelectValue placeholder="Tous" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-50 bg-popover">
                       <SelectItem value="all">Tous</SelectItem>
                       <SelectItem value="Jamais">Jamais</SelectItem>
                       <SelectItem value="Foires">Foires</SelectItem>
@@ -353,10 +353,10 @@ export default function Companies() {
               </div>
             )}
 
-            {(filters.sector || (filters.participation !== "all") || filters.support.financier || filters.support.nonFinancier || filters.support.autres) && (
+            {(filters.sector !== "all" || (filters.participation !== "all") || filters.support.financier || filters.support.nonFinancier || filters.support.autres) && (
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-sm text-muted-foreground">Filtres actifs:</span>
-                {filters.sector && (
+                {filters.sector !== "all" && (
                   <Badge variant="secondary" className="gap-1">
                     Secteur: {filters.sector}
                   </Badge>
