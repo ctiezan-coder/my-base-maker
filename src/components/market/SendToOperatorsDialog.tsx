@@ -173,8 +173,8 @@ export const SendToOperatorsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh]">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Envoyer l'opportunité aux opérateurs</DialogTitle>
           <DialogDescription>
             Sélectionnez les opérateurs qui correspondent à cette opportunité :{" "}
@@ -182,7 +182,7 @@ export const SendToOperatorsDialog = ({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="flex-1 overflow-hidden flex flex-col space-y-4 min-h-0">
           {/* Search and filters */}
           <div className="flex gap-2">
             <div className="flex-1 relative">
@@ -228,7 +228,7 @@ export const SendToOperatorsDialog = ({
           </div>
 
           {/* Operators list */}
-          <ScrollArea className="h-[400px] pr-4">
+          <ScrollArea className="flex-1 pr-4 min-h-0">
             {isLoading ? (
               <p className="text-center text-muted-foreground py-8">Chargement...</p>
             ) : operators.length === 0 ? (
@@ -300,7 +300,7 @@ export const SendToOperatorsDialog = ({
           </ScrollArea>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
+          <div className="flex-shrink-0 flex justify-end gap-2 pt-4 border-t bg-background">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Annuler
             </Button>
