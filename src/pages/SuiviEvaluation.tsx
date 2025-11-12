@@ -164,6 +164,20 @@ export default function SuiviEvaluation() {
     })(),
   };
 
+  // Statistics by direction
+  const statsByDirection = directions?.map((direction) => {
+    const dirImputations = filteredImputations.filter(
+      (i) => i.direction_id === direction.id
+    );
+    return {
+      name: direction.name,
+      total: dirImputations.length,
+      enAttente: dirImputations.filter((i) => i.etat === "En attente").length,
+      enCours: dirImputations.filter((i) => i.etat === "En cours").length,
+      terminees: dirImputations.filter((i) => i.etat === "Terminé").length,
+    };
+  });
+
   // Export to CSV
   const exportToCSV = () => {
     const headers = [
@@ -379,6 +393,56 @@ export default function SuiviEvaluation() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Statistics by Direction */}
+      {isAdmin && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Statistiques par Direction</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {statsByDirection?.map((stat) => (
+                <div
+                  key={stat.name}
+                  onClick={() => {
+                    const direction = directions?.find((d) => d.name === stat.name);
+                    if (direction) {
+                      handleDirectionClick(direction.id, direction.name);
+                    }
+                  }}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{stat.name}</h3>
+                    <div className="flex gap-6 mt-2 text-sm text-muted-foreground">
+                      <span>Total: {stat.total}</span>
+                      <span className="text-yellow-600">
+                        En attente: {stat.enAttente}
+                      </span>
+                      <span className="text-orange-600">
+                        En cours: {stat.enCours}
+                      </span>
+                      <span className="text-green-600">
+                        Terminées: {stat.terminees}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold">{stat.total}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {stats.total > 0
+                        ? Math.round((stat.total / stats.total) * 100)
+                        : 0}
+                      % du total
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Detailed Table */}
       <Card>
