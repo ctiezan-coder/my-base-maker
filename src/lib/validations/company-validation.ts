@@ -24,22 +24,20 @@ export const companySchema = z.object({
     .max(50, { message: "Le compte contribuables ne peut pas dépasser 50 caractères" }),
   
   legal_form: z.enum([
-    'SARL',
     'SA',
-    'SARLU',
-    'SNC',
-    'SCS',
-    'SCA',
+    'SARL',
+    'SAS',
+    'SASU',
+    'EI',
     'GIE',
-    'Entreprise individuelle',
     'Autre'
   ]).optional().nullable(),
   
   company_size: z.enum([
-    'TPE (1-9)',
-    'PME (10-49)',
-    'ETI (50-249)',
-    'Grande entreprise (250+)'
+    'TPE',
+    'PME',
+    'ETI',
+    'Grande entreprise'
   ]).optional().nullable(),
   
   creation_date: z.string()
@@ -91,7 +89,7 @@ export const companySchema = z.object({
     .optional()
     .nullable(),
   
-  legal_representative_gender: z.enum(['M', 'F', 'Autre'])
+  legal_representative_gender: z.enum(['Homme', 'Femme'])
     .optional()
     .nullable(),
   
@@ -170,17 +168,14 @@ export const companySchema = z.object({
   
   commercial_events_participation: z.enum([
     'Jamais',
-    'Occasionnellement',
-    'Régulièrement',
-    'Fréquemment'
+    'Foires',
+    'Salons'
   ]).optional().default('Jamais'),
   
   support_needed: z.enum([
-    'Information',
-    'Formation',
-    'Financement',
-    'Accompagnement technique',
-    'Mise en relation'
+    'Financier',
+    'Non financier',
+    'Les deux'
   ]).optional().nullable(),
   
   accompaniment_status: z.string()
