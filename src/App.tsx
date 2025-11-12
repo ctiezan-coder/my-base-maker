@@ -20,6 +20,7 @@ import MarketDevelopment from "./pages/MarketDevelopment";
 import Admin from "./pages/Admin";
 import Collaborateurs from "./pages/Collaborateurs";
 import Imputations from "./pages/Imputations";
+import SuiviEvaluation from "./pages/SuiviEvaluation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="kpis" element={<Kpis />} />
               <Route path="market-development" element={<MarketDevelopment />} />
               <Route path="imputations" element={<Imputations />} />
+              <Route path="suivi-evaluation" element={<SuiviEvaluation />} />
               <Route path="admin" element={<Admin />} />
               <Route path="collaborateurs" element={<Collaborateurs />} />
             </Route>
