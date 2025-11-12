@@ -22,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ACTIVITY_SECTORS } from "@/lib/constants/sectors";
 
 interface SendToOperatorsDialogProps {
   open: boolean;
@@ -62,9 +61,9 @@ export const SendToOperatorsDialog = ({
         .select("*")
         .order("company_name", { ascending: true });
 
-      // Filter by sector
+      // Filter by sector - use ilike for case-insensitive matching
       if (sectorFilter && sectorFilter !== "all") {
-        query = query.eq("activity_sector", sectorFilter);
+        query = query.ilike("activity_sector", sectorFilter);
       }
 
       // Search filter
@@ -77,6 +76,26 @@ export const SendToOperatorsDialog = ({
       const { data, error } = await query;
       if (error) throw error;
       return data || [];
+    },
+    enabled: open,
+  });
+
+  // Fetch available sectors from database
+  const { data: availableSectors = [] } = useQuery({
+    queryKey: ["unique-sectors-operators"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("activity_sector")
+        .not("activity_sector", "is", null);
+      
+      if (error) throw error;
+      
+      const uniqueSectors = Array.from(
+        new Set(data.map(c => c.activity_sector).filter(Boolean))
+      ).sort();
+      
+      return uniqueSectors;
     },
     enabled: open,
   });
@@ -179,9 +198,9 @@ export const SendToOperatorsDialog = ({
               <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="Secteur" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 bg-popover">
                 <SelectItem value="all">Tous les secteurs</SelectItem>
-                {ACTIVITY_SECTORS.map((sector) => (
+                {availableSectors.map((sector) => (
                   <SelectItem key={sector} value={sector}>
                     {sector}
                   </SelectItem>

@@ -20,7 +20,6 @@ import { ApplicationDialog } from "@/components/market/ApplicationDialog";
 import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog";
 import { WebMarketSearch } from "@/components/market/WebMarketSearch";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
-import { ACTIVITY_SECTORS } from "@/lib/constants/sectors";
 
 export default function MarketDevelopment() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -53,7 +52,7 @@ export default function MarketDevelopment() {
         query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
       }
       if (sectorFilter !== "all") {
-        query = query.eq("sector", sectorFilter);
+        query = query.ilike("sector", sectorFilter);
       }
       if (regionFilter !== "all") {
         query = query.eq("region", regionFilter as MarketRegion);
@@ -62,6 +61,25 @@ export default function MarketDevelopment() {
       const { data, error } = await query;
       if (error) throw error;
       return data as ExportOpportunity[];
+    },
+  });
+
+  // Fetch available sectors from opportunities
+  const { data: availableOpportunitySectors = [] } = useQuery({
+    queryKey: ["unique-opportunity-sectors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("export_opportunities")
+        .select("sector")
+        .not("sector", "is", null);
+      
+      if (error) throw error;
+      
+      const uniqueSectors = Array.from(
+        new Set(data.map(o => o.sector).filter(Boolean))
+      ).sort();
+      
+      return uniqueSectors;
     },
   });
 
@@ -175,9 +193,9 @@ export default function MarketDevelopment() {
               <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Tous les secteurs" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 bg-popover">
                 <SelectItem value="all">Tous les secteurs</SelectItem>
-                {ACTIVITY_SECTORS.map((sector) => (
+                {availableOpportunitySectors.map((sector) => (
                   <SelectItem key={sector} value={sector}>
                     {sector}
                   </SelectItem>

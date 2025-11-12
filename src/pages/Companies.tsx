@@ -14,7 +14,6 @@ import { useToast } from "@/hooks/use-toast";
 import type { Company } from "@/types/company";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { ACTIVITY_SECTORS } from "@/lib/constants/sectors";
 
 const ITEMS_PER_PAGE = 15;
 
@@ -54,7 +53,7 @@ export default function Companies() {
       }
 
       if (filters.sector !== "all") {
-        query = query.eq("activity_sector", filters.sector);
+        query = query.ilike("activity_sector", filters.sector);
       }
 
       if (filters.participation !== "all") {
@@ -78,8 +77,30 @@ export default function Companies() {
     },
   });
 
+  // Charger les secteurs uniques depuis la base de données
+  const { data: sectorsData } = useQuery({
+    queryKey: ["unique-sectors"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("activity_sector")
+        .not("activity_sector", "is", null)
+        .order("activity_sector");
+      
+      if (error) throw error;
+      
+      // Extraire les secteurs uniques
+      const uniqueSectors = Array.from(
+        new Set(data.map(c => c.activity_sector).filter(Boolean))
+      ).sort();
+      
+      return uniqueSectors;
+    },
+  });
+
   const companies = companiesData?.companies || [];
   const totalPages = Math.ceil((companiesData?.total || 0) / ITEMS_PER_PAGE);
+  const availableSectors = sectorsData || [];
 
   const handleEdit = (company: Company) => {
     setSelectedCompany(company);
@@ -248,7 +269,7 @@ export default function Companies() {
                     </SelectTrigger>
                     <SelectContent className="z-50 bg-popover">
                       <SelectItem value="all">Tous les secteurs</SelectItem>
-                      {ACTIVITY_SECTORS.map((sector) => (
+                      {availableSectors.map((sector) => (
                         <SelectItem key={sector} value={sector}>
                           {sector}
                         </SelectItem>
