@@ -143,7 +143,17 @@ export const SendToOperatorsDialog = ({
         return {
           user_id: operator?.created_by,
           title: "Nouvelle opportunité d'export",
-          message: `L'opportunité "${opportunityTitle}" correspond à votre secteur d'activité (${opportunity.sector}). Destination: ${opportunity.destination_country}, Valeur: ${opportunity.estimated_value.toLocaleString()} ${opportunity.currency}.`,
+          message: `L'opportunité "${opportunityTitle}" correspond à votre secteur d'activité (${opportunity.sector}). 
+
+Destination: ${opportunity.destination_country}${opportunity.destination_city ? `, ${opportunity.destination_city}` : ''}
+Région: ${opportunity.region}
+Valeur estimée: ${opportunity.estimated_value.toLocaleString()} ${opportunity.currency}
+Volume: ${opportunity.volume}
+Échéance: ${new Date(opportunity.deadline).toLocaleDateString('fr-FR')}
+
+${opportunity.description}
+
+${opportunity.requirements && opportunity.requirements.length > 0 ? `Exigences: ${opportunity.requirements.join(', ')}` : ''}`,
           type: "opportunity",
           reference_table: "export_opportunities",
           reference_id: opportunityId,
@@ -208,6 +218,29 @@ export const SendToOperatorsDialog = ({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Message preview */}
+          {selectedOperators.size > 0 && (
+            <div className="p-4 bg-muted/50 rounded-lg border space-y-2">
+              <h4 className="font-semibold text-sm mb-2">📧 Aperçu du message à envoyer :</h4>
+              <div className="space-y-2 text-sm bg-background p-3 rounded border">
+                <p className="font-semibold">Nouvelle opportunité d'export</p>
+                <p className="text-muted-foreground leading-relaxed">
+                  L'opportunité "{opportunityTitle}" correspond à votre secteur d'activité ({opportunitySector}).
+                </p>
+                <div className="text-xs text-muted-foreground pt-2 border-t">
+                  <p>Le message complet inclura également :</p>
+                  <ul className="list-disc list-inside ml-2 mt-1 space-y-0.5">
+                    <li>Destination et région</li>
+                    <li>Valeur estimée et volume</li>
+                    <li>Date d'échéance</li>
+                    <li>Description détaillée</li>
+                    <li>Exigences spécifiques</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Select all button */}
           <div className="flex items-center justify-between">
