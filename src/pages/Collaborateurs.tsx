@@ -242,7 +242,7 @@ export default function Collaborateurs() {
         <div className="flex items-center justify-between px-6 py-4">
           <div>
             <h1 className="text-2xl font-bold">Espace Collaborateurs</h1>
-            <p className="text-sm text-muted-foreground">Gestion de votre portefeuille PME</p>
+            <p className="text-sm text-muted-foreground">Gestion de votre portefeuille Opérateur</p>
           </div>
 
           <div className="flex items-center gap-4">
