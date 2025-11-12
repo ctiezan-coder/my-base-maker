@@ -5,7 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { OperatorTrackingDialog } from "@/components/collaborateurs/OperatorTrackingDialog";
 import { OpportunityMatchesDialog } from "@/components/collaborateurs/OpportunityMatchesDialog";
 import { ReportDialog } from "@/components/collaborateurs/ReportDialog";
+import { TaskDialog } from "@/components/collaborateurs/TaskDialog";
 import { useChatMessages } from "@/hooks/useChatMessages";
+import { useUserDirection } from "@/hooks/useUserDirection";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +43,7 @@ type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
 
 export default function Collaborateurs() {
   const { user } = useAuth();
+  const { data: userDirection } = useUserDirection();
   const [activeSection, setActiveSection] = useState<Section>('mes-pme');
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
@@ -54,6 +59,8 @@ export default function Collaborateurs() {
   const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportType, setReportType] = useState<ReportType>("monthly");
+  const [showTaskDialog, setShowTaskDialog] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
 
   // Chat functionality
   const { messages, isLoading: isLoadingMessages, sendMessage, isSending } = useChatMessages(selectedCollaborators);
@@ -75,6 +82,24 @@ export default function Collaborateurs() {
       if (error) throw error;
       return data;
     }
+  });
+
+  // Charger les tâches depuis la base de données
+  const { data: tasksData = [] } = useQuery({
+    queryKey: ['tasks', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('tasks')
+        .select('*')
+        .or(`assigned_to.eq.${user.id},created_by.eq.${user.id}`)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
   });
 
   // Liste des collaborateurs depuis la base de données
@@ -177,36 +202,6 @@ export default function Collaborateurs() {
     }
   ];
 
-  const tasks = [
-    {
-      id: 1,
-      title: "Valider contrat BioKarité",
-      pme: "BioKarité CI",
-      deadline: "08/11/2025",
-      priority: "Urgent"
-    },
-    {
-      id: 2,
-      title: "Préparer dossier certification",
-      pme: "Cacao Excellence",
-      deadline: "12/11/2025",
-      priority: "Important"
-    },
-    {
-      id: 3,
-      title: "Rapport mensuel activités",
-      pme: "Toutes PME",
-      deadline: "15/11/2025",
-      priority: "Normal"
-    },
-    {
-      id: 4,
-      title: "Suivi post-mission Ghana",
-      pme: "Anacarde Export",
-      deadline: "18/11/2025",
-      priority: "Normal"
-    }
-  ];
 
   const events = [
     {
@@ -356,7 +351,7 @@ export default function Collaborateurs() {
               <CheckSquare className="mr-2 h-4 w-4" />
               Mes tâches
               <Badge variant="destructive" className="ml-auto">
-                {tasks.length}
+                {tasksData.length}
               </Badge>
             </Button>
             <Button
@@ -552,37 +547,85 @@ export default function Collaborateurs() {
           {/* TACHES Section */}
           {activeSection === 'taches' && (
             <div className="space-y-6">
-              <h2 className="text-3xl font-bold">Mes tâches</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-3xl font-bold">Mes tâches</h2>
+                <Button onClick={() => {
+                  setSelectedTask(null);
+                  setShowTaskDialog(true);
+                }}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouvelle tâche
+                </Button>
+              </div>
 
               <div className="grid gap-4">
-                {tasks.map((task) => (
-                  <Card key={task.id}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <CheckSquare className="h-5 w-5 text-muted-foreground" />
-                          <div>
-                            <p className="font-semibold">{task.title}</p>
-                            <p className="text-sm text-muted-foreground">{task.pme}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <Badge variant={
-                            task.priority === 'Urgent' ? 'destructive' :
-                            task.priority === 'Important' ? 'default' :
-                            'secondary'
-                          }>
-                            {task.priority}
-                          </Badge>
-                          <div className="text-sm text-muted-foreground">
-                            <Calendar className="inline mr-1 h-4 w-4" />
-                            {task.deadline}
-                          </div>
-                        </div>
-                      </div>
+                {tasksData.length === 0 ? (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <CheckSquare className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                      <p className="text-muted-foreground">
+                        Aucune tâche pour le moment. Créez votre première tâche pour commencer !
+                      </p>
                     </CardContent>
                   </Card>
-                ))}
+                ) : (
+                  tasksData.map((task: any) => (
+                    <Card 
+                      key={task.id} 
+                      className="hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => {
+                        setSelectedTask(task);
+                        setShowTaskDialog(true);
+                      }}
+                    >
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 flex-1">
+                            <CheckSquare className="h-5 w-5 text-muted-foreground" />
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="font-semibold">{task.title}</p>
+                                <Badge variant={
+                                  task.priority === 'Haute' ? 'destructive' :
+                                  task.priority === 'Moyenne' ? 'default' :
+                                  'secondary'
+                                }>
+                                  {task.priority}
+                                </Badge>
+                                <Badge variant={
+                                  task.status === 'Terminée' ? 'default' :
+                                  task.status === 'En cours' ? 'secondary' : 
+                                  'outline'
+                                }>
+                                  {task.status}
+                                </Badge>
+                              </div>
+                              {task.description && (
+                                <p className="text-sm text-muted-foreground mb-2">
+                                  {task.description}
+                                </p>
+                              )}
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                {task.company_name && (
+                                  <span className="flex items-center gap-1">
+                                    <Building2 className="h-4 w-4" />
+                                    {task.company_name}
+                                  </span>
+                                )}
+                                {task.deadline && (
+                                  <span className="flex items-center gap-1">
+                                    <Calendar className="h-4 w-4" />
+                                    {format(new Date(task.deadline), 'dd/MM/yyyy', { locale: fr })}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -907,6 +950,20 @@ export default function Collaborateurs() {
         open={showReportDialog} 
         onOpenChange={setShowReportDialog}
         reportType={reportType}
+      />
+      <TaskDialog
+        open={showTaskDialog}
+        onOpenChange={setShowTaskDialog}
+        task={selectedTask}
+        companies={companiesData?.map(c => ({ 
+          id: c.id, 
+          company_name: c.company_name 
+        })) || []}
+        collaborators={collaboratorsData?.map(p => ({ 
+          user_id: p.user_id, 
+          full_name: p.full_name 
+        })) || []}
+        directionId={userDirection?.direction_id || null}
       />
     </div>
   );
