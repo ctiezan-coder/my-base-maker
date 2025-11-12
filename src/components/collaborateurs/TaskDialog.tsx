@@ -166,15 +166,14 @@ export function TaskDialog({
                 name="company_id"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Opérateur</FormLabel>
+                    <FormLabel>Opérateur (optionnel)</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un opérateur" />
+                          <SelectValue placeholder="Aucun opérateur sélectionné" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Aucun</SelectItem>
                         {companies.map((company) => (
                           <SelectItem key={company.id} value={company.id}>
                             {company.company_name}
@@ -192,15 +191,14 @@ export function TaskDialog({
                 name="assigned_to"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Assigné à</FormLabel>
+                    <FormLabel>Assigné à (optionnel)</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un collaborateur" />
+                          <SelectValue placeholder="Non assigné" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Non assigné</SelectItem>
                         {collaborators.map((collab) => (
                           <SelectItem key={collab.user_id} value={collab.user_id}>
                             {collab.full_name}
