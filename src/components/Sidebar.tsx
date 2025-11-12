@@ -31,6 +31,7 @@ const menuItems = [
   { icon: FileText, label: "Documents", path: "/documents" },
   { icon: ClipboardList, label: "Imputations", path: "/imputations" },
   { icon: TrendingUp, label: "Suivi & Évaluation", path: "/suivi-evaluation" },
+  { icon: FolderKanban, label: "Suivi par Direction", path: "/suivi-direction" },
   { icon: Image, label: "Médias", path: "/media" },
   { icon: BarChart3, label: "KPIs", path: "/kpis" },
 ];

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { NotificationsMenu } from "@/components/notifications/NotificationsMenu";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
@@ -33,6 +34,7 @@ export const Header = () => {
           </div>
           {user ? (
             <div className="flex items-center gap-4">
+              <NotificationsMenu />
               <span className="text-sm text-muted-foreground">{user.email}</span>
               <Button onClick={handleSignOut} variant="outline" size="sm">
                 <LogOut className="mr-2 h-4 w-4" />
