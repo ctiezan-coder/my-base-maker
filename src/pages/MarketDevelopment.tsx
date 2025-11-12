@@ -17,6 +17,7 @@ import { MarketCard } from "@/components/market/MarketCard";
 import { ConnectionsTable } from "@/components/market/ConnectionsTable";
 import { OpportunityDialog } from "@/components/market/OpportunityDialog";
 import { ApplicationDialog } from "@/components/market/ApplicationDialog";
+import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog";
 import { WebMarketSearch } from "@/components/market/WebMarketSearch";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
@@ -26,10 +27,16 @@ export default function MarketDevelopment() {
   const [regionFilter, setRegionFilter] = useState<string | "all">("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
+  const [sendToOperatorsDialogOpen, setSendToOperatorsDialogOpen] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<ExportOpportunity | undefined>();
   const [selectedOpportunityForApplication, setSelectedOpportunityForApplication] = useState<{
     id: string;
     title: string;
+  } | null>(null);
+  const [selectedOpportunityForOperators, setSelectedOpportunityForOperators] = useState<{
+    id: string;
+    title: string;
+    sector: string;
   } | null>(null);
 
   // Fetch opportunities
@@ -119,6 +126,20 @@ export default function MarketDevelopment() {
     refetchOpportunities();
   };
 
+  const handleSendToOperators = (opportunityId: string, title: string, sector: string) => {
+    setSelectedOpportunityForOperators({
+      id: opportunityId,
+      title,
+      sector,
+    });
+    setSendToOperatorsDialogOpen(true);
+  };
+
+  const handleCloseSendToOperatorsDialog = () => {
+    setSendToOperatorsDialogOpen(false);
+    setSelectedOpportunityForOperators(null);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -191,7 +212,7 @@ export default function MarketDevelopment() {
                 <OpportunityCard
                   key={opportunity.id}
                   opportunity={opportunity}
-                  onApply={handleApply}
+                  onSendToOperators={handleSendToOperators}
                   showApplications={true}
                 />
               ))}
@@ -262,6 +283,16 @@ export default function MarketDevelopment() {
           opportunityId={selectedOpportunityForApplication.id}
           opportunityTitle={selectedOpportunityForApplication.title}
           onClose={handleCloseApplicationDialog}
+        />
+      )}
+
+      {selectedOpportunityForOperators && (
+        <SendToOperatorsDialog
+          open={sendToOperatorsDialogOpen}
+          onOpenChange={setSendToOperatorsDialogOpen}
+          opportunityId={selectedOpportunityForOperators.id}
+          opportunityTitle={selectedOpportunityForOperators.title}
+          opportunitySector={selectedOpportunityForOperators.sector}
         />
       )}
     </div>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MapPin, Calendar, Package, TrendingUp, Building2 } from "lucide-react";
+import { MapPin, Calendar, Package, TrendingUp, Building2, Send } from "lucide-react";
 import { ExportOpportunity } from "@/types/market-development";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -10,13 +10,13 @@ import { CompanyApplications } from "./CompanyApplications";
 
 interface OpportunityCardProps {
   opportunity: ExportOpportunity;
-  onApply?: (id: string) => void;
+  onSendToOperators?: (id: string, title: string, sector: string) => void;
   showApplications?: boolean;
 }
 
 export const OpportunityCard = ({ 
   opportunity, 
-  onApply,
+  onSendToOperators,
   showApplications = false 
 }: OpportunityCardProps) => {
   const [showApps, setShowApps] = useState(false);
@@ -118,12 +118,13 @@ export const OpportunityCard = ({
             {showApps ? "Masquer" : "Voir"} candidatures
           </Button>
         )}
-        {onApply && (
+        {onSendToOperators && (
           <Button
-            onClick={() => onApply(opportunity.id)}
+            onClick={() => onSendToOperators(opportunity.id, opportunity.title, opportunity.sector)}
             className="flex-1"
           >
-            Postuler une PME
+            <Send className="mr-2 h-4 w-4" />
+            Envoyer à opérateurs
           </Button>
         )}
       </div>
