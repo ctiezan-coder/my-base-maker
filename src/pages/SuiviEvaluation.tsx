@@ -438,55 +438,68 @@ export default function SuiviEvaluation() {
         </Card>
       )}
 
-      {/* Statistics by Direction */}
-      {isAdmin && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Statistiques par Direction</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {statsByDirection?.map((stat) => (
-                <div
-                  key={stat.name}
-                  onClick={() => {
-                    const direction = directions?.find((d) => d.name === stat.name);
-                    if (direction) {
-                      handleDirectionClick(direction.id, direction.name);
-                    }
-                  }}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                >
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{stat.name}</h3>
-                    <div className="flex gap-6 mt-2 text-sm text-muted-foreground">
-                      <span>Total: {stat.total}</span>
-                      <span className="text-yellow-600">
-                        En attente: {stat.enAttente}
-                      </span>
-                      <span className="text-orange-600">
-                        En cours: {stat.enCours}
-                      </span>
-                      <span className="text-green-600">
-                        Terminées: {stat.terminees}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{stat.total}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {stats.total > 0
-                        ? Math.round((stat.total / stats.total) * 100)
-                        : 0}
-                      % du total
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Detailed Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Vue Détaillée ({filteredImputations.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-2">Date</th>
+                  {isAdmin && <th className="text-left p-2">Direction</th>}
+                  <th className="text-left p-2">Provenance</th>
+                  <th className="text-left p-2">Objet</th>
+                  <th className="text-left p-2">Imputation</th>
+                  <th className="text-left p-2">Durée</th>
+                  <th className="text-left p-2">État</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredImputations.map((imp) => {
+                  const direction = directions?.find(
+                    (d) => d.id === imp.direction_id
+                  );
+                  const duration = calculateDuration(imp);
+                  return (
+                    <tr key={imp.id} className="border-b hover:bg-muted/50">
+                      <td className="p-2 text-sm">
+                        {format(parseISO(imp.date_reception), "dd/MM/yyyy", {
+                          locale: fr,
+                        })}
+                      </td>
+                      {isAdmin && (
+                        <td className="p-2 text-sm">{direction?.name || "N/A"}</td>
+                      )}
+                      <td className="p-2 text-sm">{imp.provenance}</td>
+                      <td className="p-2 text-sm">{imp.objet}</td>
+                      <td className="p-2 text-sm">{imp.imputation}</td>
+                      <td className="p-2 text-sm">
+                        {duration !== null ? `${duration} jours` : "-"}
+                      </td>
+                      <td className="p-2">
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${
+                            imp.etat === "Terminé"
+                              ? "bg-green-100 text-green-800"
+                              : imp.etat === "En cours"
+                              ? "bg-orange-100 text-orange-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {imp.etat}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Direction Details Modal */}
       <DirectionDetailsModal
