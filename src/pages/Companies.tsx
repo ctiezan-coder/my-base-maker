@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Company } from "@/types/company";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { ACTIVITY_SECTORS } from "@/lib/constants/sectors";
 
 const ITEMS_PER_PAGE = 15;
 
@@ -53,7 +54,7 @@ export default function Companies() {
       }
 
       if (filters.sector) {
-        query = query.ilike("activity_sector", `%${filters.sector}%`);
+        query = query.eq("activity_sector", filters.sector);
       }
 
       if (filters.participation !== "all") {
@@ -235,14 +236,25 @@ export default function Companies() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/50">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Secteur d'activité</label>
-                  <Input
-                    placeholder="Ex: Cosmétiques"
+                  <Select
                     value={filters.sector}
-                    onChange={(e) => {
-                      setFilters({ ...filters, sector: e.target.value });
+                    onValueChange={(value) => {
+                      setFilters({ ...filters, sector: value });
                       setCurrentPage(1);
                     }}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tous les secteurs" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">Tous les secteurs</SelectItem>
+                      {ACTIVITY_SECTORS.map((sector) => (
+                        <SelectItem key={sector} value={sector}>
+                          {sector}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Participation événements</label>

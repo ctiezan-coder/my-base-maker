@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { ACTIVITY_SECTORS } from "@/lib/constants/sectors";
 
 interface SendToOperatorsDialogProps {
   open: boolean;
@@ -180,10 +181,11 @@ export const SendToOperatorsDialog = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les secteurs</SelectItem>
-                <SelectItem value="Agroalimentaire">Agroalimentaire</SelectItem>
-                <SelectItem value="Cosmétiques">Cosmétiques</SelectItem>
-                <SelectItem value="Textile">Textile</SelectItem>
-                <SelectItem value="Technologies">Technologies</SelectItem>
+                {ACTIVITY_SECTORS.map((sector) => (
+                  <SelectItem key={sector} value={sector}>
+                    {sector}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
