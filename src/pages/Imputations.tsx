@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useUserDirection } from "@/hooks/useUserDirection";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   Select,
   SelectContent,
@@ -26,16 +28,28 @@ export default function Imputations() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Get user's direction
+  const { data: userDirection } = useUserDirection();
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
+
   const { data: imputations = [], isLoading } = useQuery({
-    queryKey: ['imputations'],
+    queryKey: ['imputations', userDirection?.direction_id, isAdmin],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('imputations')
-        .select('*')
-        .order('date_reception', { ascending: false });
+        .select('*');
+
+      // Filter by direction unless user is admin
+      if (!isAdmin && userDirection?.direction_id) {
+        query = query.eq('direction_id', userDirection.direction_id);
+      }
+
+      const { data, error } = await query.order('date_reception', { ascending: false });
       if (error) throw error;
       return data as Imputation[];
     },
+    enabled: isAdmin || !!userDirection?.direction_id,
   });
 
   const { data: directions } = useQuery({

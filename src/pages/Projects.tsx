@@ -6,22 +6,36 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Plus, FolderKanban } from "lucide-react";
 import { ProjectDialog } from "@/components/projects/ProjectDialog";
 import { ProjectList } from "@/components/projects/ProjectList";
+import { useUserDirection } from "@/hooks/useUserDirection";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Projects() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
 
+  // Get user's direction
+  const { data: userDirection } = useUserDirection();
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
+
   const { data: projects, isLoading, refetch } = useQuery({
-    queryKey: ["projects"],
+    queryKey: ["projects", userDirection?.direction_id, isAdmin],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("projects")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
+
+      // Filter by direction unless user is admin
+      if (!isAdmin && userDirection?.direction_id) {
+        query = query.eq("direction_id", userDirection.direction_id);
+      }
+
+      const { data, error } = await query.order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
+    enabled: isAdmin || !!userDirection?.direction_id,
   });
 
   const handleEdit = (project: any) => {
