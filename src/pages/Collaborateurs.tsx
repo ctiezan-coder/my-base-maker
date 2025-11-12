@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { 
@@ -43,6 +44,8 @@ export default function Collaborateurs() {
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
   const [chatMessage, setChatMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sectorFilter, setSectorFilter] = useState<string>("all");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Dialog states
@@ -126,13 +129,23 @@ export default function Collaborateurs() {
     id: company.id,
     name: company.company_name,
     sector: `${company.activity_sector || 'Non spécifié'} • ${company.products_services || 'Produits variés'}`,
+    activitySector: company.activity_sector || 'Non spécifié',
     status: company.accompaniment_status || 'En prospection',
     market: company.target_export_markets?.[0] || 'Non défini',
     contact: company.legal_representative_name || 'Non renseigné',
     nextMeeting: '-',
     progress: company.accompaniment_status === 'Actif' ? 90 : 
               company.accompaniment_status === 'Négociation' ? 70 : 50
-  })) || [];
+  }))
+  .filter((pme) => {
+    const matchesStatus = statusFilter === "all" || pme.status === statusFilter;
+    const matchesSector = sectorFilter === "all" || pme.activitySector === sectorFilter;
+    return matchesStatus && matchesSector;
+  }) || [];
+
+  // Get unique sectors and statuses for filter options
+  const uniqueSectors = Array.from(new Set(companiesData?.map(c => c.activity_sector).filter(Boolean))) || [];
+  const uniqueStatuses = Array.from(new Set(companiesData?.map(c => c.accompaniment_status).filter(Boolean))) || [];
 
   const opportunities = [
     {
@@ -402,6 +415,40 @@ export default function Collaborateurs() {
                   <Plus className="mr-2 h-4 w-4" />
                   Suivre un opérateur
                 </Button>
+              </div>
+
+              {/* Filtres */}
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filtrer par statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      {uniqueStatuses.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <Select value={sectorFilter} onValueChange={setSectorFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filtrer par secteur" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les secteurs</SelectItem>
+                      {uniqueSectors.map((sector) => (
+                        <SelectItem key={sector} value={sector}>
+                          {sector}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
