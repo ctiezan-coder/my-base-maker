@@ -401,44 +401,122 @@ export default function SuiviEvaluation() {
             <CardTitle>Statistiques par Direction</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {statsByDirection?.map((stat) => (
-                <div
-                  key={stat.name}
-                  onClick={() => {
-                    const direction = directions?.find((d) => d.name === stat.name);
-                    if (direction) {
-                      handleDirectionClick(direction.id, direction.name);
-                    }
-                  }}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
-                >
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{stat.name}</h3>
-                    <div className="flex gap-6 mt-2 text-sm text-muted-foreground">
-                      <span>Total: {stat.total}</span>
-                      <span className="text-yellow-600">
-                        En attente: {stat.enAttente}
-                      </span>
-                      <span className="text-orange-600">
-                        En cours: {stat.enCours}
-                      </span>
-                      <span className="text-green-600">
-                        Terminées: {stat.terminees}
-                      </span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {statsByDirection?.map((stat, index) => {
+                const direction = directions?.find((d) => d.name === stat.name);
+                // Assign colors and icons based on direction
+                const colors = [
+                  { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700", icon: "text-blue-500" },
+                  { bg: "bg-purple-50", border: "border-purple-200", text: "text-purple-700", icon: "text-purple-500" },
+                  { bg: "bg-green-50", border: "border-green-200", text: "text-green-700", icon: "text-green-500" },
+                  { bg: "bg-orange-50", border: "border-orange-200", text: "text-orange-700", icon: "text-orange-500" },
+                  { bg: "bg-pink-50", border: "border-pink-200", text: "text-pink-700", icon: "text-pink-500" },
+                  { bg: "bg-indigo-50", border: "border-indigo-200", text: "text-indigo-700", icon: "text-indigo-500" },
+                  { bg: "bg-teal-50", border: "border-teal-200", text: "text-teal-700", icon: "text-teal-500" },
+                  { bg: "bg-cyan-50", border: "border-cyan-200", text: "text-cyan-700", icon: "text-cyan-500" },
+                ];
+                const colorScheme = colors[index % colors.length];
+
+                return (
+                  <div
+                    key={stat.name}
+                    onClick={() => {
+                      if (direction) {
+                        handleDirectionClick(direction.id, direction.name);
+                      }
+                    }}
+                    className={`${colorScheme.bg} ${colorScheme.border} border-2 rounded-xl p-6 cursor-pointer transition-all hover:shadow-lg hover:scale-105 relative overflow-hidden`}
+                  >
+                    {/* Background decoration */}
+                    <div className={`absolute top-0 right-0 w-24 h-24 ${colorScheme.icon} opacity-10 -mr-8 -mt-8`}>
+                      <BarChart3 className="w-full h-full" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="relative z-10">
+                      {/* Icon and Title */}
+                      <div className="flex items-start justify-between mb-4">
+                        <div className={`${colorScheme.icon} p-3 bg-white rounded-lg shadow-sm`}>
+                          <BarChart3 className="w-6 h-6" />
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-3xl font-bold ${colorScheme.text}`}>
+                            {stat.total}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {stats.total > 0
+                              ? Math.round((stat.total / stats.total) * 100)
+                              : 0}
+                            %
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Direction Name */}
+                      <h3 className={`font-semibold text-sm mb-3 ${colorScheme.text} line-clamp-2 min-h-[2.5rem]`}>
+                        {stat.name}
+                      </h3>
+
+                      {/* Statistics */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-yellow-600 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            En attente
+                          </span>
+                          <span className="font-semibold">{stat.enAttente}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-orange-600 flex items-center gap-1">
+                            <TrendingUp className="w-3 h-3" />
+                            En cours
+                          </span>
+                          <span className="font-semibold">{stat.enCours}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-green-600 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" />
+                            Terminées
+                          </span>
+                          <span className="font-semibold">{stat.terminees}</span>
+                        </div>
+                      </div>
+
+                      {/* Progress bar */}
+                      {stat.total > 0 && (
+                        <div className="mt-4 pt-4 border-t border-white">
+                          <div className="flex gap-1 h-2 rounded-full overflow-hidden bg-white">
+                            {stat.enAttente > 0 && (
+                              <div
+                                className="bg-yellow-400"
+                                style={{
+                                  width: `${(stat.enAttente / stat.total) * 100}%`,
+                                }}
+                              />
+                            )}
+                            {stat.enCours > 0 && (
+                              <div
+                                className="bg-orange-400"
+                                style={{
+                                  width: `${(stat.enCours / stat.total) * 100}%`,
+                                }}
+                              />
+                            )}
+                            {stat.terminees > 0 && (
+                              <div
+                                className="bg-green-400"
+                                style={{
+                                  width: `${(stat.terminees / stat.total) * 100}%`,
+                                }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold">{stat.total}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {stats.total > 0
-                        ? Math.round((stat.total / stats.total) * 100)
-                        : 0}
-                      % du total
-                    </div>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
