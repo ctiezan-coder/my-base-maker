@@ -24,7 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 
 type AppRole = 'admin' | 'manager' | 'user';
-type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators';
+type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators' | 'imputations' | 'suivi_evaluation';
 
 const MODULES: { value: AppModule; label: string }[] = [
   { value: 'companies', label: 'Entreprises' },
@@ -37,6 +37,8 @@ const MODULES: { value: AppModule; label: string }[] = [
   { value: 'partnerships', label: 'Partenariats' },
   { value: 'media', label: 'Médias' },
   { value: 'collaborators', label: 'Collaborateurs' },
+  { value: 'imputations', label: 'Imputations' },
+  { value: 'suivi_evaluation', label: 'Suivi et Évaluation' },
 ];
 
 interface RoleAssignmentDialogProps {
@@ -58,6 +60,8 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
     partnerships: null,
     media: null,
     collaborators: null,
+    imputations: null,
+    suivi_evaluation: null,
   });
   const [bulkRole, setBulkRole] = useState<AppRole | 'none'>('none');
   const [selectedForBulk, setSelectedForBulk] = useState<Set<AppModule>>(new Set());

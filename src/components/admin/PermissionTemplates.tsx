@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { UserPlus, Briefcase, Eye, Shield } from "lucide-react";
 
-type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators';
+type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators' | 'imputations' | 'suivi_evaluation';
 type AppRole = 'admin' | 'manager' | 'user';
 
 interface PermissionTemplate {
@@ -40,6 +40,8 @@ const TEMPLATES: PermissionTemplate[] = [
       partnerships: 'manager',
       media: 'manager',
       collaborators: 'manager',
+      imputations: 'manager',
+      suivi_evaluation: 'manager',
     },
   },
   {
@@ -53,6 +55,7 @@ const TEMPLATES: PermissionTemplate[] = [
       events: 'user',
       trainings: 'user',
       collaborators: 'user',
+      imputations: 'user',
     },
   },
   {
@@ -64,6 +67,7 @@ const TEMPLATES: PermissionTemplate[] = [
       projects: 'user',
       documents: 'user',
       kpis: 'user',
+      suivi_evaluation: 'user',
     },
   },
   {
@@ -74,6 +78,18 @@ const TEMPLATES: PermissionTemplate[] = [
       media: 'manager',
       events: 'manager',
       partnerships: 'manager',
+      companies: 'user',
+    },
+  },
+  {
+    name: "Manager Administratif",
+    description: "Gestion imputations et suivi",
+    icon: Briefcase,
+    permissions: {
+      imputations: 'manager',
+      suivi_evaluation: 'manager',
+      documents: 'manager',
+      projects: 'user',
       companies: 'user',
     },
   },
