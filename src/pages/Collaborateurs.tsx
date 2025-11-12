@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { AddPmeDialog } from "@/components/collaborateurs/AddPmeDialog";
+import { OperatorTrackingDialog } from "@/components/collaborateurs/OperatorTrackingDialog";
 import { OpportunityMatchesDialog } from "@/components/collaborateurs/OpportunityMatchesDialog";
 import { ReportDialog } from "@/components/collaborateurs/ReportDialog";
 import { useChatMessages } from "@/hooks/useChatMessages";
@@ -46,7 +46,7 @@ export default function Collaborateurs() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // Dialog states
-  const [showAddPmeDialog, setShowAddPmeDialog] = useState(false);
+  const [showTrackingDialog, setShowTrackingDialog] = useState(false);
   const [showMatchesDialog, setShowMatchesDialog] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
@@ -107,48 +107,32 @@ export default function Collaborateurs() {
     }
   ];
 
-  const pmeList = [
-    {
-      id: 1,
-      name: "Cacao Excellence CI",
-      sector: "Agroalimentaire • Cacao transformé",
-      status: "En prospection",
-      market: "Suisse",
-      contact: "Yao Marie, DG",
-      nextMeeting: "15/11/2025",
-      progress: 65
-    },
-    {
-      id: 2,
-      name: "BioKarité Côte d'Ivoire",
-      sector: "Cosmétique • Produits naturels",
-      status: "Négociation",
-      market: "France",
-      contact: "Koné Fatou, CEO",
-      nextMeeting: "10/11/2025",
-      progress: 80
-    },
-    {
-      id: 3,
-      name: "Textile Africain Premium",
-      sector: "Mode • Textile artisanal",
-      status: "Prospection",
-      market: "Allemagne",
-      contact: "Diallo Ibrahim, Fondateur",
-      nextMeeting: "20/11/2025",
-      progress: 45
-    },
-    {
-      id: 4,
-      name: "Anacarde Export Plus",
-      sector: "Agroalimentaire • Noix de cajou",
-      status: "Actif",
-      market: "Belgique",
-      contact: "Traoré Seydou, DG",
-      nextMeeting: "12/11/2025",
-      progress: 90
+  // Charger les entreprises avec suivi depuis la base de données
+  const { data: companiesData, isLoading: isLoadingCompanies, refetch: refetchCompanies } = useQuery({
+    queryKey: ['tracked-companies'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .not('accompaniment_status', 'is', null)
+        .order('company_name');
+      
+      if (error) throw error;
+      return data;
     }
-  ];
+  });
+
+  const pmeList = companiesData?.map((company) => ({
+    id: company.id,
+    name: company.company_name,
+    sector: `${company.activity_sector || 'Non spécifié'} • ${company.products_services || 'Produits variés'}`,
+    status: company.accompaniment_status || 'En prospection',
+    market: company.target_export_markets?.[0] || 'Non défini',
+    contact: company.legal_representative_name || 'Non renseigné',
+    nextMeeting: '-',
+    progress: company.accompaniment_status === 'Actif' ? 90 : 
+              company.accompaniment_status === 'Négociation' ? 70 : 50
+  })) || [];
 
   const opportunities = [
     {
@@ -338,7 +322,7 @@ export default function Collaborateurs() {
               onClick={() => setActiveSection('mes-pme')}
             >
               <Building2 className="mr-2 h-4 w-4" />
-              Mes PME ({pmeList.length})
+              Mes opérateurs ({pmeList.length})
             </Button>
             <Button
               variant={activeSection === 'opportunites' ? 'default' : 'ghost'}
@@ -413,10 +397,10 @@ export default function Collaborateurs() {
           {activeSection === 'mes-pme' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-3xl font-bold">Mes PME accompagnées</h2>
-                <Button onClick={() => setShowAddPmeDialog(true)}>
+                <h2 className="text-3xl font-bold">Mes opérateurs suivis</h2>
+                <Button onClick={() => setShowTrackingDialog(true)}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Ajouter une PME
+                  Suivre un opérateur
                 </Button>
               </div>
 
@@ -860,7 +844,13 @@ export default function Collaborateurs() {
       </div>
 
       {/* Dialogues */}
-      <AddPmeDialog open={showAddPmeDialog} onOpenChange={setShowAddPmeDialog} />
+      <OperatorTrackingDialog 
+        open={showTrackingDialog} 
+        onOpenChange={(open) => {
+          setShowTrackingDialog(open);
+          if (!open) refetchCompanies();
+        }} 
+      />
       <OpportunityMatchesDialog 
         open={showMatchesDialog} 
         onOpenChange={setShowMatchesDialog}
