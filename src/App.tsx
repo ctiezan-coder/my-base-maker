@@ -21,7 +21,6 @@ import Admin from "./pages/Admin";
 import Collaborateurs from "./pages/Collaborateurs";
 import Imputations from "./pages/Imputations";
 import SuiviEvaluation from "./pages/SuiviEvaluation";
-import SuiviEvaluationDirection from "./pages/SuiviEvaluationDirection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,7 +48,6 @@ const App = () => (
               <Route path="market-development" element={<MarketDevelopment />} />
               <Route path="imputations" element={<Imputations />} />
               <Route path="suivi-evaluation" element={<SuiviEvaluation />} />
-              <Route path="suivi-direction" element={<SuiviEvaluationDirection />} />
               <Route path="admin" element={<Admin />} />
               <Route path="collaborateurs" element={<Collaborateurs />} />
             </Route>
