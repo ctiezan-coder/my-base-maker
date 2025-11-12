@@ -927,50 +927,6 @@ export type Database = {
           },
         ]
       }
-      permission_history: {
-        Row: {
-          action: string
-          created_at: string
-          direction_id: string | null
-          id: string
-          module: Database["public"]["Enums"]["app_module"] | null
-          new_role: Database["public"]["Enums"]["app_role"] | null
-          old_role: Database["public"]["Enums"]["app_role"] | null
-          target_user_id: string
-          user_id: string
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          direction_id?: string | null
-          id?: string
-          module?: Database["public"]["Enums"]["app_module"] | null
-          new_role?: Database["public"]["Enums"]["app_role"] | null
-          old_role?: Database["public"]["Enums"]["app_role"] | null
-          target_user_id: string
-          user_id: string
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          direction_id?: string | null
-          id?: string
-          module?: Database["public"]["Enums"]["app_module"] | null
-          new_role?: Database["public"]["Enums"]["app_role"] | null
-          old_role?: Database["public"]["Enums"]["app_role"] | null
-          target_user_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "permission_history_direction_id_fkey"
-            columns: ["direction_id"]
-            isOneToOne: false
-            referencedRelation: "directions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       potential_markets: {
         Row: {
           country: string
@@ -1466,8 +1422,6 @@ export type Database = {
         | "partnerships"
         | "media"
         | "collaborators"
-        | "imputations"
-        | "suivi_evaluation"
       app_role: "admin" | "manager" | "user"
       company_legal_form:
         | "SA"
@@ -1686,8 +1640,6 @@ export const Constants = {
         "partnerships",
         "media",
         "collaborators",
-        "imputations",
-        "suivi_evaluation",
       ],
       app_role: ["admin", "manager", "user"],
       company_legal_form: ["SA", "SARL", "SAS", "SASU", "EI", "GIE", "Autre"],

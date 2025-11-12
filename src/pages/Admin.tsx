@@ -4,14 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useHasRole } from '@/hooks/useUserRole';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Users, Lock, Grid, FileText, History as HistoryIcon } from 'lucide-react';
+import { Shield, Users, Lock } from 'lucide-react';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { UserManagementTable } from '@/components/admin/UserManagementTable';
-import { PermissionsMatrixView } from '@/components/admin/PermissionsMatrixView';
-import { PermissionTemplates } from '@/components/admin/PermissionTemplates';
-import { PermissionHistory } from '@/components/admin/PermissionHistory';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -57,7 +53,7 @@ export default function Admin() {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Administration</h1>
           <p className="text-muted-foreground mt-2">
-            Gestion avancée des utilisateurs et permissions
+            Gérez les utilisateurs, leurs rôles et permissions
           </p>
         </div>
         <CreateUserDialog />
@@ -99,120 +95,49 @@ export default function Admin() {
         </Card>
       </div>
 
-      <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="users">
-            <Users className="h-4 w-4 mr-2" />
-            Utilisateurs
-          </TabsTrigger>
-          <TabsTrigger value="matrix">
-            <Grid className="h-4 w-4 mr-2" />
-            Vue Matricielle
-          </TabsTrigger>
-          <TabsTrigger value="templates">
-            <FileText className="h-4 w-4 mr-2" />
-            Templates
-          </TabsTrigger>
-          <TabsTrigger value="history">
-            <HistoryIcon className="h-4 w-4 mr-2" />
-            Historique
-          </TabsTrigger>
-          <TabsTrigger value="roles">
-            <Shield className="h-4 w-4 mr-2" />
-            Rôles
-          </TabsTrigger>
-        </TabsList>
+      <Card>
+        <CardHeader>
+          <CardTitle>Gestion des utilisateurs</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <UserManagementTable />
+        </CardContent>
+      </Card>
 
-        <TabsContent value="users" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Gestion des utilisateurs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <UserManagementTable />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="matrix" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Vue Matricielle des Permissions</CardTitle>
+      <Card>
+        <CardHeader>
+          <CardTitle>Description des rôles</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-start gap-3">
+            <Shield className="w-5 h-5 text-destructive mt-0.5" />
+            <div>
+              <p className="font-medium">Administrateur</p>
               <p className="text-sm text-muted-foreground">
-                Vue d'ensemble de toutes les permissions par utilisateur et module
+                Accès complet à toutes les fonctionnalités, gestion des utilisateurs et configuration système
               </p>
-            </CardHeader>
-            <CardContent>
-              <PermissionsMatrixView />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="templates" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Templates de Permissions</CardTitle>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <Lock className="w-5 h-5 text-primary mt-0.5" />
+            <div>
+              <p className="font-medium">Manager</p>
               <p className="text-sm text-muted-foreground">
-                Appliquez rapidement des ensembles de permissions prédéfinis
+                Peut gérer les données de sa direction, créer et modifier les contenus
               </p>
-            </CardHeader>
-            <CardContent>
-              <PermissionTemplates />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique des Permissions</CardTitle>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <Users className="w-5 h-5 text-muted-foreground mt-0.5" />
+            <div>
+              <p className="font-medium">Utilisateur</p>
               <p className="text-sm text-muted-foreground">
-                Suivez toutes les modifications de permissions effectuées
+                Accès en lecture aux données de sa direction
               </p>
-            </CardHeader>
-            <CardContent>
-              <PermissionHistory />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="roles" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Description des rôles</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-destructive mt-0.5" />
-                <div>
-                  <p className="font-medium">Administrateur</p>
-                  <p className="text-sm text-muted-foreground">
-                    Accès complet à toutes les fonctionnalités, gestion des utilisateurs et configuration système
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Lock className="w-5 h-5 text-primary mt-0.5" />
-                <div>
-                  <p className="font-medium">Manager</p>
-                  <p className="text-sm text-muted-foreground">
-                    Peut gérer les données de sa direction, créer et modifier les contenus
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Users className="w-5 h-5 text-muted-foreground mt-0.5" />
-                <div>
-                  <p className="font-medium">Utilisateur</p>
-                  <p className="text-sm text-muted-foreground">
-                    Accès en lecture aux données de sa direction
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
