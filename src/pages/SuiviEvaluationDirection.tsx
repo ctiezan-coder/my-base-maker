@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -42,15 +42,15 @@ export default function SuiviEvaluationDirection() {
   });
 
   // Auto-select first direction or user's direction
-  useState(() => {
-    if (directions && directions.length > 0) {
+  useEffect(() => {
+    if (directions && directions.length > 0 && !selectedDirection) {
       if (!isAdmin && userDirection?.direction_id) {
         setSelectedDirection(userDirection.direction_id);
       } else {
         setSelectedDirection(directions[0].id);
       }
     }
-  });
+  }, [directions, userDirection, isAdmin, selectedDirection]);
 
   // Fetch partnerships for selected direction
   const { data: partnerships = [] } = useQuery({
