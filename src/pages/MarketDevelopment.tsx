@@ -4,7 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Filter } from "lucide-react";
+import { Plus, Search, Filter, RefreshCw } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ import { MarketDataRefresh } from "@/components/market/MarketDataRefresh";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
 export default function MarketDevelopment() {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [sectorFilter, setSectorFilter] = useState<string>("all");
   const [regionFilter, setRegionFilter] = useState<string | "all">("all");
@@ -39,6 +41,7 @@ export default function MarketDevelopment() {
     title: string;
     sector: string;
   } | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Fetch opportunities
   const { data: opportunities = [], isLoading: loadingOpportunities, refetch: refetchOpportunities } = useQuery({
@@ -160,16 +163,50 @@ export default function MarketDevelopment() {
     setSelectedOpportunityForOperators(null);
   };
 
+  const handleUpdateMarketData = async () => {
+    setIsUpdating(true);
+    try {
+      const { error } = await supabase.functions.invoke('update-market-data');
+      
+      if (error) throw error;
+
+      toast({
+        title: "Mise à jour réussie",
+        description: "Les données de marché ont été actualisées avec succès",
+      });
+
+      // Rafraîchir les données
+      refetchOpportunities();
+    } catch (error) {
+      console.error('Error updating market data:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de mettre à jour les données de marché",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Développement des Marchés Export</h1>
           <p className="text-muted-foreground mt-2">
-            Accompagnement des PME à l'international
+            Accompagnement des PME à l'international • Mise à jour automatique 24h/24
           </p>
         </div>
-        <MarketDataRefresh />
+        <Button
+          onClick={handleUpdateMarketData}
+          disabled={isUpdating}
+          variant="outline"
+          className="gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
+          {isUpdating ? 'Mise à jour...' : 'Actualiser les données'}
+        </Button>
       </div>
 
       <Tabs defaultValue="opportunities" className="space-y-6">
