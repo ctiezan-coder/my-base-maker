@@ -649,6 +649,99 @@ export type Database = {
           },
         ]
       }
+      market_alert_preferences: {
+        Row: {
+          countries: string[] | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          keywords: string[] | null
+          max_value: number | null
+          min_value: number | null
+          name: string
+          notification_type: string
+          regions: string[] | null
+          sectors: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          countries?: string[] | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          max_value?: number | null
+          min_value?: number | null
+          name: string
+          notification_type?: string
+          regions?: string[] | null
+          sectors?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          countries?: string[] | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          keywords?: string[] | null
+          max_value?: number | null
+          min_value?: number | null
+          name?: string
+          notification_type?: string
+          regions?: string[] | null
+          sectors?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      market_alerts: {
+        Row: {
+          email_sent: boolean | null
+          id: string
+          notification_sent: boolean | null
+          opportunity_id: string
+          preference_id: string
+          sent_at: string | null
+          user_id: string
+        }
+        Insert: {
+          email_sent?: boolean | null
+          id?: string
+          notification_sent?: boolean | null
+          opportunity_id: string
+          preference_id: string
+          sent_at?: string | null
+          user_id: string
+        }
+        Update: {
+          email_sent?: boolean | null
+          id?: string
+          notification_sent?: boolean | null
+          opportunity_id?: string
+          preference_id?: string
+          sent_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_alerts_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "export_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_alerts_preference_id_fkey"
+            columns: ["preference_id"]
+            isOneToOne: false
+            referencedRelation: "market_alert_preferences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_statistics: {
         Row: {
           active_markets: number | null
