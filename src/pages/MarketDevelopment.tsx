@@ -269,7 +269,6 @@ export default function MarketDevelopment() {
                 <MarketCard
                   key={market.id}
                   market={market}
-                  onExplore={(id) => console.log("Explore", id)}
                 />
               ))}
             </div>
