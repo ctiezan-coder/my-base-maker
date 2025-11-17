@@ -19,6 +19,7 @@ import { OpportunityDialog } from "@/components/market/OpportunityDialog";
 import { ApplicationDialog } from "@/components/market/ApplicationDialog";
 import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog";
 import { WebMarketSearch } from "@/components/market/WebMarketSearch";
+import { MarketDataRefresh } from "@/components/market/MarketDataRefresh";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
 export default function MarketDevelopment() {
@@ -168,6 +169,7 @@ export default function MarketDevelopment() {
             Accompagnement des PME à l'international
           </p>
         </div>
+        <MarketDataRefresh />
       </div>
 
       <Tabs defaultValue="opportunities" className="space-y-6">
