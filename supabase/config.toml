@@ -1,1 +1,4 @@
 project_id = "abbxntdwuvduagjtlyri"
+
+[functions.update-market-data]
+verify_jwt = false
