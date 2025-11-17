@@ -6,10 +6,9 @@ import { PotentialMarket } from "@/types/market-development";
 
 interface MarketCardProps {
   market: PotentialMarket;
-  onExplore?: (id: string) => void;
 }
 
-export const MarketCard = ({ market, onExplore }: MarketCardProps) => {
+export const MarketCard = ({ market }: MarketCardProps) => {
   const getPotentialColor = (potential: string) => {
     switch (potential.toLowerCase()) {
       case "très élevé":
@@ -87,31 +86,20 @@ export const MarketCard = ({ market, onExplore }: MarketCardProps) => {
         )}
       </div>
 
-      <div className="flex items-center justify-between pt-4 border-t">
-        <div className="flex items-center gap-4">
-          {market.risk_level && (
-            <div className="flex items-center gap-1">
-              <AlertTriangle className="h-4 w-4" />
-              <Badge variant={getRiskColor(market.risk_level)}>
-                {market.risk_level}
-              </Badge>
-            </div>
-          )}
-          {market.growth_rate && (
-            <div className="flex items-center gap-1">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-medium">+{market.growth_rate}%</span>
-            </div>
-          )}
-        </div>
-        {onExplore && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onExplore(market.id)}
-          >
-            Explorer
-          </Button>
+      <div className="flex items-center gap-4 pt-4 border-t">
+        {market.risk_level && (
+          <div className="flex items-center gap-1">
+            <AlertTriangle className="h-4 w-4" />
+            <Badge variant={getRiskColor(market.risk_level)}>
+              {market.risk_level}
+            </Badge>
+          </div>
+        )}
+        {market.growth_rate && (
+          <div className="flex items-center gap-1">
+            <TrendingUp className="h-4 w-4 text-green-600" />
+            <span className="text-sm font-medium">+{market.growth_rate}%</span>
+          </div>
         )}
       </div>
     </Card>
