@@ -15,6 +15,8 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface DocumentListProps {
   documents: any[];
@@ -24,8 +26,30 @@ interface DocumentListProps {
 }
 
 export function DocumentList({ documents, isLoading, onEdit, onDelete }: DocumentListProps) {
+  const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<any>(null);
+
+  const handleDownload = async (doc: any) => {
+    try {
+      // Générer une URL signée valide 1 heure
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .createSignedUrl(doc.file_url, 3600);
+
+      if (error) throw error;
+
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de télécharger le document",
+      });
+    }
+  };
 
   const handleDeleteClick = (document: any) => {
     setDocumentToDelete(document);
@@ -97,10 +121,8 @@ export function DocumentList({ documents, isLoading, onEdit, onDelete }: Documen
                 </div>
                 <div className="flex gap-1">
                   {doc.file_url && (
-                    <Button variant="ghost" size="sm" asChild>
-                      <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
-                        <Download className="w-4 h-4" />
-                      </a>
+                    <Button variant="ghost" size="sm" onClick={() => handleDownload(doc)}>
+                      <Download className="w-4 h-4" />
                     </Button>
                   )}
                   <Button variant="ghost" size="sm" onClick={() => onEdit(doc)}>

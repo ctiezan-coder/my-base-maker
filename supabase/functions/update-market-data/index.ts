@@ -45,6 +45,46 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Verify authentication and admin role
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error('No authorization header provided');
+      return new Response(JSON.stringify({ error: 'Unauthorized - No authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Get user from JWT token
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError || !user) {
+      console.error('Invalid token or user not found:', userError);
+      return new Response(JSON.stringify({ error: 'Unauthorized - Invalid token' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Check if user has admin role
+    const { data: userRole, error: roleError } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user.id)
+      .eq('role', 'admin')
+      .single();
+
+    if (roleError || !userRole) {
+      console.error('User is not admin:', user.id);
+      return new Response(JSON.stringify({ error: 'Forbidden - Admin access required' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    console.log('Admin user authenticated:', user.email);
+
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')
     if (!lovableApiKey) {
       throw new Error('LOVABLE_API_KEY not configured')

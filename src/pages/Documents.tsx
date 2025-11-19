@@ -124,7 +124,8 @@ export default function Documents() {
     try {
       // Supprimer le fichier du storage
       if (document.file_url) {
-        const path = document.file_url.split('/documents/')[1];
+        // file_url contient maintenant le chemin, pas une URL complète
+        const path = document.file_url;
         if (path) {
           await supabase.storage.from('documents').remove([path]);
         }
