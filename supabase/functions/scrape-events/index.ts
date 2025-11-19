@@ -111,13 +111,15 @@ Deno.serve(async (req) => {
               // Rate limiting
               await new Promise(resolve => setTimeout(resolve, 2000));
             } catch (pathError) {
+              const errMsg = pathError instanceof Error ? pathError.message : String(pathError);
               console.error(`  ❌ Error scraping path ${path}:`, pathError);
-              errors.push(`${source.name}${path}: ${pathError.message}`);
+              errors.push(`${source.name}${path}: ${errMsg}`);
             }
           }
         } catch (sourceError) {
+          const errMsg = sourceError instanceof Error ? sourceError.message : String(sourceError);
           console.error(`❌ Error scraping ${source.name}:`, sourceError);
-          errors.push(`${source.name}: ${sourceError.message}`);
+          errors.push(`${source.name}: ${errMsg}`);
         }
       }
     }
@@ -200,11 +202,12 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
+    const errMsg = error instanceof Error ? error.message : 'Unknown error';
     console.error('❌ Fatal error:', error);
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: errMsg,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
