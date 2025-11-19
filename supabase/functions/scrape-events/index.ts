@@ -1,9 +1,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.77.0';
+import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
 interface EventSource {
   id: string;
@@ -102,8 +105,9 @@ Deno.serve(async (req) => {
 
               const html = await response.text();
               
-              // Extraction basique avec regex (en production, utiliser un parser HTML)
-              const events = extractEventsFromHTML(html, source);
+              // Extraction intelligente avec IA
+              console.log('  🤖 Analyzing with AI...');
+              const events = await extractEventsWithAI(html, source, fullUrl);
               scrapedEvents.push(...events);
               
               console.log(`  ✅ Found ${events.length} events`);
@@ -217,63 +221,122 @@ Deno.serve(async (req) => {
   }
 });
 
-// Fonction d'extraction basique (à améliorer selon la structure HTML réelle)
-function extractEventsFromHTML(html: string, source: EventSource): ScrapedEvent[] {
-  const events: ScrapedEvent[] = [];
-  
-  // Patterns de recherche basiques pour dates et titres
-  const datePattern = /(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+(\d{4})/gi;
-  const titlePattern = /<h[1-4][^>]*>(.*?)<\/h[1-4]>/gi;
-  
-  let titleMatch;
-  const titles: string[] = [];
-  while ((titleMatch = titlePattern.exec(html)) !== null) {
-    const title = titleMatch[1].replace(/<[^>]*>/g, '').trim();
-    if (title.length > 10 && title.length < 200) {
-      titles.push(title);
+// Extraction intelligente avec IA de Lovable
+async function extractEventsWithAI(
+  html: string, 
+  source: EventSource,
+  sourceUrl: string
+): Promise<ScrapedEvent[]> {
+  try {
+    // Nettoyer le HTML pour ne garder que le texte pertinent
+    const cleanText = html
+      .replace(/<script[^>]*>.*?<\/script>/gis, '')
+      .replace(/<style[^>]*>.*?<\/style>/gis, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 15000); // Limiter la taille
+
+    console.log(`  📝 Analyzing ${cleanText.length} characters with AI`);
+
+    // Appeler l'IA Lovable pour extraire les événements
+    const response = await fetch('https://gateway.ai.cloudflare.com/v1/5b1111d0cbca8aae0c36d8aa3a84c94e/lovable/openai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `Tu es un expert en extraction d'informations sur des événements commerciaux en Côte d'Ivoire. 
+Extrait UNIQUEMENT les événements futurs (foires, salons, conférences, forums, ateliers) avec leurs informations.
+Réponds UNIQUEMENT avec un tableau JSON valide, sans texte supplémentaire.`
+          },
+          {
+            role: 'user',
+            content: `Analyse ce contenu web et extrait les événements. Source: ${source.name}
+
+Contenu:
+${cleanText}
+
+Retourne un tableau JSON avec cette structure exacte:
+[
+  {
+    "title": "Nom de l'événement",
+    "event_type": "foire|salon|conférence|forum|atelier|autre",
+    "start_date": "YYYY-MM-DD",
+    "end_date": "YYYY-MM-DD",
+    "location": "Lieu",
+    "description": "Description brève"
+  }
+]
+
+Règles:
+- Maximum 10 événements
+- Dates au format YYYY-MM-DD
+- Uniquement événements futurs
+- Si pas de date précise, estimer
+- Location par défaut: "Abidjan, Côte d'Ivoire"
+- Si pas d'événements trouvés, retourner []`
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('  ❌ AI API Error:', response.status, errorText);
+      return [];
     }
-  }
 
-  let dateMatch;
-  const dates: string[] = [];
-  while ((dateMatch = datePattern.exec(html)) !== null) {
-    const monthMap: { [key: string]: string } = {
-      'janvier': '01', 'février': '02', 'mars': '03', 'avril': '04',
-      'mai': '05', 'juin': '06', 'juillet': '07', 'août': '08',
-      'septembre': '09', 'octobre': '10', 'novembre': '11', 'décembre': '12'
-    };
-    const day = dateMatch[1].padStart(2, '0');
-    const month = monthMap[dateMatch[2].toLowerCase()];
-    const year = dateMatch[3];
-    dates.push(`${year}-${month}-${day}`);
-  }
+    const data = await response.json();
+    const aiResponse = data.choices?.[0]?.message?.content || '[]';
+    
+    console.log('  🤖 AI Response:', aiResponse.substring(0, 200));
 
-  // Combiner titres et dates (approximatif)
-  const maxEvents = Math.min(titles.length, dates.length);
-  for (let i = 0; i < maxEvents; i++) {
-    // Filtrer les mots-clés d'événements
-    const title = titles[i];
-    const hasEventKeyword = source.eventTypes.some(type => 
-      title.toLowerCase().includes(type.toLowerCase()) ||
-      title.toLowerCase().includes('salon') ||
-      title.toLowerCase().includes('foire') ||
-      title.toLowerCase().includes('forum') ||
-      title.toLowerCase().includes('conférence')
-    );
-
-    if (hasEventKeyword) {
-      events.push({
-        title: title,
-        event_type: source.eventTypes[0] || 'Autre',
-        start_date: dates[i],
-        end_date: dates[i], // Même date par défaut
-        location: 'Abidjan, Côte d\'Ivoire', // Par défaut
-        description: `Événement collecté depuis ${source.name}`,
-        source: source.name,
-        source_url: source.url,
-      });
+    // Parser la réponse JSON
+    let extractedEvents: any[] = [];
+    try {
+      // Nettoyer la réponse (enlever les backticks markdown si présents)
+      const cleanedResponse = aiResponse
+        .replace(/```json\n?/g, '')
+        .replace(/```\n?/g, '')
+        .trim();
+      
+      extractedEvents = JSON.parse(cleanedResponse);
+    } catch (parseError) {
+      console.error('  ⚠️ Failed to parse AI response as JSON:', parseError);
+      return [];
     }
-  }
 
-  return events;
+    // Valider et formater les événements
+    const validEvents: ScrapedEvent[] = [];
+    for (const event of extractedEvents) {
+      if (event.title && event.start_date) {
+        validEvents.push({
+          title: event.title.substring(0, 200),
+          event_type: event.event_type || source.eventTypes[0] || 'Autre',
+          start_date: event.start_date,
+          end_date: event.end_date || event.start_date,
+          location: event.location || 'Abidjan, Côte d\'Ivoire',
+          description: event.description || `Événement collecté depuis ${source.name}`,
+          source: source.name,
+          source_url: sourceUrl,
+        });
+      }
+    }
+
+    console.log(`  ✨ Extracted ${validEvents.length} valid events with AI`);
+    return validEvents;
+
+  } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
+    console.error('  ❌ AI extraction error:', errMsg);
+    return [];
+  }
 }
