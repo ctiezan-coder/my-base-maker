@@ -240,14 +240,14 @@ async function extractEventsWithAI(
     console.log(`  📝 Analyzing ${cleanText.length} characters with AI`);
 
     // Appeler l'IA Lovable pour extraire les événements
-    const response = await fetch('https://gateway.ai.cloudflare.com/v1/5b1111d0cbca8aae0c36d8aa3a84c94e/lovable/openai/chat/completions', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'google/gemini-2.5-flash',
         messages: [
           {
             role: 'system',
@@ -283,8 +283,7 @@ Règles:
 - Si pas d'événements trouvés, retourner []`
           }
         ],
-        temperature: 0.3,
-        max_tokens: 2000,
+        max_completion_tokens: 2000,
       }),
     });
 
