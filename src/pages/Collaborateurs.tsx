@@ -107,6 +107,28 @@ export default function Collaborateurs() {
     };
   }, [queryClient]);
 
+  // Real-time updates for events
+  useEffect(() => {
+    const channel = supabase
+      .channel('events-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'events'
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['upcoming-events-collaborateurs'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   // Charger les collaborateurs depuis la base de données
   const { data: collaboratorsData, isLoading: isLoadingCollaborators } = useQuery({
     queryKey: ['collaborators'],
@@ -245,32 +267,35 @@ export default function Collaborateurs() {
   });
 
 
-  const events = [
-    {
-      date: "12",
-      month: "Nov",
-      title: "Webinaire ZLECAf",
-      location: "En ligne",
-      participants: 50,
-      type: "Webinaire"
-    },
-    {
-      date: "18",
-      month: "Nov",
-      title: "Formation Export - FDFP",
-      location: "Maison de la Formation",
-      participants: 25,
-      type: "Formation"
-    },
-    {
-      date: "25",
-      month: "Nov",
-      title: "Mission commerciale Ghana",
-      location: "Accra, Ghana",
-      participants: 8,
-      type: "Mission"
+  // Charger les événements à venir depuis la base de données
+  const { data: eventsData = [] } = useQuery({
+    queryKey: ['upcoming-events-collaborateurs'],
+    queryFn: async () => {
+      const today = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .gte('start_date', today)
+        .order('start_date', { ascending: true })
+        .limit(3);
+      
+      if (error) throw error;
+      return data || [];
     }
-  ];
+  });
+
+  // Formater les événements pour l'affichage
+  const events = eventsData.map(event => {
+    const startDate = new Date(event.start_date);
+    return {
+      date: startDate.getDate().toString(),
+      month: startDate.toLocaleDateString('fr-FR', { month: 'short' }),
+      title: event.title,
+      location: event.location || 'Non spécifié',
+      participants: event.max_participants || 0,
+      type: event.event_type
+    };
+  });
 
   return (
     <div className="min-h-screen bg-background">
