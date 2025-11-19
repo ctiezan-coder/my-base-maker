@@ -52,6 +52,27 @@ Deno.serve(async (req) => {
 
     console.log('Fetching real market data from AI...')
 
+    // Calculer les dates pour les opportunités (1 à 6 mois dans le futur)
+    const now = new Date()
+    const minDeadline = new Date(now)
+    minDeadline.setMonth(now.getMonth() + 1) // 1 mois minimum
+    const maxDeadline = new Date(now)
+    maxDeadline.setMonth(now.getMonth() + 6) // 6 mois maximum
+
+    // Fermer automatiquement les opportunités expirées
+    console.log('Closing expired opportunities...')
+    const { error: updateError } = await supabaseClient
+      .from('export_opportunities')
+      .update({ status: 'FERMÉ' })
+      .lt('deadline', now.toISOString().split('T')[0])
+      .neq('status', 'FERMÉ')
+    
+    if (updateError) {
+      console.error('Error closing expired opportunities:', updateError)
+    } else {
+      console.log('Expired opportunities marked as closed')
+    }
+
     // Générer des données de marchés potentiels
     const marketsPrompt = `Génère 5 marchés potentiels d'export africains réels et actuels (2025) avec des données précises.
     Format JSON strict:
@@ -101,7 +122,7 @@ Deno.serve(async (req) => {
       for (const market of marketsContent.markets) {
         const { error } = await supabaseClient
           .from('potential_markets')
-          .upsert({
+          .insert({
             country: market.country,
             region: market.region,
             sector: market.sector,
@@ -113,9 +134,6 @@ Deno.serve(async (req) => {
             key_products: market.key_products,
             requirements: market.requirements,
             updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'country,sector',
-            ignoreDuplicates: false
           })
 
         if (error) {
@@ -127,7 +145,7 @@ Deno.serve(async (req) => {
     }
 
     // Générer des opportunités d'export en utilisant des sources réelles de marché
-    const opportunitiesPrompt = `Tu es un expert en commerce international et développement des PME africaines. Génère 5 opportunités d'export RÉELLES et ACTUELLES (2025) pour les PME africaines, en t'inspirant des principales plateformes d'export internationales:
+    const opportunitiesPrompt = `Tu es un expert en commerce international et développement des PME africaines. Génère 5 opportunités d'export RÉELLES et ACTUELLES (2025-2026) pour les PME africaines, en t'inspirant des principales plateformes d'export internationales:
 
     SOURCES DE RÉFÉRENCE (à utiliser comme inspiration):
     
@@ -171,7 +189,7 @@ Deno.serve(async (req) => {
           "region": "Europe" ou "Afrique" ou "ZLECAf" ou "Asie" ou "Moyen-Orient" ou "Amérique du Nord" ou "Amérique du Sud",
           "estimated_value": montant réaliste en CFA (entre 50000 et 300000),
           "currency": "CFA",
-          "deadline": "YYYY-MM-DD" (entre mars 2025 et juin 2025, dates réalistes),
+          "deadline": "YYYY-MM-DD" (entre ${minDeadline.toISOString().split('T')[0]} et ${maxDeadline.toISOString().split('T')[0]}, dates réalistes dans le futur),
           "volume": "quantité/volume détaillé et réaliste (ex: '10 tonnes métriques', '5000 mètres linéaires')",
           "description": "description détaillée professionnelle: contexte du marché, type d'acheteur (importateur, distributeur, fabricant), usage prévu, potentiel de partenariat long terme",
           "requirements": ["exigence concrète 1 (ex: 'Certification biologique européenne (EU Organic)')", "exigence 2 (ex: 'Capacité de production de 5 tonnes/mois')", "exigence 3 si pertinente"],
