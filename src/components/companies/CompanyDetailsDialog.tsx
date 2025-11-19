@@ -52,12 +52,14 @@ export function CompanyDetailsDialog({
         .order("registration_date", { ascending: false });
       
       if (error) throw error;
-      return data?.map(ep => ({
-        ...ep.events,
-        participation_status: ep.status,
-        registration_date: ep.registration_date,
-        participation_notes: ep.notes
-      })) || [];
+      return data
+        ?.filter(ep => ep.events)
+        ?.map(ep => ({
+          ...ep.events,
+          participation_status: ep.status,
+          registration_date: ep.registration_date,
+          participation_notes: ep.notes
+        })) || [];
     },
     enabled: open && !!companyId,
   });
