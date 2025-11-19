@@ -125,38 +125,66 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
       
       if (coords[0] === 0 && coords[1] === 0) return;
 
+      // Determine marker color based on opportunity priority
+      const hasUrgent = opps.some(o => o.status === 'URGENT');
+      const hasRecommended = opps.some(o => o.status === 'RECOMMANDÉ');
+      
+      let markerColor = '#10b981'; // Vert par défaut
+      let markerBorder = '#059669';
+      
+      if (hasUrgent) {
+        markerColor = '#f97316'; // Orange pour urgent
+        markerBorder = '#ea580c';
+      } else if (hasRecommended) {
+        markerColor = '#10b981'; // Vert pour recommandé
+        markerBorder = '#059669';
+      }
+
       // Create custom icon
       const customIcon = L.divIcon({
         className: 'custom-marker',
         html: `
           <div style="
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            background: hsl(var(--primary));
-            border: 3px solid hsl(var(--background));
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, ${markerColor} 0%, ${markerBorder} 100%);
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25), 0 0 0 2px ${markerColor}40;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: hsl(var(--primary-foreground));
+            color: white;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            animation: pulse 2s infinite;
           ">
             ${opps.length}
           </div>
+          <style>
+            @keyframes pulse {
+              0%, 100% { transform: scale(1); }
+              50% { transform: scale(1.05); }
+            }
+            .custom-marker:hover > div {
+              transform: scale(1.15) !important;
+              box-shadow: 0 6px 16px rgba(0,0,0,0.35), 0 0 0 3px ${markerColor}60;
+            }
+          </style>
         `,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
       });
 
       // Create popup content
       const popupContent = document.createElement('div');
-      popupContent.className = 'p-4 min-w-[400px]';
+      popupContent.className = 'p-4 min-w-[400px] bg-white rounded-lg';
       popupContent.innerHTML = `
-        <div class="mb-3 pb-3 border-b border-border">
-          <h3 class="text-lg font-bold text-foreground mb-1">${country}${city !== 'general' ? ` - ${city}` : ''}</h3>
-          <p class="text-sm text-muted-foreground">${opps.length} opportunité${opps.length > 1 ? 's' : ''} disponible${opps.length > 1 ? 's' : ''}</p>
+        <div class="mb-3 pb-3 border-b-2 border-green-500">
+          <h3 class="text-lg font-bold text-gray-800 mb-1">📍 ${country}${city !== 'general' ? ` - ${city}` : ''}</h3>
+          <p class="text-sm text-gray-600 font-medium">${opps.length} opportunité${opps.length > 1 ? 's' : ''} disponible${opps.length > 1 ? 's' : ''}</p>
         </div>
       `;
 
@@ -166,87 +194,89 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
 
       opps.forEach(opp => {
         const oppDiv = document.createElement('div');
-        oppDiv.className = 'p-3 hover:bg-accent/50 rounded-lg cursor-pointer border border-border bg-card transition-all duration-200 hover:shadow-md';
+        oppDiv.className = 'p-3 hover:bg-green-50 rounded-lg cursor-pointer border-2 border-gray-200 bg-white transition-all duration-200 hover:shadow-lg hover:border-green-400';
         
         const statusColors = {
-          'URGENT': 'bg-red-500 text-white',
-          'NOUVEAU': 'bg-blue-500 text-white',
-          'RECOMMANDÉ': 'bg-green-500 text-white',
-          'EN_COURS': 'bg-yellow-500 text-white',
-          'FERMÉ': 'bg-gray-500 text-white'
+          'URGENT': 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
+          'NOUVEAU': 'bg-gradient-to-r from-white to-gray-100 text-gray-800 border border-gray-300',
+          'RECOMMANDÉ': 'bg-gradient-to-r from-green-500 to-green-600 text-white',
+          'EN_COURS': 'bg-gradient-to-r from-orange-400 to-orange-500 text-white',
+          'FERMÉ': 'bg-gray-400 text-white'
         };
         
-        const statusColor = statusColors[opp.status as keyof typeof statusColors] || 'bg-gray-500 text-white';
+        const statusColor = statusColors[opp.status as keyof typeof statusColors] || 'bg-gray-400 text-white';
         const deadlineDate = new Date(opp.deadline).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
         
         oppDiv.innerHTML = `
           <div class="flex items-start justify-between gap-2 mb-2">
-            <div class="font-semibold text-foreground text-base flex-1">${opp.title}</div>
-            <span class="px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${statusColor}">
+            <div class="font-bold text-gray-800 text-base flex-1">${opp.title}</div>
+            <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${statusColor} shadow-sm">
               ${opp.status?.replace('_', ' ')}
             </span>
           </div>
           <div class="space-y-1.5">
             <div class="flex items-center gap-2 text-sm">
-              <span class="text-muted-foreground">📊 Secteur:</span>
-              <span class="font-medium text-foreground">${opp.sector}</span>
+              <span class="text-gray-500 font-medium">📊 Secteur:</span>
+              <span class="font-semibold text-green-700">${opp.sector}</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
-              <span class="text-muted-foreground">💰 Valeur estimée:</span>
-              <span class="font-medium text-foreground">${opp.estimated_value.toLocaleString()} ${opp.currency || 'CFA'}</span>
+              <span class="text-gray-500 font-medium">💰 Valeur estimée:</span>
+              <span class="font-bold text-orange-600">${opp.estimated_value.toLocaleString()} ${opp.currency || 'CFA'}</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
-              <span class="text-muted-foreground">📅 Date limite:</span>
-              <span class="font-medium text-foreground">${deadlineDate}</span>
+              <span class="text-gray-500 font-medium">📅 Date limite:</span>
+              <span class="font-semibold text-gray-700">${deadlineDate}</span>
             </div>
             <div class="flex items-center gap-2 text-sm">
-              <span class="text-muted-foreground">📦 Volume:</span>
-              <span class="font-medium text-foreground">${opp.volume}</span>
+              <span class="text-gray-500 font-medium">📦 Volume:</span>
+              <span class="font-semibold text-gray-700">${opp.volume}</span>
             </div>
           </div>
-          <div class="mt-2 pt-2 border-t border-border">
-            <p class="text-xs text-muted-foreground line-clamp-2">${opp.description}</p>
+          <div class="mt-2 pt-2 border-t-2 border-gray-200">
+            <p class="text-xs text-gray-600 line-clamp-2">${opp.description}</p>
           </div>
           <div style="display: flex; gap: 8px; margin-top: 12px;">
             <button 
               class="opp-details-btn"
               data-opp-id="${opp.id}"
               style="
-                padding: 8px 16px;
-                background: hsl(var(--primary));
-                color: hsl(var(--primary-foreground));
+                padding: 10px 16px;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                color: white;
                 border: none;
-                border-radius: 6px;
+                border-radius: 8px;
                 cursor: pointer;
                 font-size: 13px;
+                font-weight: 600;
                 flex: 1;
-                font-weight: 500;
-                transition: opacity 0.2s;
+                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+                transition: all 0.2s;
               "
-              onmouseover="this.style.opacity='0.9'"
-              onmouseout="this.style.opacity='1'"
+              onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';"
+              onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)';"
             >
-              Voir détails
+              📋 Voir détails
             </button>
             <button 
               class="opp-send-btn"
               data-opp-id="${opp.id}"
               style="
-                padding: 8px 16px;
-                background: hsl(var(--secondary));
-                color: hsl(var(--secondary-foreground));
+                padding: 10px 16px;
+                background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+                color: white;
                 border: none;
-                border-radius: 6px;
+                border-radius: 8px;
                 cursor: pointer;
                 font-size: 13px;
+                font-weight: 600;
                 flex: 1;
-                font-weight: 500;
-                transition: opacity 0.2s;
+                box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+                transition: all 0.2s;
               "
-              onmouseover="this.style.opacity='0.9'"
-              onmouseout="this.style.opacity='1'"
+              onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(249, 115, 22, 0.4)';"
+              onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(249, 115, 22, 0.3)';"
             >
-              Envoyer aux opérateurs
+              📤 Envoyer
             </button>
           </div>
         `;
@@ -311,23 +341,44 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
       <div className="space-y-4">
         <div 
           ref={mapContainer} 
-          className="w-full h-[600px] rounded-lg overflow-hidden border border-border shadow-lg"
+          className="w-full h-[600px] rounded-xl overflow-hidden border-2 border-green-200 shadow-2xl relative"
           role="region"
           aria-label="Carte des opportunités d'exportation"
-        />
+        >
+          {/* Légende des couleurs */}
+          <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border-2 border-green-200">
+            <div className="text-xs font-bold text-gray-700 mb-2">Légende</div>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 border-2 border-white shadow"></div>
+                <span className="text-xs font-medium text-gray-700">Urgent</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full bg-gradient-to-r from-green-500 to-green-600 border-2 border-white shadow"></div>
+                <span className="text-xs font-medium text-gray-700">Recommandé</span>
+              </div>
+            </div>
+          </div>
+        </div>
         
         <div className="flex gap-3 items-center flex-wrap">
-          <Button onClick={centerOnAfrica} variant="outline" className="gap-2">
+          <Button 
+            onClick={centerOnAfrica} 
+            className="gap-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold shadow-lg border-2 border-white"
+          >
             <MapPin className="h-4 w-4" />
             Centrer sur l'Afrique
           </Button>
-          <Button onClick={centerOnWorld} variant="outline" className="gap-2">
+          <Button 
+            onClick={centerOnWorld} 
+            className="gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold shadow-lg border-2 border-green-200"
+          >
             <Globe className="h-4 w-4" />
             Vue globale
           </Button>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
-            <div className="w-4 h-4 rounded-full bg-primary"></div>
-            <span className="font-medium">{opportunities.length} opportunités</span>
+          <div className="flex items-center gap-2 text-sm ml-auto bg-gradient-to-r from-green-100 to-green-50 px-4 py-2 rounded-full border-2 border-green-200 shadow-md">
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-500 to-green-600 animate-pulse"></div>
+            <span className="font-bold text-green-700">{opportunities.length} opportunités actives</span>
           </div>
         </div>
       </div>
