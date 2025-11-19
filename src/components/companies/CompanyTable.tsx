@@ -1,7 +1,7 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Mail, Phone, Trash2 } from "lucide-react";
+import { Pencil, Mail, Phone, Trash2, Eye } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { CompanyDetailsDialog } from "./CompanyDetailsDialog";
 
 interface CompanyTableProps {
   companies: any[];
@@ -24,6 +25,8 @@ interface CompanyTableProps {
 export function CompanyTable({ companies, isLoading, onEdit, onDelete }: CompanyTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [companyToDelete, setCompanyToDelete] = useState<any>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
 
   const handleDeleteClick = (company: any) => {
     setCompanyToDelete(company);
@@ -36,6 +39,11 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
       setDeleteDialogOpen(false);
       setCompanyToDelete(null);
     }
+  };
+
+  const handleViewDetails = (company: any) => {
+    setSelectedCompany(company);
+    setDetailsDialogOpen(true);
   };
   if (isLoading) {
     return (
@@ -113,11 +121,14 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
                 </span>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="sm" onClick={() => onEdit(company)}>
+                <div className="flex justify-end gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => handleViewDetails(company)} title="Voir détails">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(company)} title="Modifier">
                     <Pencil className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(company)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(company)} title="Supprimer">
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
@@ -130,19 +141,28 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer l'opérateur "{companyToDelete?.company_name}" ? Cette action est irréversible.
+              Cette action est irréversible. L'entreprise "{companyToDelete?.company_name}" sera définitivement supprimée.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AlertDialogAction onClick={handleConfirmDelete}>
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {selectedCompany && (
+        <CompanyDetailsDialog
+          open={detailsDialogOpen}
+          onOpenChange={setDetailsDialogOpen}
+          companyId={selectedCompany.id}
+          companyName={selectedCompany.company_name}
+        />
+      )}
     </div>
   );
 }
