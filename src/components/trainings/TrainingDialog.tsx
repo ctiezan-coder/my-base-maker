@@ -40,10 +40,23 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
     queryFn: async () => {
       const { data, error } = await supabase
         .from("companies")
-        .select("id, company_name")
+        .select("id, company_name, rccm_number")
         .order("company_name");
       if (error) throw error;
-      return data;
+      
+      // Éliminer les doublons basés sur le RCCM ET le nom
+      const uniqueCompanies = data?.reduce((acc: any[], company: any) => {
+        const isDuplicate = acc.find(c => 
+          c.rccm_number === company.rccm_number || 
+          c.company_name.toLowerCase().trim() === company.company_name.toLowerCase().trim()
+        );
+        if (!isDuplicate) {
+          acc.push(company);
+        }
+        return acc;
+      }, []);
+      
+      return uniqueCompanies;
     },
   });
 
