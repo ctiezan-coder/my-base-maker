@@ -43,8 +43,9 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Configuration des sources (basée sur le JSON fourni)
+    // Configuration des sources (nationales et internationales)
     const sources: EventSource[] = [
+      // Sources nationales (Côte d'Ivoire)
       {
         id: 'gov-commerce',
         name: 'Ministère du Commerce et de l\'Industrie',
@@ -65,15 +66,90 @@ Deno.serve(async (req) => {
         eventTypes: ['foire', 'salon', 'formation', 'atelier'],
         coverage: 'national'
       },
+      
+      // Sources internationales - Afrique
       {
-        id: 'eventseye',
-        name: 'EventsEye International',
+        id: 'eventseye-africa',
+        name: 'EventsEye - Afrique',
         url: 'https://www.eventseye.com',
         type: 'commercial',
         priority: 2,
+        searchPaths: [
+          '/fairs/c1_salons_afrique.html',
+          '/fairs/c0_salons_senegal.html',
+          '/fairs/c0_salons_ghana.html',
+          '/fairs/c0_salons_nigeria.html',
+          '/fairs/c0_salons_kenya.html',
+          '/fairs/c0_salons_maroc.html',
+          '/fairs/c0_salons_afrique-du-sud.html'
+        ],
+        eventTypes: ['foire', 'salon', 'exposition'],
+        coverage: 'afrique'
+      },
+      
+      // Sources internationales - Europe
+      {
+        id: 'eventseye-europe',
+        name: 'EventsEye - Europe',
+        url: 'https://www.eventseye.com',
+        type: 'commercial',
+        priority: 2,
+        searchPaths: [
+          '/fairs/c1_salons_europe.html',
+          '/fairs/c0_salons_france.html',
+          '/fairs/c0_salons_allemagne.html',
+          '/fairs/c0_salons_italie.html',
+          '/fairs/c0_salons_espagne.html'
+        ],
+        eventTypes: ['foire', 'salon', 'exposition'],
+        coverage: 'europe'
+      },
+      
+      // Sources internationales - Asie et Moyen-Orient
+      {
+        id: 'eventseye-asia',
+        name: 'EventsEye - Asie & Moyen-Orient',
+        url: 'https://www.eventseye.com',
+        type: 'commercial',
+        priority: 2,
+        searchPaths: [
+          '/fairs/c1_salons_asie.html',
+          '/fairs/c0_salons_chine.html',
+          '/fairs/c0_salons_emirats-arabes-unis.html',
+          '/fairs/c0_salons_arabie-saoudite.html',
+          '/fairs/c0_salons_inde.html'
+        ],
+        eventTypes: ['foire', 'salon', 'exposition'],
+        coverage: 'asie'
+      },
+      
+      // Sources internationales - Amériques
+      {
+        id: 'eventseye-americas',
+        name: 'EventsEye - Amériques',
+        url: 'https://www.eventseye.com',
+        type: 'commercial',
+        priority: 2,
+        searchPaths: [
+          '/fairs/c1_salons_amerique-du-nord.html',
+          '/fairs/c0_salons_etats-unis.html',
+          '/fairs/c1_salons_amerique-du-sud.html',
+          '/fairs/c0_salons_bresil.html'
+        ],
+        eventTypes: ['foire', 'salon', 'exposition'],
+        coverage: 'ameriques'
+      },
+      
+      // Source globale Côte d'Ivoire
+      {
+        id: 'eventseye-ci',
+        name: 'EventsEye - Côte d\'Ivoire',
+        url: 'https://www.eventseye.com',
+        type: 'commercial',
+        priority: 1,
         searchPaths: ['/fairs/c0_salons_cote-d-ivoire.html'],
         eventTypes: ['foire', 'salon', 'exposition'],
-        coverage: 'international'
+        coverage: 'national'
       }
     ];
 
@@ -251,13 +327,13 @@ async function extractEventsWithAI(
         messages: [
           {
             role: 'system',
-            content: `Tu es un expert en extraction d'informations sur des événements commerciaux en Côte d'Ivoire. 
-Extrait UNIQUEMENT les événements futurs (foires, salons, conférences, forums, ateliers) avec leurs informations.
+            content: `Tu es un expert en extraction d'informations sur des événements commerciaux internationaux (foires, salons, conférences). 
+Extrait UNIQUEMENT les événements futurs avec leurs informations complètes.
 Réponds UNIQUEMENT avec un tableau JSON valide, sans texte supplémentaire.`
           },
           {
             role: 'user',
-            content: `Analyse ce contenu web et extrait les événements. Source: ${source.name}
+            content: `Analyse ce contenu web et extrait les événements. Source: ${source.name} (Couverture: ${source.coverage})
 
 Contenu:
 ${cleanText}
@@ -265,21 +341,22 @@ ${cleanText}
 Retourne un tableau JSON avec cette structure exacte:
 [
   {
-    "title": "Nom de l'événement",
+    "title": "Nom complet de l'événement",
     "event_type": "foire|salon|conférence|forum|atelier|formation|séminaire|webinaire|exposition|réunion|autre",
     "start_date": "YYYY-MM-DD",
     "end_date": "YYYY-MM-DD",
-    "location": "Lieu",
-    "description": "Description brève"
+    "location": "Ville, Pays",
+    "description": "Description complète avec secteurs et informations clés"
   }
 ]
 
-Règles:
+Règles IMPORTANTES:
 - Maximum 10 événements
-- Dates au format YYYY-MM-DD
-- Uniquement événements futurs
-- Si pas de date précise, estimer
-- Location par défaut: "Abidjan, Côte d'Ivoire"
+- Dates au format YYYY-MM-DD (si année seulement, utiliser 01-01)
+- Uniquement événements futurs (2025 et après)
+- Location COMPLÈTE avec ville ET pays (ex: "Paris, France", "Lagos, Nigeria", "Dubaï, EAU")
+- Description avec secteurs d'activité et public cible
+- Si informations manquantes, estimer intelligemment selon le contexte
 - Si pas d'événements trouvés, retourner []`
           }
         ],
