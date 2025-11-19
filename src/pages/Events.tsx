@@ -10,12 +10,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventDialog } from "@/components/events/EventDialog";
 import { EventList } from "@/components/events/EventList";
 import { EventsStatsCards } from "@/components/events/EventsStatsCards";
+import { EventSearchDialog } from "@/components/events/EventSearchDialog";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Events() {
   const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [directionFilter, setDirectionFilter] = useState<string>("all");
@@ -121,10 +123,20 @@ export default function Events() {
             Gestion des événements et calendrier
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvel événement
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => setSearchDialogOpen(true)}
+            variant="outline"
+            className="gap-2"
+          >
+            <Search className="w-4 h-4" />
+            Recherche Auto
+          </Button>
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvel événement
+          </Button>
+        </div>
       </div>
 
       <EventsStatsCards events={events} />
@@ -233,6 +245,12 @@ export default function Events() {
         onOpenChange={setDialogOpen}
         event={selectedEvent}
         onClose={handleCloseDialog}
+      />
+
+      <EventSearchDialog
+        open={searchDialogOpen}
+        onOpenChange={setSearchDialogOpen}
+        onEventAdded={refetch}
       />
     </div>
   );
