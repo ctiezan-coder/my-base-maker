@@ -338,6 +338,16 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
 
   return (
     <>
+      <style>
+        {`
+          .leaflet-popup {
+            z-index: 50 !important;
+          }
+          .leaflet-pane {
+            z-index: 1 !important;
+          }
+        `}
+      </style>
       <div className="space-y-4">
         <div 
           ref={mapContainer} 
@@ -346,7 +356,7 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
           aria-label="Carte des opportunités d'exportation"
         >
           {/* Légende des couleurs */}
-          <div className="absolute top-4 left-4 z-[1000] bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border-2 border-green-200">
+          <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-3 border-2 border-green-200">
             <div className="text-xs font-bold text-gray-700 mb-2">Légende</div>
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
