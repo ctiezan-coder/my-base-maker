@@ -29,6 +29,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { ExportOpportunity, MarketRegion, OpportunityStatus } from "@/types/market-development";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
 
 const formSchema = z.object({
   title: z.string().min(1, "Le titre est requis"),
@@ -50,6 +53,7 @@ interface OpportunityDialogProps {
   onOpenChange: (open: boolean) => void;
   opportunity?: ExportOpportunity;
   onClose: () => void;
+  mode?: "view" | "edit";
 }
 
 export const OpportunityDialog = ({
@@ -57,6 +61,7 @@ export const OpportunityDialog = ({
   onOpenChange,
   opportunity,
   onClose,
+  mode = "edit",
 }: OpportunityDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -124,12 +129,100 @@ export const OpportunityDialog = ({
     }
   };
 
+  if (mode === "view" && opportunity) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{opportunity.title}</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            <div className="flex gap-2">
+              {opportunity.status && (
+                <Badge variant={opportunity.status === "URGENT" ? "destructive" : "default"}>
+                  {opportunity.status}
+                </Badge>
+              )}
+              <Badge variant="outline">{opportunity.region}</Badge>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Secteur</label>
+                <p className="text-base mt-1">{opportunity.sector}</p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Destination</label>
+                <p className="text-base mt-1">
+                  {opportunity.destination_country}
+                  {opportunity.destination_city && `, ${opportunity.destination_city}`}
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Valeur estimée</label>
+                <p className="text-base mt-1">
+                  {opportunity.estimated_value.toLocaleString()} {opportunity.currency}
+                </p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Volume</label>
+                <p className="text-base mt-1">{opportunity.volume}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Échéance</label>
+                <p className="text-base mt-1">
+                  {format(new Date(opportunity.deadline), "dd MMMM yyyy", { locale: fr })}
+                </p>
+              </div>
+
+              {opportunity.compatibility_score && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Score de compatibilité</label>
+                  <p className="text-base mt-1 text-green-600 font-semibold">
+                    {opportunity.compatibility_score}%
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Description</label>
+              <p className="text-base mt-2 whitespace-pre-wrap">{opportunity.description}</p>
+            </div>
+
+            {opportunity.requirements && opportunity.requirements.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Exigences</label>
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  {opportunity.requirements.map((req, index) => (
+                    <li key={index} className="text-base">{req}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Fermer
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {opportunity ? "Modifier l'opportunité" : "Nouvelle opportunité"}
+            {opportunity ? "Modifier l'opportunité" : "Nouvelle opportunité d'export"}
           </DialogTitle>
         </DialogHeader>
 
