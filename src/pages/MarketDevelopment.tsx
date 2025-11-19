@@ -213,75 +213,12 @@ export default function MarketDevelopment() {
       <Tabs defaultValue="opportunities" className="space-y-6">
         <TabsList>
           <TabsTrigger value="opportunities">Opportunités</TabsTrigger>
-          <TabsTrigger value="map">Carte</TabsTrigger>
           <TabsTrigger value="markets">Marchés Potentiels</TabsTrigger>
           <TabsTrigger value="connections">Mises en Relation</TabsTrigger>
           <TabsTrigger value="web-search">Recherche Web</TabsTrigger>
         </TabsList>
 
         <TabsContent value="opportunities" className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                placeholder="Rechercher une opportunité..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Select value={sectorFilter} onValueChange={setSectorFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Tous les secteurs" />
-              </SelectTrigger>
-              <SelectContent className="z-50 bg-popover">
-                <SelectItem value="all">Tous les secteurs</SelectItem>
-                {availableOpportunitySectors.map((sector) => (
-                  <SelectItem key={sector} value={sector}>
-                    {sector}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={regionFilter} onValueChange={setRegionFilter}>
-              <SelectTrigger className="w-full sm:w-[200px]">
-                <SelectValue placeholder="Toutes les régions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes les régions</SelectItem>
-                <SelectItem value="Europe">Europe</SelectItem>
-                <SelectItem value="ZLECAf">ZLECAf</SelectItem>
-                <SelectItem value="Asie">Asie</SelectItem>
-                <SelectItem value="Moyen-Orient">Moyen-Orient</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setDialogOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Nouvelle opportunité
-            </Button>
-          </div>
-
-          {loadingOpportunities ? (
-            <p>Chargement...</p>
-          ) : opportunities.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
-              Aucune opportunité trouvée
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {opportunities.map((opportunity) => (
-                <OpportunityCard
-                  key={opportunity.id}
-                  opportunity={opportunity}
-                  onSendToOperators={handleSendToOperators}
-                  showApplications={true}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="map" className="space-y-6">
           <OpportunitiesMap 
             opportunities={opportunities}
             onOpportunityClick={(opportunity) => {
