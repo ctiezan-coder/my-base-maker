@@ -98,7 +98,16 @@ export default function Companies() {
     },
   });
 
-  const companies = companiesData?.companies || [];
+  const allCompanies = companiesData?.companies || [];
+  
+  // Éliminer les doublons basés sur le RCCM (garder la première occurrence)
+  const companies = allCompanies.reduce((acc: any[], company: any) => {
+    if (!acc.find(c => c.rccm_number === company.rccm_number)) {
+      acc.push(company);
+    }
+    return acc;
+  }, []);
+  
   const totalPages = Math.ceil((companiesData?.total || 0) / ITEMS_PER_PAGE);
   const availableSectors = sectorsData || [];
 
