@@ -105,7 +105,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         if (selectedCompanies.length > 0 && newTraining) {
           const { data: companiesData } = await supabase
             .from("companies")
-            .select("id, company_name, email, phone")
+            .select("id, company_name, email, phone, created_by")
             .in("id", selectedCompanies);
 
           if (companiesData) {
@@ -123,6 +123,24 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
               .insert(registrations);
 
             if (registrationsError) throw registrationsError;
+
+            // Créer des notifications pour les opérateurs
+            const notifications = companiesData
+              .filter(company => company.created_by)
+              .map(company => ({
+                user_id: company.created_by!,
+                title: "Inscription à une formation",
+                message: `Votre entreprise ${company.company_name} a été inscrite à la formation "${formData.title}"`,
+                type: "info",
+                reference_id: newTraining.id,
+                reference_table: "trainings",
+              }));
+
+            if (notifications.length > 0) {
+              await supabase
+                .from("notifications")
+                .insert(notifications);
+            }
           }
         }
 
