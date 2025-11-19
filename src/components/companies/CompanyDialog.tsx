@@ -129,10 +129,17 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
       await new Promise(resolve => setTimeout(resolve, 300));
       onClose();
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Détecter les erreurs de doublon
+      if (error.message?.includes('unique_company_rccm') || error.code === '23505') {
+        errorMessage = "Cette entreprise existe déjà (numéro RCCM déjà utilisé). Veuillez vérifier les informations.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
       });
     }
   };

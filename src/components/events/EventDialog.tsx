@@ -166,10 +166,17 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
       }
       onClose();
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Détecter les erreurs de doublon
+      if (error.message?.includes('unique_event') || error.code === '23505') {
+        errorMessage = "Cet événement existe déjà (même titre, date et direction). Veuillez modifier les informations.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
