@@ -1,12 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+const allowedOrigins = [
+  'https://abbxntdwuvduagjtlyri.lovableproject.com',
+  'http://localhost:5173'
+]
+
+const getCorsHeaders = (origin: string | null) => ({
+  'Access-Control-Allow-Origin': origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0],
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+})
+
+const createUserSchema = z.object({
+  email: z.string().email().max(255),
+  password: z.string().min(8).max(100),
+  fullName: z.string().min(1).max(200),
+  role: z.enum(['admin', 'manager', 'user']),
+  direction: z.string().optional()
+})
 
 serve(async (req) => {
+  const origin = req.headers.get('Origin')
+  const corsHeaders = getCorsHeaders(origin)
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -52,8 +69,10 @@ serve(async (req) => {
       )
     }
 
-    // Get the request body
-    const { email, password, fullName, role, direction } = await req.json()
+    // Get and validate the request body
+    const body = await req.json()
+    const validated = createUserSchema.parse(body)
+    const { email, password, fullName, role, direction } = validated
 
     // Create the user
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
