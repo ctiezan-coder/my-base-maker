@@ -190,10 +190,17 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
       }
       onClose();
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Détecter les erreurs de doublon
+      if (error.message?.includes('unique_training') || error.code === '23505') {
+        errorMessage = "Cette formation existe déjà (même titre, date et direction). Veuillez modifier les informations.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setLoading(false);

@@ -119,9 +119,16 @@ export const OpportunityDialog = ({
       onClose();
       form.reset();
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Détecter les erreurs de doublon
+      if (error.message?.includes('unique_opportunity') || error.code === '23505') {
+        errorMessage = "Cette opportunité existe déjà (même titre, pays et date limite). Veuillez modifier les informations.";
+      }
+      
       toast({
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {

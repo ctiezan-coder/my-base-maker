@@ -187,10 +187,17 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
       });
       onClose();
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Détecter les erreurs de doublon
+      if (error.message?.includes('unique_partnership') || error.code === '23505') {
+        errorMessage = "Ce partenariat existe déjà (même nom et direction). Veuillez modifier les informations.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setLoading(false);
