@@ -1581,6 +1581,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          p_message: string
+          p_reference_id?: string
+          p_reference_table?: string
+          p_title: string
+          p_type?: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       has_module_permission: {
         Args: {
           _direction_id: string
