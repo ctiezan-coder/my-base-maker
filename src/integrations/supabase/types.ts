@@ -843,45 +843,139 @@ export type Database = {
       }
       media_content: {
         Row: {
+          budget_estime: number | null
+          categorie_niveau:
+            | Database["public"]["Enums"]["niveau_categorisation"]
+            | null
+          cibles: string | null
           created_at: string
           created_by: string | null
+          date_demande: string | null
+          date_evenement: string | null
+          date_livraison_effective: string | null
+          date_livraison_prevue: string | null
+          delai_traitement_semaines: number | null
           description: string | null
           direction_id: string
+          enjeux: string | null
+          entites_externes: string[] | null
+          event_id: string | null
           file_size: number | null
           file_url: string | null
+          heure_evenement: string | null
           id: string
+          lieu_evenement: string | null
           media_type: Database["public"]["Enums"]["media_type"]
+          objectifs: string | null
+          observations: string | null
+          partnership_id: string | null
+          phase_communication:
+            | Database["public"]["Enums"]["phase_communication"]
+            | null
           priority_level: Database["public"]["Enums"]["priority_level"] | null
+          role_agence: Database["public"]["Enums"]["role_agence"] | null
+          statut_workflow: Database["public"]["Enums"]["statut_workflow"] | null
+          supports_demandes: string[] | null
           title: string
+          type_activite: Database["public"]["Enums"]["type_activite"] | null
           updated_at: string
         }
         Insert: {
+          budget_estime?: number | null
+          categorie_niveau?:
+            | Database["public"]["Enums"]["niveau_categorisation"]
+            | null
+          cibles?: string | null
           created_at?: string
           created_by?: string | null
+          date_demande?: string | null
+          date_evenement?: string | null
+          date_livraison_effective?: string | null
+          date_livraison_prevue?: string | null
+          delai_traitement_semaines?: number | null
           description?: string | null
           direction_id: string
+          enjeux?: string | null
+          entites_externes?: string[] | null
+          event_id?: string | null
           file_size?: number | null
           file_url?: string | null
+          heure_evenement?: string | null
           id?: string
+          lieu_evenement?: string | null
           media_type: Database["public"]["Enums"]["media_type"]
+          objectifs?: string | null
+          observations?: string | null
+          partnership_id?: string | null
+          phase_communication?:
+            | Database["public"]["Enums"]["phase_communication"]
+            | null
           priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          role_agence?: Database["public"]["Enums"]["role_agence"] | null
+          statut_workflow?:
+            | Database["public"]["Enums"]["statut_workflow"]
+            | null
+          supports_demandes?: string[] | null
           title: string
+          type_activite?: Database["public"]["Enums"]["type_activite"] | null
           updated_at?: string
         }
         Update: {
+          budget_estime?: number | null
+          categorie_niveau?:
+            | Database["public"]["Enums"]["niveau_categorisation"]
+            | null
+          cibles?: string | null
           created_at?: string
           created_by?: string | null
+          date_demande?: string | null
+          date_evenement?: string | null
+          date_livraison_effective?: string | null
+          date_livraison_prevue?: string | null
+          delai_traitement_semaines?: number | null
           description?: string | null
           direction_id?: string
+          enjeux?: string | null
+          entites_externes?: string[] | null
+          event_id?: string | null
           file_size?: number | null
           file_url?: string | null
+          heure_evenement?: string | null
           id?: string
+          lieu_evenement?: string | null
           media_type?: Database["public"]["Enums"]["media_type"]
+          objectifs?: string | null
+          observations?: string | null
+          partnership_id?: string | null
+          phase_communication?:
+            | Database["public"]["Enums"]["phase_communication"]
+            | null
           priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          role_agence?: Database["public"]["Enums"]["role_agence"] | null
+          statut_workflow?:
+            | Database["public"]["Enums"]["statut_workflow"]
+            | null
+          supports_demandes?: string[] | null
           title?: string
+          type_activite?: Database["public"]["Enums"]["type_activite"] | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "media_content_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_content_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -1673,14 +1767,27 @@ export type Database = {
       media_type:
         | "Newsletter"
         | "Magazine"
-        | "Création graphique"
+        | "Article presse"
+        | "Communiqué de presse"
+        | "Dossier de presse"
+        | "Branding visuel"
+        | "Fond de scène"
+        | "Mur de photo"
+        | "Dépliant"
+        | "Flyer"
+        | "Kakemono"
+        | "Affiche"
+        | "Bannière web"
+        | "Post réseaux sociaux"
         | "Film institutionnel"
         | "Reportage"
         | "Capsule vidéo"
-        | "Photo"
-        | "Article presse"
         | "Interview audio"
+        | "Photo professionnelle"
+        | "Couverture événement"
+        | "Support présentation"
         | "Autre"
+      niveau_categorisation: "Niveau 1" | "Niveau 2" | "Niveau 3"
       opportunity_status:
         | "URGENT"
         | "NOUVEAU"
@@ -1688,6 +1795,10 @@ export type Database = {
         | "EN_COURS"
         | "FERMÉ"
       participation_type: "Foires" | "Salons" | "Jamais"
+      phase_communication:
+        | "Avant événement"
+        | "Pendant événement"
+        | "Après événement"
       priority_level: "1" | "3" | "5"
       registration_status:
         | "En attente"
@@ -1696,12 +1807,31 @@ export type Database = {
         | "Présent"
         | "Absent"
       risk_level: "Faible" | "Modéré" | "Élevé"
+      role_agence:
+        | "Organisateur"
+        | "Co-organisateur"
+        | "Participant"
+        | "Intervenant"
+      statut_workflow: "Demande" | "En cours" | "Validé" | "Livré" | "Annulé"
       support_type: "Financier" | "Non financier" | "Les deux"
       training_type:
         | "Formation"
         | "Atelier"
         | "Coaching"
         | "Webinaire"
+        | "Autre"
+      type_activite:
+        | "Séminaire"
+        | "Formation"
+        | "Signature de convention"
+        | "Foire / Salon"
+        | "Panel"
+        | "Appel à Manifestations d'Intérêts"
+        | "Cérémonie"
+        | "Masterclass"
+        | "Forum économique"
+        | "Mission officielle"
+        | "Journée Portes Ouvertes"
         | "Autre"
     }
     CompositeTypes: {
@@ -1890,15 +2020,28 @@ export const Constants = {
       media_type: [
         "Newsletter",
         "Magazine",
-        "Création graphique",
+        "Article presse",
+        "Communiqué de presse",
+        "Dossier de presse",
+        "Branding visuel",
+        "Fond de scène",
+        "Mur de photo",
+        "Dépliant",
+        "Flyer",
+        "Kakemono",
+        "Affiche",
+        "Bannière web",
+        "Post réseaux sociaux",
         "Film institutionnel",
         "Reportage",
         "Capsule vidéo",
-        "Photo",
-        "Article presse",
         "Interview audio",
+        "Photo professionnelle",
+        "Couverture événement",
+        "Support présentation",
         "Autre",
       ],
+      niveau_categorisation: ["Niveau 1", "Niveau 2", "Niveau 3"],
       opportunity_status: [
         "URGENT",
         "NOUVEAU",
@@ -1907,6 +2050,11 @@ export const Constants = {
         "FERMÉ",
       ],
       participation_type: ["Foires", "Salons", "Jamais"],
+      phase_communication: [
+        "Avant événement",
+        "Pendant événement",
+        "Après événement",
+      ],
       priority_level: ["1", "3", "5"],
       registration_status: [
         "En attente",
@@ -1916,8 +2064,29 @@ export const Constants = {
         "Absent",
       ],
       risk_level: ["Faible", "Modéré", "Élevé"],
+      role_agence: [
+        "Organisateur",
+        "Co-organisateur",
+        "Participant",
+        "Intervenant",
+      ],
+      statut_workflow: ["Demande", "En cours", "Validé", "Livré", "Annulé"],
       support_type: ["Financier", "Non financier", "Les deux"],
       training_type: ["Formation", "Atelier", "Coaching", "Webinaire", "Autre"],
+      type_activite: [
+        "Séminaire",
+        "Formation",
+        "Signature de convention",
+        "Foire / Salon",
+        "Panel",
+        "Appel à Manifestations d'Intérêts",
+        "Cérémonie",
+        "Masterclass",
+        "Forum économique",
+        "Mission officielle",
+        "Journée Portes Ouvertes",
+        "Autre",
+      ],
     },
   },
 } as const
