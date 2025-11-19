@@ -21,7 +21,7 @@ export default function Events() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [directionFilter, setDirectionFilter] = useState<string>("all");
-  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("upcoming");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const { data: directions } = useQuery({
