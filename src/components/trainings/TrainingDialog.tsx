@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserDirection } from "@/hooks/useUserDirection";
 
 interface TrainingDialogProps {
   open: boolean;
@@ -22,6 +23,7 @@ interface TrainingDialogProps {
 export function TrainingDialog({ open, onOpenChange, training, onClose }: TrainingDialogProps) {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { data: userDirection } = useUserDirection();
   const [loading, setLoading] = useState(false);
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({
@@ -33,6 +35,18 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
     location: "",
     max_participants: "",
     direction_id: "",
+  });
+
+  const { data: directions = [] } = useQuery({
+    queryKey: ["directions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("directions")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
   });
 
   const { data: companies } = useQuery({
@@ -81,20 +95,35 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         end_date: "",
         location: "",
         max_participants: "",
-        direction_id: "",
+        direction_id: userDirection?.direction_id || "",
       });
       setSelectedCompanies([]);
     }
-  }, [training, open]);
+  }, [training, open, userDirection]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const directionId = formData.direction_id || training?.direction_id || userDirection?.direction_id;
+      
+      if (!directionId) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Direction non définie. Veuillez sélectionner une direction.",
+        });
+        setLoading(false);
+        return;
+      }
+
       const dataToSave = {
         ...formData,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
+        direction_id: directionId,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
       };
 
       if (training) {
@@ -270,6 +299,25 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="direction_id">Direction *</Label>
+            <Select
+              value={formData.direction_id}
+              onValueChange={(value) => setFormData({ ...formData, direction_id: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une direction" />
+              </SelectTrigger>
+              <SelectContent>
+                {directions.map((direction) => (
+                  <SelectItem key={direction.id} value={direction.id}>
+                    {direction.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {!training && (
