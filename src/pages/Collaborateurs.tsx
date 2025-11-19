@@ -412,92 +412,9 @@ export default function Collaborateurs() {
                 </Button>
               </div>
 
-              {/* Filtres */}
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Filtrer par statut" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-popover">
-                      <SelectItem value="all">Tous les statuts</SelectItem>
-                      {uniqueStatuses.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex-1">
-                  <Select value={sectorFilter} onValueChange={setSectorFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Filtrer par secteur" />
-                    </SelectTrigger>
-                    <SelectContent className="z-50 bg-popover">
-                      <SelectItem value="all">Tous les secteurs</SelectItem>
-                      {uniqueSectors.map((sector) => (
-                        <SelectItem key={sector} value={sector}>
-                          {sector}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              {/* Filtres masqués */}
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {pmeList.map((pme) => (
-                  <Card key={pme.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle>{pme.name}</CardTitle>
-                          <CardDescription>{pme.sector}</CardDescription>
-                        </div>
-                        <Badge variant={
-                          pme.status === 'Actif' ? 'default' :
-                          pme.status === 'Négociation' ? 'secondary' :
-                          'outline'
-                        }>
-                          {pme.status}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center text-sm">
-                          <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">Marché cible:</span>
-                          <span className="ml-2 text-muted-foreground">{pme.market}</span>
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">Contact:</span>
-                          <span className="ml-2 text-muted-foreground">{pme.contact}</span>
-                        </div>
-                        <div className="flex items-center text-sm">
-                          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">Prochain RDV:</span>
-                          <span className="ml-2 text-muted-foreground">{pme.nextMeeting}</span>
-                        </div>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span className="font-medium">Progression:</span>
-                          <span className="text-muted-foreground">{pme.progress}%</span>
-                        </div>
-                        <div className="w-full bg-secondary rounded-full h-2">
-                          <div 
-                            className="bg-primary rounded-full h-2 transition-all"
-                            style={{ width: `${pme.progress}%` }}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              {/* Liste des opérateurs masquée */}
             </div>
           )}
 
