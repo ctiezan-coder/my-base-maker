@@ -30,6 +30,7 @@ export default function MarketDevelopment() {
   const [sectorFilter, setSectorFilter] = useState<string>("all");
   const [regionFilter, setRegionFilter] = useState<string | "all">("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<"view" | "edit">("edit");
   const [applicationDialogOpen, setApplicationDialogOpen] = useState(false);
   const [sendToOperatorsDialogOpen, setSendToOperatorsDialogOpen] = useState(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<ExportOpportunity | undefined>();
@@ -131,6 +132,7 @@ export default function MarketDevelopment() {
 
   const handleEdit = (opportunity: ExportOpportunity) => {
     setSelectedOpportunity(opportunity);
+    setDialogMode("edit");
     setDialogOpen(true);
   };
 
@@ -224,6 +226,7 @@ export default function MarketDevelopment() {
             opportunities={opportunities}
             onOpportunityClick={(opportunity) => {
               setSelectedOpportunity(opportunity);
+              setDialogMode("view");
               setDialogOpen(true);
             }}
           />
@@ -282,6 +285,7 @@ export default function MarketDevelopment() {
         onOpenChange={setDialogOpen}
         opportunity={selectedOpportunity}
         onClose={handleCloseDialog}
+        mode={dialogMode}
       />
 
       {selectedOpportunityForApplication && (
