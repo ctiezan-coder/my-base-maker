@@ -39,11 +39,12 @@ import {
   Plus,
   Download,
   MessageSquare,
-  Send
+  Send,
+  History
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Section = 'mes-pme' | 'opportunites' | 'taches' | 'rapports' | 'chat';
+type Section = 'mes-pme' | 'opportunites' | 'taches' | 'rapports' | 'chat' | 'historique';
 type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
 
 export default function Collaborateurs() {
@@ -201,6 +202,24 @@ export default function Collaborateurs() {
     }
   });
 
+  // Charger l'historique des envois d'opportunités
+  const { data: sendHistory = [], isLoading: isLoadingHistory } = useQuery({
+    queryKey: ['opportunity-applications-history'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('opportunity_applications')
+        .select(`
+          *,
+          opportunity:export_opportunities(*),
+          company:companies(*)
+        `)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
 
   const events = [
     {
@@ -351,6 +370,17 @@ export default function Collaborateurs() {
               Mes tâches
               <Badge variant="destructive" className="ml-auto">
                 {tasksData.length}
+              </Badge>
+            </Button>
+            <Button
+              variant={activeSection === 'historique' ? 'default' : 'ghost'}
+              className="w-full justify-start"
+              onClick={() => setActiveSection('historique')}
+            >
+              <History className="mr-2 h-4 w-4" />
+              Historique envois
+              <Badge variant="secondary" className="ml-auto">
+                {sendHistory.length}
               </Badge>
             </Button>
             <Button
@@ -582,6 +612,106 @@ export default function Collaborateurs() {
                   ))
                 )}
               </div>
+            </div>
+          )}
+
+          {/* HISTORIQUE Section */}
+          {activeSection === 'historique' && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-3xl font-bold">Historique des envois d'opportunités</h2>
+              </div>
+
+              {isLoadingHistory ? (
+                <p className="text-center text-muted-foreground">Chargement de l'historique...</p>
+              ) : sendHistory.length === 0 ? (
+                <Card>
+                  <CardContent className="p-12 text-center">
+                    <History className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">
+                      Aucun envoi d'opportunité pour le moment.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid gap-4">
+                  {sendHistory.map((record: any) => (
+                    <Card key={record.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-base">
+                              {record.opportunity?.title || "Opportunité supprimée"}
+                            </CardTitle>
+                            <CardDescription>
+                              Envoyé à: {record.company?.company_name || "Entreprise supprimée"}
+                            </CardDescription>
+                          </div>
+                          <Badge variant={
+                            record.status === 'En attente' ? 'secondary' :
+                            record.status === 'Accepté' ? 'default' :
+                            record.status === 'Refusé' ? 'destructive' :
+                            'outline'
+                          }>
+                            {record.status}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          {record.opportunity && (
+                            <>
+                              <div>
+                                <p className="text-muted-foreground">Destination</p>
+                                <p className="font-medium">
+                                  {record.opportunity.destination_country}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Secteur</p>
+                                <p className="font-medium">{record.opportunity.sector}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground">Valeur estimée</p>
+                                <p className="font-medium">
+                                  {record.opportunity.estimated_value.toLocaleString()} {record.opportunity.currency}
+                                </p>
+                              </div>
+                            </>
+                          )}
+                          <div>
+                            <p className="text-muted-foreground">Date d'envoi</p>
+                            <p className="font-medium">
+                              {format(new Date(record.application_date), "dd/MM/yyyy", { locale: fr })}
+                            </p>
+                          </div>
+                        </div>
+                        {record.notes && (
+                          <div className="mt-4 pt-4 border-t">
+                            <p className="text-sm text-muted-foreground mb-1">Notes:</p>
+                            <p className="text-sm">{record.notes}</p>
+                          </div>
+                        )}
+                        {record.company && (
+                          <div className="mt-4 flex gap-2">
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => {
+                                setSelectedCompanyId(record.company.id);
+                                setSelectedCompanyName(record.company.company_name);
+                                setShowCompanyDetailsDialog(true);
+                              }}
+                            >
+                              Voir détails PME
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
