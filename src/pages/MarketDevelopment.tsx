@@ -21,6 +21,7 @@ import { ApplicationDialog } from "@/components/market/ApplicationDialog";
 import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog";
 import { WebMarketSearch } from "@/components/market/WebMarketSearch";
 import { MarketDataRefresh } from "@/components/market/MarketDataRefresh";
+import { OpportunitiesMap } from "@/components/market/OpportunitiesMap";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
 export default function MarketDevelopment() {
@@ -211,7 +212,8 @@ export default function MarketDevelopment() {
 
       <Tabs defaultValue="opportunities" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="opportunities">Opportunités</TabsTrigger>
+          <TabsTrigger value="opportunities">Liste</TabsTrigger>
+          <TabsTrigger value="map">Carte</TabsTrigger>
           <TabsTrigger value="markets">Marchés Potentiels</TabsTrigger>
           <TabsTrigger value="connections">Mises en Relation</TabsTrigger>
           <TabsTrigger value="web-search">Recherche Web</TabsTrigger>
@@ -277,6 +279,16 @@ export default function MarketDevelopment() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="map" className="space-y-6">
+          <OpportunitiesMap 
+            opportunities={opportunities}
+            onOpportunityClick={(opportunity) => {
+              setSelectedOpportunity(opportunity);
+              setDialogOpen(true);
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="markets" className="space-y-6">
