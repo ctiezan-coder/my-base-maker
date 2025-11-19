@@ -137,6 +137,21 @@ export const SendToOperatorsDialog = ({
         throw new Error("Opportunité introuvable");
       }
 
+      // Create applications for each selected operator
+      const applications = Array.from(selectedOperators).map((operatorId) => ({
+        company_id: operatorId,
+        opportunity_id: opportunityId,
+        status: 'En attente',
+        application_date: new Date().toISOString(),
+      }));
+
+      // Insert applications
+      const { error: appError } = await supabase
+        .from("opportunity_applications")
+        .insert(applications);
+
+      if (appError) throw appError;
+
       // Create notifications for each selected operator
       const notifications = Array.from(selectedOperators).map((operatorId) => {
         const operator = operators.find((op) => op.id === operatorId);

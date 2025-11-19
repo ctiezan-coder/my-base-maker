@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { OperatorTrackingDialog } from "@/components/collaborateurs/OperatorTrackingDialog";
@@ -50,6 +50,7 @@ type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
 export default function Collaborateurs() {
   const { user } = useAuth();
   const { data: userDirection } = useUserDirection();
+  const queryClient = useQueryClient();
   const [activeSection, setActiveSection] = useState<Section>('mes-pme');
   const [showNotifications, setShowNotifications] = useState(false);
   const [selectedCollaborators, setSelectedCollaborators] = useState<string[]>([]);
@@ -82,6 +83,29 @@ export default function Collaborateurs() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Real-time updates for opportunity applications
+  useEffect(() => {
+    const channel = supabase
+      .channel('opportunity-applications-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'opportunity_applications'
+        },
+        () => {
+          // Invalidate the query to refetch data
+          queryClient.invalidateQueries({ queryKey: ['opportunity-applications-history'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   // Charger les collaborateurs depuis la base de données
   const { data: collaboratorsData, isLoading: isLoadingCollaborators } = useQuery({
@@ -1135,7 +1159,13 @@ export default function Collaborateurs() {
       {sendOpportunityData && (
         <SendToOperatorsDialog
           open={showSendToOperatorsDialog}
-          onOpenChange={setShowSendToOperatorsDialog}
+          onOpenChange={(open) => {
+            setShowSendToOperatorsDialog(open);
+            if (!open) {
+              // Invalidate history query when dialog closes
+              queryClient.invalidateQueries({ queryKey: ['opportunity-applications-history'] });
+            }
+          }}
           opportunityId={sendOpportunityData.id}
           opportunityTitle={sendOpportunityData.title}
           opportunitySector={sendOpportunityData.sector}
