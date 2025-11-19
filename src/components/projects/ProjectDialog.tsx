@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { useUserDirection } from "@/hooks/useUserDirection";
 
 interface ProjectDialogProps {
   open: boolean;
@@ -18,6 +20,8 @@ interface ProjectDialogProps {
 export function ProjectDialog({ open, onOpenChange, project, onClose }: ProjectDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const { data: userDirection } = useUserDirection();
+  
   const [formData, setFormData] = useState<any>({
     name: "",
     description: "",
@@ -26,6 +30,18 @@ export function ProjectDialog({ open, onOpenChange, project, onClose }: ProjectD
     end_date: "",
     budget: "",
     direction_id: "",
+  });
+
+  const { data: directions = [] } = useQuery({
+    queryKey: ["directions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("directions")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
   });
 
   useEffect(() => {
@@ -47,19 +63,34 @@ export function ProjectDialog({ open, onOpenChange, project, onClose }: ProjectD
         start_date: "",
         end_date: "",
         budget: "",
-        direction_id: "",
+        direction_id: userDirection?.direction_id || "",
       });
     }
-  }, [project]);
+  }, [project, userDirection]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const directionId = formData.direction_id || project?.direction_id || userDirection?.direction_id;
+      
+      if (!directionId) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Direction non définie. Veuillez sélectionner une direction.",
+        });
+        setLoading(false);
+        return;
+      }
+
       const dataToSave = {
         ...formData,
         budget: formData.budget ? parseFloat(formData.budget) : null,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        direction_id: directionId,
       };
 
       if (project) {
@@ -147,6 +178,25 @@ export function ProjectDialog({ open, onOpenChange, project, onClose }: ProjectD
                 onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="direction_id">Direction *</Label>
+            <Select
+              value={formData.direction_id}
+              onValueChange={(value) => setFormData({ ...formData, direction_id: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner une direction" />
+              </SelectTrigger>
+              <SelectContent>
+                {directions.map((direction) => (
+                  <SelectItem key={direction.id} value={direction.id}>
+                    {direction.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
