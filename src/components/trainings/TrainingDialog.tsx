@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface TrainingDialogProps {
   open: boolean;
@@ -17,7 +21,9 @@ interface TrainingDialogProps {
 
 export function TrainingDialog({ open, onOpenChange, training, onClose }: TrainingDialogProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({
     title: "",
     description: "",
@@ -27,6 +33,18 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
     location: "",
     max_participants: "",
     direction_id: "",
+  });
+
+  const { data: companies } = useQuery({
+    queryKey: ["companies"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("companies")
+        .select("id, company_name")
+        .order("company_name");
+      if (error) throw error;
+      return data;
+    },
   });
 
   useEffect(() => {
@@ -52,8 +70,9 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         max_participants: "",
         direction_id: "",
       });
+      setSelectedCompanies([]);
     }
-  }, [training]);
+  }, [training, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,11 +93,39 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         if (error) throw error;
         toast({ title: "Formation mise à jour avec succès" });
       } else {
-        const { error } = await supabase
+        const { data: newTraining, error } = await supabase
           .from("trainings")
-          .insert([dataToSave]);
+          .insert([dataToSave])
+          .select()
+          .single();
 
         if (error) throw error;
+
+        // Ajouter les inscriptions pour les entreprises sélectionnées
+        if (selectedCompanies.length > 0 && newTraining) {
+          const { data: companiesData } = await supabase
+            .from("companies")
+            .select("id, company_name, email, phone")
+            .in("id", selectedCompanies);
+
+          if (companiesData) {
+            const registrations = companiesData.map(company => ({
+              training_id: newTraining.id,
+              company_id: company.id,
+              participant_name: company.company_name,
+              participant_email: company.email || "non-renseigné@email.com",
+              participant_phone: company.phone || null,
+              status: "Confirmée" as const,
+            }));
+
+            const { error: registrationsError } = await supabase
+              .from("training_registrations")
+              .insert(registrations);
+
+            if (registrationsError) throw registrationsError;
+          }
+        }
+
         toast({ title: "Formation créée avec succès" });
       }
       onClose();
@@ -91,6 +138,14 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleCompany = (companyId: string) => {
+    setSelectedCompanies(prev =>
+      prev.includes(companyId)
+        ? prev.filter(id => id !== companyId)
+        : [...prev, companyId]
+    );
   };
 
   return (
@@ -185,6 +240,42 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             />
           </div>
+
+          {!training && (
+            <div className="space-y-2">
+              <Label>Opérateurs participants (optionnel)</Label>
+              <div className="text-sm text-muted-foreground mb-2">
+                Sélectionnez les opérateurs à inscrire à cette formation
+              </div>
+              <ScrollArea className="h-[200px] border rounded-md p-4">
+                <div className="space-y-3">
+                  {companies?.map((company) => (
+                    <div key={company.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`company-${company.id}`}
+                        checked={selectedCompanies.includes(company.id)}
+                        onCheckedChange={() => toggleCompany(company.id)}
+                      />
+                      <label
+                        htmlFor={`company-${company.id}`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      >
+                        {company.company_name}
+                      </label>
+                    </div>
+                  ))}
+                  {companies?.length === 0 && (
+                    <p className="text-sm text-muted-foreground">Aucun opérateur disponible</p>
+                  )}
+                </div>
+              </ScrollArea>
+              {selectedCompanies.length > 0 && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  {selectedCompanies.length} opérateur(s) sélectionné(s)
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="flex justify-end gap-2 mt-6">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
