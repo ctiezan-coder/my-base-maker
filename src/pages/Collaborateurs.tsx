@@ -464,8 +464,36 @@ export default function Collaborateurs() {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent className="pt-2">
-                      {/* Informations détaillées supprimées */}
+                    <CardContent className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center text-sm">
+                          <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Marché cible:</span>
+                          <span className="ml-2 text-muted-foreground">{pme.market}</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Contact:</span>
+                          <span className="ml-2 text-muted-foreground">{pme.contact}</span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">Prochain RDV:</span>
+                          <span className="ml-2 text-muted-foreground">{pme.nextMeeting}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium">Progression:</span>
+                          <span className="text-muted-foreground">{pme.progress}%</span>
+                        </div>
+                        <div className="w-full bg-secondary rounded-full h-2">
+                          <div 
+                            className="bg-primary rounded-full h-2 transition-all"
+                            style={{ width: `${pme.progress}%` }}
+                          />
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
