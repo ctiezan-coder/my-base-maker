@@ -38,6 +38,18 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
     direction_id: "",
   });
 
+  const { data: directions = [] } = useQuery({
+    queryKey: ["directions"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("directions")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: projects = [] } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
@@ -91,11 +103,11 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
         contact_email: "",
         contact_phone: "",
         budget: "",
-        direction_id: "",
+        direction_id: userDirection?.direction_id || "",
       });
       setSelectedProjects([]);
     }
-  }, [partnership]);
+  }, [partnership, userDirection]);
 
   useEffect(() => {
     if (linkedProjects.length > 0) {
@@ -108,13 +120,14 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
     setLoading(true);
 
     try {
-      const directionId = partnership?.direction_id || userDirection?.direction_id;
-      
+      const directionId =
+        formData.direction_id || partnership?.direction_id || userDirection?.direction_id;
+
       if (!directionId) {
         toast({
           variant: "destructive",
           title: "Erreur",
-          description: "Direction non définie. Veuillez contacter l'administrateur.",
+          description: "Direction non définie. Veuillez sélectionner une direction.",
         });
         setLoading(false);
         return;
@@ -227,6 +240,25 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
                   <SelectItem value="en négociation">En négociation</SelectItem>
                   <SelectItem value="actif">Actif</SelectItem>
                   <SelectItem value="suspendu">Suspendu</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="direction_id">Direction *</Label>
+              <Select
+                value={formData.direction_id}
+                onValueChange={(value) => setFormData({ ...formData, direction_id: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une direction" />
+                </SelectTrigger>
+                <SelectContent>
+                  {directions.map((direction) => (
+                    <SelectItem key={direction.id} value={direction.id}>
+                      {direction.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
