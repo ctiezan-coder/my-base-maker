@@ -82,17 +82,15 @@ export function FileUploadDialog({ open, onOpenChange, folderId, onClose }: File
 
       if (uploadError) throw uploadError;
 
-      // Obtenir l'URL publique
-      const { data: { publicUrl } } = supabase.storage
-        .from('documents')
-        .getPublicUrl(filePath);
-
+      // Stocker uniquement le chemin (pas d'URL publique)
+      // Les URLs signées seront générées à la demande
+      
       // Créer l'entrée dans la table documents
       const { error: dbError } = await supabase
         .from("documents")
         .insert([{
           ...formData,
-          file_url: publicUrl,
+          file_url: filePath, // Stocker le chemin, pas l'URL publique
           file_type: fileExt,
           file_size: file.size,
           folder_id: folderId,

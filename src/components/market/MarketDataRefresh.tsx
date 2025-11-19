@@ -11,8 +11,18 @@ export const MarketDataRefresh = () => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
+      // Get current session to send auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error("Vous devez être connecté");
+      }
+
       const { data, error } = await supabase.functions.invoke('update-market-data', {
-        body: {}
+        body: {},
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
       if (error) throw error;
@@ -25,7 +35,7 @@ export const MarketDataRefresh = () => {
       console.error('Error refreshing market data:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour les données",
+        description: error instanceof Error ? error.message : "Impossible de mettre à jour les données",
         variant: "destructive",
       });
     } finally {
