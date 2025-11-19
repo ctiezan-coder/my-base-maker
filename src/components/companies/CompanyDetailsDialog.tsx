@@ -38,18 +38,26 @@ export function CompanyDetailsDialog({
     enabled: open && !!companyId,
   });
 
-  // Fetch events (we need to check if there's a link table or if company participated)
+  // Fetch events the company participated in using the event_participants table
   const { data: events } = useQuery({
     queryKey: ["company-events", companyId],
     queryFn: async () => {
-      // Assuming events might have company participation tracking
       const { data, error } = await supabase
-        .from("events")
-        .select("*")
-        .order("start_date", { ascending: false });
+        .from("event_participants")
+        .select(`
+          *,
+          events (*)
+        `)
+        .eq("company_id", companyId)
+        .order("registration_date", { ascending: false });
       
       if (error) throw error;
-      return data || [];
+      return data?.map(ep => ({
+        ...ep.events,
+        participation_status: ep.status,
+        registration_date: ep.registration_date,
+        participation_notes: ep.notes
+      })) || [];
     },
     enabled: open && !!companyId,
   });
