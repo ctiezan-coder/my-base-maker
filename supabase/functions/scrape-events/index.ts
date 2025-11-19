@@ -266,7 +266,7 @@ Retourne un tableau JSON avec cette structure exacte:
 [
   {
     "title": "Nom de l'événement",
-    "event_type": "foire|salon|conférence|forum|atelier|autre",
+    "event_type": "foire|salon|conférence|forum|atelier|formation|séminaire|webinaire|exposition|réunion|autre",
     "start_date": "YYYY-MM-DD",
     "end_date": "YYYY-MM-DD",
     "location": "Lieu",
