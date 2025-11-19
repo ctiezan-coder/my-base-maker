@@ -28,7 +28,7 @@ export function CompanyDetailsDialog({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("companies")
-        .select("accompaniment_status, exported_products, activity_sector")
+        .select("support_needed, exported_products, activity_sector")
         .eq("id", companyId)
         .single();
       
@@ -119,7 +119,7 @@ export function CompanyDetailsDialog({
       const { data, error } = await supabase
         .from("export_opportunities")
         .select("*")
-        .eq("sector", company.activity_sector)
+        .ilike("sector", `%${company.activity_sector}%`)
         .neq("status", "FERMÉ")
         .order("deadline", { ascending: true })
         .limit(5);
@@ -157,7 +157,7 @@ export function CompanyDetailsDialog({
               </CardHeader>
               <CardContent>
                 <Badge variant="outline" className="text-base px-4 py-2">
-                  {company?.accompaniment_status || "Non défini"}
+                  {company?.support_needed || "Non défini"}
                 </Badge>
               </CardContent>
             </Card>
