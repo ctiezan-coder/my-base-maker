@@ -464,34 +464,8 @@ export default function Collaborateurs() {
                         </Badge>
                       </div>
                     </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3 mb-4">
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <MapPin className="mr-2 h-4 w-4 text-primary" />
-                          Marché cible: <strong className="ml-1">{pme.market}</strong>
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <User className="mr-2 h-4 w-4 text-primary" />
-                          Contact: <strong className="ml-1">{pme.contact}</strong>
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground">
-                          <Calendar className="mr-2 h-4 w-4 text-primary" />
-                          Prochain RDV: <strong className="ml-1">{pme.nextMeeting}</strong>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">Progression</span>
-                          <span className="font-bold text-primary">{pme.progress}%</span>
-                        </div>
-                        <div className="w-full bg-secondary rounded-full h-3">
-                          <div 
-                            className="bg-gradient-to-r from-primary to-green-600 h-3 rounded-full transition-all"
-                            style={{ width: `${pme.progress}%` }}
-                          />
-                        </div>
-                      </div>
+                    <CardContent className="pt-2">
+                      {/* Informations détaillées supprimées */}
                     </CardContent>
                   </Card>
                 ))}
