@@ -206,13 +206,21 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="event_type">Type d'événement *</Label>
-              <Input
-                id="event_type"
+              <Select
                 value={formData.event_type}
-                onChange={(e) => setFormData({ ...formData, event_type: e.target.value })}
-                placeholder="Conférence, Atelier, Séminaire..."
-                required
-              />
+                onValueChange={(value) => setFormData({ ...formData, event_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner un type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="formation">Formation</SelectItem>
+                  <SelectItem value="conférence">Conférence</SelectItem>
+                  <SelectItem value="atelier">Atelier</SelectItem>
+                  <SelectItem value="réunion">Réunion</SelectItem>
+                  <SelectItem value="autre">Autre</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="direction_id">Direction *</Label>
