@@ -44,13 +44,14 @@ export default function MarketDevelopment() {
   } | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Fetch opportunities
+  // Fetch opportunities (excluding closed ones)
   const { data: opportunities = [], isLoading: loadingOpportunities, refetch: refetchOpportunities } = useQuery({
     queryKey: ["export-opportunities", searchTerm, sectorFilter, regionFilter],
     queryFn: async () => {
       let query = supabase
         .from("export_opportunities")
         .select("*")
+        .neq("status", "FERMÉ")
         .order("deadline", { ascending: true });
 
       if (searchTerm) {
