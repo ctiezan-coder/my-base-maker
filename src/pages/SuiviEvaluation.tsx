@@ -45,24 +45,18 @@ export default function SuiviEvaluation() {
   const { data: userRole } = useUserRole();
   const isAdmin = userRole === "admin";
 
-  // Fetch imputations with direction filter
+  // Fetch all imputations from all directions
   const { data: imputations = [], isLoading } = useQuery({
-    queryKey: ["imputations-evaluation", userDirection?.direction_id, isAdmin],
+    queryKey: ["imputations-evaluation"],
     queryFn: async () => {
-      let query = supabase.from("imputations").select("*");
-
-      // Filter by direction unless user is admin
-      if (!isAdmin && userDirection?.direction_id) {
-        query = query.eq("direction_id", userDirection.direction_id);
-      }
-
-      const { data, error } = await query.order("date_reception", {
-        ascending: false,
-      });
+      const { data, error } = await supabase
+        .from("imputations")
+        .select("*")
+        .order("date_reception", { ascending: false });
+      
       if (error) throw error;
       return data as Imputation[];
     },
-    enabled: isAdmin || !!userDirection?.direction_id,
   });
 
   // Fetch directions
