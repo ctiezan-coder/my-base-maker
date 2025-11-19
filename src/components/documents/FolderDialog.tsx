@@ -91,7 +91,7 @@ export function FolderDialog({ open, onOpenChange, folder, parentFolderId, onClo
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {folder ? "Modifier le dossier" : "Nouveau dossier"}
+            {folder ? "Modifier le dossier" : parentFolderId ? "Nouveau sous-dossier" : "Nouveau dossier"}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,8 +102,13 @@ export function FolderDialog({ open, onOpenChange, folder, parentFolderId, onClo
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
-              placeholder="Ex: Rapports 2024"
+              placeholder={parentFolderId ? "Ex: Sous-dossier 2024" : "Ex: Rapports 2024"}
             />
+            {parentFolderId && (
+              <p className="text-xs text-muted-foreground">
+                Ce dossier sera créé comme sous-dossier
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">

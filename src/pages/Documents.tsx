@@ -38,6 +38,21 @@ export default function Documents() {
 
       const { data, error } = await query;
       if (error) throw error;
+      
+      // Compter les sous-dossiers pour chaque dossier
+      if (data) {
+        const foldersWithCounts = await Promise.all(
+          data.map(async (folder) => {
+            const { count } = await supabase
+              .from("folders")
+              .select("*", { count: "exact", head: true })
+              .eq("parent_folder_id", folder.id);
+            return { ...folder, subfolderCount: count || 0 };
+          })
+        );
+        return foldersWithCounts;
+      }
+      
       return data;
     },
   });
@@ -167,7 +182,7 @@ export default function Documents() {
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setFolderDialogOpen(true)}>
             <FolderPlus className="w-4 h-4 mr-2" />
-            Nouveau dossier
+            {currentFolderId ? "Nouveau sous-dossier" : "Nouveau dossier"}
           </Button>
           <Button variant="outline" onClick={() => setUploadDialogOpen(true)}>
             <Upload className="w-4 h-4 mr-2" />
@@ -225,12 +240,24 @@ export default function Documents() {
           {/* Liste des dossiers */}
           {folders && folders.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                <Folder className="w-4 h-4" />
-                Dossiers
-              </h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-medium flex items-center gap-2">
+                  <Folder className="w-4 h-4" />
+                  Dossiers {currentFolderId && "(sous-dossiers)"}
+                </h3>
+                {currentFolderId && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setFolderDialogOpen(true)}
+                  >
+                    <FolderPlus className="w-3 h-3 mr-2" />
+                    Nouveau sous-dossier
+                  </Button>
+                )}
+              </div>
               <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4">
-                {folders.map((folder) => (
+                {folders.map((folder: any) => (
                   <Card 
                     key={folder.id}
                     className="hover:shadow-md transition-all group"
@@ -242,7 +269,21 @@ export default function Documents() {
                           onClick={() => navigateToFolder(folder.id, folder.name)}
                         >
                           <Folder className="w-5 h-5 text-primary" />
-                          <span className="font-medium text-sm">{folder.name}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-sm">{folder.name}</span>
+                              {folder.subfolderCount > 0 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {folder.subfolderCount}
+                                </Badge>
+                              )}
+                            </div>
+                            {folder.subfolderCount > 0 && (
+                              <span className="text-xs text-muted-foreground">
+                                {folder.subfolderCount} sous-dossier{folder.subfolderCount > 1 ? 's' : ''}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <Button
                           variant="ghost"
@@ -256,19 +297,34 @@ export default function Documents() {
                           ×
                         </Button>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentFolderId(folder.id);
-                          setUploadDialogOpen(true);
-                        }}
-                      >
-                        <Upload className="w-3 h-3 mr-2" />
-                        Ajouter un fichier
-                      </Button>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentFolderId(folder.id);
+                            setFolderDialogOpen(true);
+                          }}
+                        >
+                          <FolderPlus className="w-3 h-3 mr-1" />
+                          Sous-dossier
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentFolderId(folder.id);
+                            setUploadDialogOpen(true);
+                          }}
+                        >
+                          <Upload className="w-3 h-3 mr-1" />
+                          Fichier
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
