@@ -233,12 +233,12 @@ export default function Documents() {
                 {folders.map((folder) => (
                   <Card 
                     key={folder.id}
-                    className="cursor-pointer hover:bg-accent/50 transition-colors"
+                    className="hover:shadow-md transition-all group"
                   >
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mb-2">
                         <div 
-                          className="flex items-center gap-2 flex-1"
+                          className="flex items-center gap-2 flex-1 cursor-pointer"
                           onClick={() => navigateToFolder(folder.id, folder.name)}
                         >
                           <Folder className="w-5 h-5 text-primary" />
@@ -256,6 +256,19 @@ export default function Documents() {
                           ×
                         </Button>
                       </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCurrentFolderId(folder.id);
+                          setUploadDialogOpen(true);
+                        }}
+                      >
+                        <Upload className="w-3 h-3 mr-2" />
+                        Ajouter un fichier
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
