@@ -119,3 +119,44 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Leaflet popup styles */
+.custom-leaflet-popup .leaflet-popup-content-wrapper {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 0;
+}
+
+.custom-leaflet-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+
+.custom-leaflet-popup .leaflet-popup-tip {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Custom scrollbar for popup */
+.custom-leaflet-popup ::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-leaflet-popup ::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+.custom-leaflet-popup ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+
+.custom-leaflet-popup ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+

@@ -149,22 +149,63 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
 
       // Create popup content
       const popupContent = document.createElement('div');
-      popupContent.className = 'p-2 max-w-xs';
+      popupContent.className = 'p-4 min-w-[400px]';
       popupContent.innerHTML = `
-        <h3 class="font-semibold mb-2 text-foreground">${country}${city !== 'general' ? ` - ${city}` : ''}</h3>
-        <p class="text-sm text-muted-foreground mb-2">${opps.length} opportunité(s)</p>
+        <div class="mb-3 pb-3 border-b border-border">
+          <h3 class="text-lg font-bold text-foreground mb-1">${country}${city !== 'general' ? ` - ${city}` : ''}</h3>
+          <p class="text-sm text-muted-foreground">${opps.length} opportunité${opps.length > 1 ? 's' : ''} disponible${opps.length > 1 ? 's' : ''}</p>
+        </div>
       `;
 
       const oppList = document.createElement('div');
-      oppList.className = 'space-y-1 max-h-48 overflow-y-auto';
+      oppList.className = 'space-y-2 max-h-96 overflow-y-auto pr-2';
+      oppList.style.scrollbarWidth = 'thin';
 
       opps.forEach(opp => {
         const oppDiv = document.createElement('div');
-        oppDiv.className = 'text-sm p-2 hover:bg-muted rounded cursor-pointer border border-border';
+        oppDiv.className = 'p-3 hover:bg-accent/50 rounded-lg cursor-pointer border border-border bg-card transition-all duration-200 hover:shadow-md';
+        
+        const statusColors = {
+          'URGENT': 'bg-red-500 text-white',
+          'NOUVEAU': 'bg-blue-500 text-white',
+          'RECOMMANDÉ': 'bg-green-500 text-white',
+          'EN_COURS': 'bg-yellow-500 text-white',
+          'FERMÉ': 'bg-gray-500 text-white'
+        };
+        
+        const statusColor = statusColors[opp.status as keyof typeof statusColors] || 'bg-gray-500 text-white';
+        const deadlineDate = new Date(opp.deadline).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+        
         oppDiv.innerHTML = `
-          <div class="font-medium text-foreground">${opp.title}</div>
-          <div class="text-xs text-muted-foreground">${opp.sector}</div>
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <div class="font-semibold text-foreground text-base flex-1">${opp.title}</div>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${statusColor}">
+              ${opp.status?.replace('_', ' ')}
+            </span>
+          </div>
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2 text-sm">
+              <span class="text-muted-foreground">📊 Secteur:</span>
+              <span class="font-medium text-foreground">${opp.sector}</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="text-muted-foreground">💰 Valeur estimée:</span>
+              <span class="font-medium text-foreground">${opp.estimated_value.toLocaleString()} ${opp.currency || 'CFA'}</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="text-muted-foreground">📅 Date limite:</span>
+              <span class="font-medium text-foreground">${deadlineDate}</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="text-muted-foreground">📦 Volume:</span>
+              <span class="font-medium text-foreground">${opp.volume}</span>
+            </div>
+          </div>
+          <div class="mt-2 pt-2 border-t border-border">
+            <p class="text-xs text-muted-foreground line-clamp-2">${opp.description}</p>
+          </div>
         `;
+        
         oppDiv.onclick = () => {
           if (onOpportunityClick) {
             onOpportunityClick(opp);
@@ -178,8 +219,10 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
       // Add marker with popup
       const marker = L.marker(coords, { icon: customIcon })
         .bindPopup(popupContent, {
-          maxWidth: 300,
+          maxWidth: 450,
+          minWidth: 400,
           closeButton: true,
+          className: 'custom-leaflet-popup'
         });
 
       markersLayer.current!.addLayer(marker);
