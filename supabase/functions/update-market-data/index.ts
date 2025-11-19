@@ -126,30 +126,81 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Générer des opportunités d'export
-    const opportunitiesPrompt = `Génère 5 opportunités d'export réelles et actuelles (2025) pour des PME africaines.
+    // Générer des opportunités d'export en utilisant des sources réelles de marché
+    const opportunitiesPrompt = `Tu es un expert en commerce international et développement des PME africaines. Génère 5 opportunités d'export RÉELLES et ACTUELLES (2025) pour les PME africaines, en t'inspirant des principales plateformes d'export internationales:
+
+    SOURCES DE RÉFÉRENCE (à utiliser comme inspiration):
+    
+    📊 PLATEFORMES INSTITUTIONNELLES:
+    - ITC Trade Map (trademap.org): statistiques commerce international 220 pays
+    - Global Trade Helpdesk (globaltradehelpdesk.org): réglementations et opportunités par pays
+    - ITC Market Analysis Tools (intracen.org): Export Potential Map, Market Access Map
+    - WITS World Bank (wits.worldbank.org): données tarifaires et commerciales
+    - OEC (oec.world): flux commerciaux et prédictions
+    
+    🏢 PLATEFORMES B2B MONDIALES:
+    - Alibaba.com: 200M+ acheteurs, demandes d'approvisionnement
+    - Global Sources (globalsources.com): produits innovants, salons virtuels
+    - TradeKey.com: 9M+ importateurs, appels d'offres en temps réel
+    - eWorldTrade.com: demandes B2B internationales
+    - DHgate.com: opportunités pour petites quantités
+    
+    🇪🇺 PLATEFORMES EUROPÉENNES:
+    - Europages.fr: 3M entreprises européennes, appels d'offres
+    - ThomasNet.com: marché industriel nord-américain
+    - Kompass.com: opportunités B2B internationales
+    
+    🌍 PLATEFORMES AFRICAINES:
+    - African Export-Import Bank (afreximbank.com): opportunités intra-africaines
+    - Trade Africa (tradeafrica.com): commerce intra-continental
+    - African Union Platform: ZLECAf opportunités
+    
+    📢 APPELS D'OFFRES:
+    - TendersInfo.com: appels d'offres internationaux en temps réel
+    - DgMarket.com: procurement global
+    - UNDB Online: opportunités Nations Unies
+    
     Format JSON strict:
     {
       "opportunities": [
         {
-          "title": "titre de l'opportunité",
-          "sector": "secteur",
-          "destination_country": "pays de destination",
-          "destination_city": "ville",
-          "region": "Afrique" ou "ZLECAf" ou "Europe" ou "Asie" ou "Moyen-Orient",
-          "estimated_value": nombre entre 10000 et 500000,
+          "title": "titre professionnel et précis de l'opportunité (ex: 'Exportation de Mangues Séchées Bio vers l'Allemagne')",
+          "sector": "secteur spécifique (Agroalimentaire, Textile, Cosmétique, Artisanat, Mobilier, Agriculture, Technologie, etc.)",
+          "destination_country": "pays de destination précis",
+          "destination_city": "ville commerciale majeure (ex: Hambourg, Paris, Dubaï, Lagos)",
+          "region": "Europe" ou "Afrique" ou "ZLECAf" ou "Asie" ou "Moyen-Orient" ou "Amérique du Nord" ou "Amérique du Sud",
+          "estimated_value": montant réaliste en CFA (entre 50000 et 300000),
           "currency": "CFA",
-          "deadline": "2025-XX-XX",
-          "volume": "quantité estimée",
-          "description": "description détaillée de l'opportunité",
-          "requirements": ["exigence1", "exigence2", "exigence3"],
-          "status": "NOUVEAU" ou "RECOMMANDÉ" ou "URGENT",
-          "compatibility_score": nombre entre 70 et 95
+          "deadline": "YYYY-MM-DD" (entre mars 2025 et juin 2025, dates réalistes),
+          "volume": "quantité/volume détaillé et réaliste (ex: '10 tonnes métriques', '5000 mètres linéaires')",
+          "description": "description détaillée professionnelle: contexte du marché, type d'acheteur (importateur, distributeur, fabricant), usage prévu, potentiel de partenariat long terme",
+          "requirements": ["exigence concrète 1 (ex: 'Certification biologique européenne (EU Organic)')", "exigence 2 (ex: 'Capacité de production de 5 tonnes/mois')", "exigence 3 si pertinente"],
+          "status": "URGENT" (deadline < 60 jours) ou "NOUVEAU" (nouvelles opportunités) ou "RECOMMANDÉ" (opportunités à fort potentiel),
+          "compatibility_score": nombre entre 75 et 95
         }
       ]
     }
     
-    Inclus des opportunités variées et réalistes avec des échéances entre 1 et 6 mois.`
+    SECTEURS PRIORITAIRES ET PRODUITS PHARES:
+    - Agroalimentaire: cacao transformé, café de spécialité, fruits séchés bio (mangue, ananas), noix de cajou, huile de palme durable, miel bio, épices
+    - Cosmétiques: beurre de karité bio, huiles essentielles, savons naturels, produits capillaires afro
+    - Textile: tissus wax authentiques, coton biologique, vêtements traditionnels modernes, teintures naturelles
+    - Artisanat: mobilier en bois exotique, maroquinerie artisanale, bijoux traditionnels, objets décoratifs, vannerie
+    - Agriculture: produits transformés, graines oléagineuses, produits de rente
+    
+    MARCHÉS CIBLES PRIORITAIRES:
+    - Europe: Allemagne, France, Belgique, Pays-Bas (bio, équitable, premium)
+    - ZLECAf: Nigeria, Ghana, Sénégal, Kenya (commerce intra-africain)
+    - Moyen-Orient: Émirats Arabes Unis, Arabie Saoudite (halal, premium)
+    - Asie: Chine, Inde, Malaisie (matières premières, ingrédients)
+    - Amérique du Nord: USA, Canada (produits ethniques, bio)
+    
+    IMPORTANT: 
+    - Crée des opportunités RÉALISTES basées sur de vraies tendances du marché international 2025
+    - Utilise des valeurs monétaires cohérentes avec le marché
+    - Inclus des exigences concrètes et réalisables
+    - Varie les régions, secteurs et types d'opportunités
+    - Privilégie les opportunités à fort impact pour les PME africaines`
 
     const opportunitiesResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
