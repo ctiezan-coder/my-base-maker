@@ -1,24 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import React, { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { ExportOpportunity } from '@/types/market-development';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { MapPin } from 'lucide-react';
+import { Globe, MapPin } from 'lucide-react';
 
 interface OpportunitiesMapProps {
   opportunities: ExportOpportunity[];
   onOpportunityClick?: (opportunity: ExportOpportunity) => void;
 }
 
+// Fix for default marker icons in Leaflet with Vite
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
+
 export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: OpportunitiesMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState('');
-  const [isMapInitialized, setIsMapInitialized] = useState(false);
-  const markers = useRef<mapboxgl.Marker[]>([]);
+  const mapInstance = useRef<L.Map | null>(null);
+  const markersLayer = useRef<L.LayerGroup | null>(null);
 
   // Group opportunities by country and city
   const groupedOpportunities = opportunities.reduce((acc, opp) => {
@@ -30,214 +33,195 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
     return acc;
   }, {} as Record<string, ExportOpportunity[]>);
 
-  // Simplified geocoding - in production, use a proper geocoding service
+  // Get coordinates for countries (simplified geocoding)
   const getCoordinates = (country: string, city?: string | null): [number, number] => {
-    // Basic coordinates for some countries (this should be replaced with proper geocoding)
     const countryCoords: Record<string, [number, number]> = {
-      'France': [2.3522, 48.8566],
-      'Allemagne': [13.4050, 52.5200],
-      'Italie': [12.4964, 41.9028],
-      'Espagne': [-3.7038, 40.4168],
-      'Royaume-Uni': [-0.1276, 51.5074],
-      'Belgique': [4.3517, 50.8503],
-      'Pays-Bas': [4.9041, 52.3676],
-      'Suisse': [7.4474, 46.9480],
-      'Portugal': [-9.1393, 38.7223],
-      'Maroc': [-6.8498, 33.9716],
-      'Tunisie': [10.1815, 36.8065],
-      'Sénégal': [-17.4467, 14.6928],
-      'Côte d\'Ivoire': [-4.0305, 5.3600],
-      'Cameroun': [11.5174, 3.8480],
-      'Afrique du Sud': [28.0473, -26.2041],
-      'Nigeria': [7.4914, 9.0820],
-      'Kenya': [36.8219, -1.2921],
-      'Chine': [116.4074, 39.9042],
-      'Japon': [139.6503, 35.6762],
-      'Inde': [77.2090, 28.6139],
-      'Corée du Sud': [126.9780, 37.5665],
-      'États-Unis': [-77.0369, 38.9072],
-      'Canada': [-75.6972, 45.4215],
-      'Brésil': [-47.8825, -15.7942],
-      'Argentine': [-58.3816, -34.6037],
-      'Chili': [-70.6693, -33.4489],
-      'Mexique': [-99.1332, 19.4326],
+      'France': [48.8566, 2.3522],
+      'Allemagne': [52.5200, 13.4050],
+      'Italie': [41.9028, 12.4964],
+      'Espagne': [40.4168, -3.7038],
+      'Royaume-Uni': [51.5074, -0.1276],
+      'Belgique': [50.8503, 4.3517],
+      'Pays-Bas': [52.3676, 4.9041],
+      'Suisse': [46.9480, 7.4474],
+      'Portugal': [38.7223, -9.1393],
+      'Maroc': [33.9716, -6.8498],
+      'Tunisie': [36.8065, 10.1815],
+      'Sénégal': [14.6928, -17.4467],
+      'Côte d\'Ivoire': [5.3600, -4.0305],
+      'Cameroun': [3.8480, 11.5174],
+      'Afrique du Sud': [-26.2041, 28.0473],
+      'Nigeria': [9.0820, 7.4914],
+      'Kenya': [-1.2921, 36.8219],
+      'Chine': [39.9042, 116.4074],
+      'Japon': [35.6762, 139.6503],
+      'Inde': [28.6139, 77.2090],
+      'Corée du Sud': [37.5665, 126.9780],
+      'États-Unis': [38.9072, -77.0369],
+      'Canada': [45.4215, -75.6972],
+      'Brésil': [-15.7942, -47.8825],
+      'Argentine': [-34.6037, -58.3816],
+      'Chili': [-33.4489, -70.6693],
+      'Mexique': [19.4326, -99.1332],
+      'Égypte': [30.0444, 31.2357],
+      'Algérie': [36.7538, 3.0588],
+      'Ghana': [5.6037, -0.1870],
+      'Éthiopie': [9.0320, 38.7469],
+      'Tanzanie': [-6.7924, 39.2083],
+      'Ouganda': [0.3476, 32.5825],
+      'Angola': [-8.8383, 13.2344],
+      'Mozambique': [-25.9655, 32.5832],
+      'Madagascar': [-18.8792, 47.5079],
+      'Mali': [12.6392, -8.0029],
+      'Niger': [13.5127, 2.1128],
+      'Burkina Faso': [12.3714, -1.5197],
+      'Tchad': [12.1348, 15.0557],
     };
 
     return countryCoords[country] || [0, 0];
   };
 
-  const initializeMap = () => {
-    if (!mapContainer.current || !mapboxToken || isMapInitialized) return;
-
-    try {
-      mapboxgl.accessToken = mapboxToken;
-      
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/light-v11',
-        projection: 'globe',
-        zoom: 1.5,
-        center: [20, 20],
-      });
-
-      map.current.addControl(
-        new mapboxgl.NavigationControl({
-          visualizePitch: true,
-        }),
-        'top-right'
-      );
-
-      map.current.on('style.load', () => {
-        map.current?.setFog({
-          color: 'rgb(255, 255, 255)',
-          'high-color': 'rgb(200, 200, 225)',
-          'horizon-blend': 0.2,
-        });
-      });
-
-      setIsMapInitialized(true);
-    } catch (error) {
-      console.error('Error initializing map:', error);
-    }
-  };
-
+  // Initialize map
   useEffect(() => {
-    if (!map.current || !isMapInitialized || opportunities.length === 0) return;
+    if (!mapContainer.current || mapInstance.current) return;
+
+    // Create map
+    const map = L.map(mapContainer.current, {
+      worldCopyJump: true,
+      zoomControl: true,
+      scrollWheelZoom: true
+    }).setView([20, 0], 2);
+
+    // Add tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Create markers layer
+    markersLayer.current = L.layerGroup().addTo(map);
+    mapInstance.current = map;
+
+    return () => {
+      map.remove();
+      mapInstance.current = null;
+    };
+  }, []);
+
+  // Update markers when opportunities change
+  useEffect(() => {
+    if (!mapInstance.current || !markersLayer.current) return;
 
     // Clear existing markers
-    markers.current.forEach(marker => marker.remove());
-    markers.current = [];
+    markersLayer.current.clearLayers();
 
     // Add markers for each location
     Object.entries(groupedOpportunities).forEach(([key, opps]) => {
       const [country, city] = key.split('-');
       const coords = getCoordinates(country, city !== 'general' ? city : null);
       
-      if (coords[0] === 0 && coords[1] === 0) return; // Skip unknown locations
+      if (coords[0] === 0 && coords[1] === 0) return;
 
-      // Create custom marker element
-      const el = document.createElement('div');
-      el.className = 'opportunity-marker';
-      el.style.width = '32px';
-      el.style.height = '32px';
-      el.style.borderRadius = '50%';
-      el.style.backgroundColor = 'hsl(var(--primary))';
-      el.style.border = '3px solid hsl(var(--background))';
-      el.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-      el.style.cursor = 'pointer';
-      el.style.display = 'flex';
-      el.style.alignItems = 'center';
-      el.style.justifyContent = 'center';
-      el.style.color = 'hsl(var(--primary-foreground))';
-      el.style.fontWeight = 'bold';
-      el.style.fontSize = '12px';
-      el.innerHTML = opps.length.toString();
+      // Create custom icon
+      const customIcon = L.divIcon({
+        className: 'custom-marker',
+        html: `
+          <div style="
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: hsl(var(--primary));
+            border: 3px solid hsl(var(--background));
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: hsl(var(--primary-foreground));
+            font-weight: bold;
+            font-size: 12px;
+          ">
+            ${opps.length}
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
 
       // Create popup content
-      const popupContent = `
-        <div class="p-2 max-w-xs">
-          <h3 class="font-semibold mb-2">${country}${city !== 'general' ? ` - ${city}` : ''}</h3>
-          <p class="text-sm text-muted-foreground mb-2">${opps.length} opportunité(s)</p>
-          <div class="space-y-1 max-h-48 overflow-y-auto">
-            ${opps.map(opp => `
-              <div class="text-sm p-2 hover:bg-muted rounded cursor-pointer border border-border" 
-                   onclick="window.dispatchEvent(new CustomEvent('opportunity-click', { detail: '${opp.id}' }))">
-                <div class="font-medium">${opp.title}</div>
-                <div class="text-xs text-muted-foreground">${opp.sector}</div>
-              </div>
-            `).join('')}
-          </div>
-        </div>
+      const popupContent = document.createElement('div');
+      popupContent.className = 'p-2 max-w-xs';
+      popupContent.innerHTML = `
+        <h3 class="font-semibold mb-2 text-foreground">${country}${city !== 'general' ? ` - ${city}` : ''}</h3>
+        <p class="text-sm text-muted-foreground mb-2">${opps.length} opportunité(s)</p>
       `;
 
-      const popup = new mapboxgl.Popup({
-        offset: 25,
-        closeButton: true,
-        closeOnClick: false,
-        maxWidth: '300px'
-      }).setHTML(popupContent);
+      const oppList = document.createElement('div');
+      oppList.className = 'space-y-1 max-h-48 overflow-y-auto';
 
-      const marker = new mapboxgl.Marker(el)
-        .setLngLat(coords)
-        .setPopup(popup)
-        .addTo(map.current!);
+      opps.forEach(opp => {
+        const oppDiv = document.createElement('div');
+        oppDiv.className = 'text-sm p-2 hover:bg-muted rounded cursor-pointer border border-border';
+        oppDiv.innerHTML = `
+          <div class="font-medium text-foreground">${opp.title}</div>
+          <div class="text-xs text-muted-foreground">${opp.sector}</div>
+        `;
+        oppDiv.onclick = () => {
+          if (onOpportunityClick) {
+            onOpportunityClick(opp);
+          }
+        };
+        oppList.appendChild(oppDiv);
+      });
 
-      markers.current.push(marker);
+      popupContent.appendChild(oppList);
+
+      // Add marker with popup
+      const marker = L.marker(coords, { icon: customIcon })
+        .bindPopup(popupContent, {
+          maxWidth: 300,
+          closeButton: true,
+        });
+
+      markersLayer.current!.addLayer(marker);
     });
+  }, [opportunities, groupedOpportunities, onOpportunityClick]);
 
-    // Listen for opportunity clicks from popup
-    const handleOpportunityClick = (event: any) => {
-      const opportunityId = event.detail;
-      const opportunity = opportunities.find(o => o.id === opportunityId);
-      if (opportunity && onOpportunityClick) {
-        onOpportunityClick(opportunity);
-      }
-    };
-
-    window.addEventListener('opportunity-click', handleOpportunityClick);
-
-    return () => {
-      window.removeEventListener('opportunity-click', handleOpportunityClick);
-    };
-  }, [opportunities, isMapInitialized, groupedOpportunities, onOpportunityClick]);
-
-  useEffect(() => {
-    return () => {
-      markers.current.forEach(marker => marker.remove());
-      map.current?.remove();
-    };
-  }, []);
-
-  if (!isMapInitialized) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
-            Configuration de la carte
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="mapbox-token">Token Mapbox Public</Label>
-            <Input
-              id="mapbox-token"
-              type="text"
-              placeholder="Entrez votre token Mapbox public..."
-              value={mapboxToken}
-              onChange={(e) => setMapboxToken(e.target.value)}
-            />
-            <p className="text-sm text-muted-foreground">
-              Obtenez votre token gratuit sur{' '}
-              <a 
-                href="https://mapbox.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-          </div>
-          <Button onClick={initializeMap} disabled={!mapboxToken}>
-            Initialiser la carte
-          </Button>
-        </CardContent>
-      </Card>
+  const centerOnAfrica = () => {
+    if (!mapInstance.current) return;
+    const boundsAfrica = L.latLngBounds(
+      L.latLng(-36, -20), // sud-ouest
+      L.latLng(38, 55)    // nord-est
     );
-  }
+    mapInstance.current.fitBounds(boundsAfrica, { padding: [20, 20] });
+  };
+
+  const centerOnWorld = () => {
+    if (!mapInstance.current) return;
+    mapInstance.current.setView([20, 0], 2);
+  };
 
   return (
-    <div className="relative w-full h-[600px] rounded-lg overflow-hidden">
-      <div ref={mapContainer} className="absolute inset-0" />
-      <div className="absolute top-4 left-4 bg-background/95 backdrop-blur-sm p-3 rounded-lg shadow-lg border">
-        <div className="flex items-center gap-2">
+    <div className="space-y-4">
+      <div 
+        ref={mapContainer} 
+        className="w-full h-[600px] rounded-lg overflow-hidden border border-border shadow-lg"
+        role="region"
+        aria-label="Carte des opportunités d'exportation"
+      />
+      
+      <div className="flex gap-3 items-center flex-wrap">
+        <Button onClick={centerOnAfrica} variant="outline" className="gap-2">
+          <MapPin className="h-4 w-4" />
+          Centrer sur l'Afrique
+        </Button>
+        <Button onClick={centerOnWorld} variant="outline" className="gap-2">
+          <Globe className="h-4 w-4" />
+          Vue globale
+        </Button>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
           <div className="w-4 h-4 rounded-full bg-primary"></div>
-          <span className="text-sm font-medium">{opportunities.length} opportunités</span>
+          <span className="font-medium">{opportunities.length} opportunités</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          Cliquez sur un marqueur pour plus de détails
-        </p>
       </div>
     </div>
   );
