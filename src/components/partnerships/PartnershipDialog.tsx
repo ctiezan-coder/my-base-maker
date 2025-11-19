@@ -111,6 +111,8 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
       const dataToSave = {
         ...formData,
         budget: formData.budget ? parseFloat(formData.budget) : null,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
         direction_id: partnership?.direction_id || userDirection?.direction_id || null,
       };
 
