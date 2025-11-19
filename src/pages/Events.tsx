@@ -42,7 +42,7 @@ export default function Events() {
       let query = supabase
         .from("events")
         .select("*, directions(name)")
-        .order("start_date", { ascending: false });
+        .order("start_date", { ascending: true });
 
       if (search) {
         query = query.or(`title.ilike.%${search}%,event_type.ilike.%${search}%,location.ilike.%${search}%`);
@@ -206,10 +206,8 @@ export default function Events() {
                   <SelectValue placeholder="Période" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes les dates</SelectItem>
                   <SelectItem value="upcoming">À venir</SelectItem>
                   <SelectItem value="ongoing">En cours</SelectItem>
-                  <SelectItem value="past">Passés</SelectItem>
                 </SelectContent>
               </Select>
 
