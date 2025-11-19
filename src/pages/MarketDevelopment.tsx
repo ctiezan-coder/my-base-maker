@@ -212,7 +212,7 @@ export default function MarketDevelopment() {
 
       <Tabs defaultValue="opportunities" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="opportunities">Liste</TabsTrigger>
+          <TabsTrigger value="opportunities">Opportunités</TabsTrigger>
           <TabsTrigger value="map">Carte</TabsTrigger>
           <TabsTrigger value="markets">Marchés Potentiels</TabsTrigger>
           <TabsTrigger value="connections">Mises en Relation</TabsTrigger>
