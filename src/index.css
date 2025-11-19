@@ -160,3 +160,28 @@ All colors MUST be HSL.
   background: hsl(var(--primary));
 }
 
+/* Ensure dialogs appear above Leaflet map */
+[data-radix-popper-content-wrapper],
+[data-radix-dialog-overlay],
+[data-radix-dialog-content] {
+  z-index: 9999 !important;
+}
+
+/* Ensure dropdown menus and selects have proper z-index */
+[data-radix-select-content],
+[data-radix-dropdown-menu-content],
+[data-radix-popover-content] {
+  z-index: 10000 !important;
+  background: hsl(var(--popover)) !important;
+}
+
+/* Ensure Leaflet popups stay below dialogs */
+.leaflet-popup-pane {
+  z-index: 700;
+}
+
+.leaflet-pane {
+  z-index: 400;
+}
+
+
