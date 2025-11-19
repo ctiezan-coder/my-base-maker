@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserDirection } from "@/hooks/useUserDirection";
 
 interface PartnershipDialogProps {
   open: boolean;
@@ -21,6 +22,8 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  const { data: userDirection } = useUserDirection();
+  
   const [formData, setFormData] = useState<any>({
     partner_name: "",
     partner_type: "",
@@ -76,7 +79,6 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
         budget: partnership.budget?.toString() || "",
         direction_id: partnership.direction_id || "",
       });
-      setSelectedProjects(linkedProjects);
     } else {
       setFormData({
         partner_name: "",
@@ -93,7 +95,13 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
       });
       setSelectedProjects([]);
     }
-  }, [partnership, linkedProjects]);
+  }, [partnership]);
+
+  useEffect(() => {
+    if (linkedProjects.length > 0) {
+      setSelectedProjects(linkedProjects);
+    }
+  }, [linkedProjects.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,6 +111,7 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
       const dataToSave = {
         ...formData,
         budget: formData.budget ? parseFloat(formData.budget) : null,
+        direction_id: partnership?.direction_id || userDirection?.direction_id || null,
       };
 
       let partnershipId: string;
