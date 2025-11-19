@@ -100,9 +100,13 @@ export default function Companies() {
 
   const allCompanies = companiesData?.companies || [];
   
-  // Éliminer les doublons basés sur le RCCM (garder la première occurrence)
+  // Éliminer les doublons basés sur le RCCM ET le nom (garder la première occurrence)
   const companies = allCompanies.reduce((acc: any[], company: any) => {
-    if (!acc.find(c => c.rccm_number === company.rccm_number)) {
+    const isDuplicate = acc.find(c => 
+      c.rccm_number === company.rccm_number || 
+      c.company_name.toLowerCase().trim() === company.company_name.toLowerCase().trim()
+    );
+    if (!isDuplicate) {
       acc.push(company);
     }
     return acc;
