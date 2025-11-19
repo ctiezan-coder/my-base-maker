@@ -108,12 +108,24 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
     setLoading(true);
 
     try {
+      const directionId = partnership?.direction_id || userDirection?.direction_id;
+      
+      if (!directionId) {
+        toast({
+          variant: "destructive",
+          title: "Erreur",
+          description: "Direction non définie. Veuillez contacter l'administrateur.",
+        });
+        setLoading(false);
+        return;
+      }
+
       const dataToSave = {
         ...formData,
         budget: formData.budget ? parseFloat(formData.budget) : null,
         start_date: formData.start_date || null,
         end_date: formData.end_date || null,
-        direction_id: partnership?.direction_id || userDirection?.direction_id || null,
+        direction_id: directionId,
       };
 
       let partnershipId: string;
