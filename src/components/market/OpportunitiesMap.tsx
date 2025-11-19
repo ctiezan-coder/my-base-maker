@@ -1,9 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ExportOpportunity } from '@/types/market-development';
 import { Button } from '@/components/ui/button';
 import { Globe, MapPin } from 'lucide-react';
+import { SendToOperatorsDialog } from './SendToOperatorsDialog';
 
 interface OpportunitiesMapProps {
   opportunities: ExportOpportunity[];
@@ -22,6 +23,8 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const markersLayer = useRef<L.LayerGroup | null>(null);
+  const [sendDialogOpen, setSendDialogOpen] = useState(false);
+  const [selectedOpportunity, setSelectedOpportunity] = useState<ExportOpportunity | null>(null);
 
   // Group opportunities by country and city
   const groupedOpportunities = opportunities.reduce((acc, opp) => {
@@ -204,14 +207,74 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
           <div class="mt-2 pt-2 border-t border-border">
             <p class="text-xs text-muted-foreground line-clamp-2">${opp.description}</p>
           </div>
+          <div style="display: flex; gap: 8px; margin-top: 12px;">
+            <button 
+              class="opp-details-btn"
+              data-opp-id="${opp.id}"
+              style="
+                padding: 8px 16px;
+                background: hsl(var(--primary));
+                color: hsl(var(--primary-foreground));
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+                flex: 1;
+                font-weight: 500;
+                transition: opacity 0.2s;
+              "
+              onmouseover="this.style.opacity='0.9'"
+              onmouseout="this.style.opacity='1'"
+            >
+              Voir détails
+            </button>
+            <button 
+              class="opp-send-btn"
+              data-opp-id="${opp.id}"
+              style="
+                padding: 8px 16px;
+                background: hsl(var(--secondary));
+                color: hsl(var(--secondary-foreground));
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 13px;
+                flex: 1;
+                font-weight: 500;
+                transition: opacity 0.2s;
+              "
+              onmouseover="this.style.opacity='0.9'"
+              onmouseout="this.style.opacity='1'"
+            >
+              Envoyer aux opérateurs
+            </button>
+          </div>
         `;
         
-        oppDiv.onclick = () => {
-          if (onOpportunityClick) {
-            onOpportunityClick(opp);
-          }
-        };
         oppList.appendChild(oppDiv);
+        
+        // Add event listeners to buttons after appending
+        setTimeout(() => {
+          const detailsBtn = oppDiv.querySelector('.opp-details-btn');
+          const sendBtn = oppDiv.querySelector('.opp-send-btn');
+          
+          if (detailsBtn) {
+            detailsBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              if (onOpportunityClick) {
+                onOpportunityClick(opp);
+              }
+            });
+          }
+          
+          if (sendBtn) {
+            sendBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              setSelectedOpportunity(opp);
+              setSendDialogOpen(true);
+            });
+          }
+        }, 0);
       });
 
       popupContent.appendChild(oppList);
@@ -244,28 +307,40 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
   };
 
   return (
-    <div className="space-y-4">
-      <div 
-        ref={mapContainer} 
-        className="w-full h-[600px] rounded-lg overflow-hidden border border-border shadow-lg"
-        role="region"
-        aria-label="Carte des opportunités d'exportation"
-      />
-      
-      <div className="flex gap-3 items-center flex-wrap">
-        <Button onClick={centerOnAfrica} variant="outline" className="gap-2">
-          <MapPin className="h-4 w-4" />
-          Centrer sur l'Afrique
-        </Button>
-        <Button onClick={centerOnWorld} variant="outline" className="gap-2">
-          <Globe className="h-4 w-4" />
-          Vue globale
-        </Button>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
-          <div className="w-4 h-4 rounded-full bg-primary"></div>
-          <span className="font-medium">{opportunities.length} opportunités</span>
+    <>
+      <div className="space-y-4">
+        <div 
+          ref={mapContainer} 
+          className="w-full h-[600px] rounded-lg overflow-hidden border border-border shadow-lg"
+          role="region"
+          aria-label="Carte des opportunités d'exportation"
+        />
+        
+        <div className="flex gap-3 items-center flex-wrap">
+          <Button onClick={centerOnAfrica} variant="outline" className="gap-2">
+            <MapPin className="h-4 w-4" />
+            Centrer sur l'Afrique
+          </Button>
+          <Button onClick={centerOnWorld} variant="outline" className="gap-2">
+            <Globe className="h-4 w-4" />
+            Vue globale
+          </Button>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
+            <div className="w-4 h-4 rounded-full bg-primary"></div>
+            <span className="font-medium">{opportunities.length} opportunités</span>
+          </div>
         </div>
       </div>
-    </div>
+
+      {selectedOpportunity && (
+        <SendToOperatorsDialog
+          open={sendDialogOpen}
+          onOpenChange={setSendDialogOpen}
+          opportunityId={selectedOpportunity.id}
+          opportunityTitle={selectedOpportunity.title}
+          opportunitySector={selectedOpportunity.sector}
+        />
+      )}
+    </>
   );
 };
