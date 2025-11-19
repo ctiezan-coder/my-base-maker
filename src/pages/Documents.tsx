@@ -4,11 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Plus, Search, FileText, FolderPlus, Upload, Folder, ChevronRight, Home } from "lucide-react";
+import { Plus, Search, FileText, FolderPlus, Upload, Folder, ChevronRight, Home, LayoutList, TreePine } from "lucide-react";
 import { DocumentDialog } from "@/components/documents/DocumentDialog";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { FolderDialog } from "@/components/documents/FolderDialog";
 import { FileUploadDialog } from "@/components/documents/FileUploadDialog";
+import { FolderTreeView } from "@/components/documents/FolderTreeView";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
@@ -21,6 +22,7 @@ export default function Documents() {
   const [selectedDocument, setSelectedDocument] = useState<any>(null);
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [folderPath, setFolderPath] = useState<any[]>([]);
+  const [viewMode, setViewMode] = useState<"grid" | "tree">("grid");
 
   const { data: folders, refetch: refetchFolders } = useQuery({
     queryKey: ["folders", currentFolderId],
@@ -198,8 +200,9 @@ export default function Documents() {
       <Card>
         <CardHeader>
           <div className="space-y-4">
-            {/* Breadcrumb navigation */}
-            <div className="flex items-center gap-2 text-sm">
+            {/* Breadcrumb navigation et toggle vue */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -221,6 +224,25 @@ export default function Documents() {
                   </Button>
                 </div>
               ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant={viewMode === "grid" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <LayoutList className="w-4 h-4 mr-2" />
+                  Grille
+                </Button>
+                <Button
+                  variant={viewMode === "tree" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setViewMode("tree")}
+                >
+                  <TreePine className="w-4 h-4 mr-2" />
+                  Arbre
+                </Button>
+              </div>
             </div>
 
             <div className="flex items-center gap-4">
@@ -237,8 +259,17 @@ export default function Documents() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Liste des dossiers */}
-          {folders && folders.length > 0 && (
+          {/* Vue en arbre */}
+          {viewMode === "tree" && (
+            <FolderTreeView
+              folders={folders || []}
+              onFolderClick={navigateToFolder}
+              currentFolderId={currentFolderId}
+            />
+          )}
+
+          {/* Liste des dossiers en grille */}
+          {viewMode === "grid" && folders && folders.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-medium flex items-center gap-2">
@@ -333,6 +364,7 @@ export default function Documents() {
           )}
 
           {/* Liste des documents */}
+          {viewMode === "grid" && (
           <div>
             <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
               <FileText className="w-4 h-4" />
@@ -345,6 +377,7 @@ export default function Documents() {
               onDelete={handleDelete}
             />
           </div>
+          )}
         </CardContent>
       </Card>
 
