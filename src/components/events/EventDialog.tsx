@@ -122,6 +122,31 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
             .insert(participants);
 
           if (participantsError) throw participantsError;
+
+          // Créer des notifications pour les opérateurs
+          const { data: companiesData } = await supabase
+            .from("companies")
+            .select("id, company_name, created_by")
+            .in("id", selectedCompanies);
+
+          if (companiesData) {
+            const notifications = companiesData
+              .filter(company => company.created_by)
+              .map(company => ({
+                user_id: company.created_by!,
+                title: "Participation à un événement",
+                message: `Votre entreprise ${company.company_name} a été inscrite à l'événement "${formData.title}"`,
+                type: "info",
+                reference_id: newEvent.id,
+                reference_table: "events",
+              }));
+
+            if (notifications.length > 0) {
+              await supabase
+                .from("notifications")
+                .insert(notifications);
+            }
+          }
         }
 
         toast({ title: "Événement créé avec succès" });
