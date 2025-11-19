@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -8,14 +8,15 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Edit, Calendar, FileText } from "lucide-react";
+import { Plus, Edit, Calendar, FileText, RefreshCw } from "lucide-react";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import type { Imputation } from "@/types/imputation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AddTrackingDialog } from "./AddTrackingDialog";
 import { ChangeProjectStatusDialog } from "./ChangeProjectStatusDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 
 interface DirectionDetailsModalProps {
   open: boolean;
@@ -33,6 +34,8 @@ export function DirectionDetailsModal({
   const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
   // Fetch partnerships
   const { data: partnerships = [] } = useQuery({
@@ -97,6 +100,80 @@ export function DirectionDetailsModal({
     enabled: open && !!directionId && projects.length > 0,
   });
 
+  // Real-time updates
+  useEffect(() => {
+    if (!open || !directionId) return;
+
+    const partnershipsChannel = supabase
+      .channel(`partnerships-${directionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "partnerships",
+          filter: `direction_id=eq.${directionId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["partnerships-modal", directionId] });
+          toast.success("Partenariats mis à jour");
+        }
+      )
+      .subscribe();
+
+    const projectsChannel = supabase
+      .channel(`projects-${directionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "projects",
+          filter: `direction_id=eq.${directionId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["projects-modal", directionId] });
+          toast.success("Projets mis à jour");
+        }
+      )
+      .subscribe();
+
+    const imputationsChannel = supabase
+      .channel(`imputations-${directionId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "imputations",
+          filter: `direction_id=eq.${directionId}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["imputations-modal", directionId] });
+          toast.success("Imputations mises à jour");
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(partnershipsChannel);
+      supabase.removeChannel(projectsChannel);
+      supabase.removeChannel(imputationsChannel);
+    };
+  }, [open, directionId, queryClient]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["partnerships-modal", directionId] }),
+      queryClient.invalidateQueries({ queryKey: ["projects-modal", directionId] }),
+      queryClient.invalidateQueries({ queryKey: ["imputations-modal", directionId] }),
+      queryClient.invalidateQueries({ queryKey: ["project-tracking-modal", directionId] }),
+    ]);
+    toast.success("Données rafraîchies");
+    setIsRefreshing(false);
+  };
+
   const calculateDuration = (imputation: Imputation): number | null => {
     if (!imputation.date_realisation) return null;
     const start = parseISO(imputation.date_reception);
@@ -109,7 +186,18 @@ export function DirectionDetailsModal({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-6xl max-h-[90vh]">
           <DialogHeader>
-            <DialogTitle className="text-2xl">{directionName}</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl">{directionName}</DialogTitle>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Rafraîchir
+              </Button>
+            </div>
           </DialogHeader>
 
           <ScrollArea className="h-[calc(90vh-8rem)] pr-4">
