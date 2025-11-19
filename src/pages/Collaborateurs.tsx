@@ -6,6 +6,9 @@ import { OperatorTrackingDialog } from "@/components/collaborateurs/OperatorTrac
 import { OpportunityMatchesDialog } from "@/components/collaborateurs/OpportunityMatchesDialog";
 import { ReportDialog } from "@/components/collaborateurs/ReportDialog";
 import { TaskDialog } from "@/components/collaborateurs/TaskDialog";
+import { OpportunityDialog } from "@/components/market/OpportunityDialog";
+import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog";
+import { CompanyDetailsDialog } from "@/components/companies/CompanyDetailsDialog";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useUserDirection } from "@/hooks/useUserDirection";
 import { format } from "date-fns";
@@ -18,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Building2, 
   Sparkles, 
@@ -34,7 +38,8 @@ import {
   Info,
   Plus,
   Download,
-  MessageSquare
+  MessageSquare,
+  Send
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -61,6 +66,13 @@ export default function Collaborateurs() {
   const [reportType, setReportType] = useState<ReportType>("monthly");
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [showOpportunityDialog, setShowOpportunityDialog] = useState(false);
+  const [selectedOpportunityDetails, setSelectedOpportunityDetails] = useState<any>(null);
+  const [showSendToOperatorsDialog, setShowSendToOperatorsDialog] = useState(false);
+  const [sendOpportunityData, setSendOpportunityData] = useState<{id: string, title: string, sector: string} | null>(null);
+  const [showCompanyDetailsDialog, setShowCompanyDetailsDialog] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(null);
+  const [selectedCompanyName, setSelectedCompanyName] = useState<string>("");
 
   // Chat functionality
   const { messages, isLoading: isLoadingMessages, sendMessage, isSending } = useChatMessages(selectedCollaborators);
@@ -172,35 +184,22 @@ export default function Collaborateurs() {
   const uniqueSectors = Array.from(new Set(companiesData?.map(c => c.activity_sector).filter(Boolean))) || [];
   const uniqueStatuses = Array.from(new Set(companiesData?.map(c => c.accompaniment_status).filter(Boolean))) || [];
 
-  const opportunities = [
-    {
-      id: 1,
-      title: "Distributeur Bio - Belgique",
-      description: "Recherche fournisseurs cacao & karité bio certifiés",
-      country: "Belgique",
-      sector: "Agroalimentaire",
-      deadline: "20/11/2025",
-      matches: 2
-    },
-    {
-      id: 2,
-      title: "Chaîne retail - Suisse",
-      description: "Partenariat chocolat premium équitable",
-      country: "Suisse",
-      sector: "Distribution",
-      deadline: "30/11/2025",
-      matches: 1
-    },
-    {
-      id: 3,
-      title: "Marque cosmétique - France",
-      description: "Sourcing karité brut certifié bio",
-      country: "France",
-      sector: "Cosmétique",
-      deadline: "15/12/2025",
-      matches: 3
+  // Charger les opportunités depuis la base de données
+  const { data: opportunities = [], isLoading: isLoadingOpportunities } = useQuery({
+    queryKey: ['export-opportunities-collaborateurs'],
+    queryFn: async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data, error } = await supabase
+        .from('export_opportunities')
+        .select('*')
+        .gte('deadline', today)
+        .neq('status', 'FERMÉ')
+        .order('deadline', { ascending: true });
+      
+      if (error) throw error;
+      return data || [];
     }
-  ];
+  });
 
 
   const events = [
@@ -424,41 +423,78 @@ export default function Collaborateurs() {
               <h2 className="text-3xl font-bold">Opportunités disponibles</h2>
 
               <div className="grid gap-6">
-                {opportunities.map((opp) => (
-                  <Card key={opp.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <CardTitle>{opp.title}</CardTitle>
-                          <CardDescription>{opp.description}</CardDescription>
+                {isLoadingOpportunities ? (
+                  <p className="text-center text-muted-foreground">Chargement des opportunités...</p>
+                ) : opportunities.length === 0 ? (
+                  <p className="text-center text-muted-foreground">Aucune opportunité disponible</p>
+                ) : (
+                  opportunities.map((opp) => (
+                    <Card key={opp.id} className="hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <CardTitle>{opp.title}</CardTitle>
+                              {opp.status && (
+                                <Badge variant={
+                                  opp.status === 'URGENT' ? 'destructive' :
+                                  opp.status === 'NOUVEAU' ? 'default' :
+                                  opp.status === 'RECOMMANDÉ' ? 'secondary' :
+                                  'outline'
+                                }>
+                                  {opp.status}
+                                </Badge>
+                              )}
+                            </div>
+                            <CardDescription>{opp.description}</CardDescription>
+                          </div>
                         </div>
-                        <Badge>{opp.matches} PME</Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-6 text-sm">
-                        <div className="flex items-center text-muted-foreground">
-                          <MapPin className="mr-2 h-4 w-4" />
-                          {opp.country}
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center flex-wrap gap-6 text-sm mb-4">
+                          <div className="flex items-center text-muted-foreground">
+                            <MapPin className="mr-2 h-4 w-4" />
+                            {opp.destination_country}{opp.destination_city && `, ${opp.destination_city}`}
+                          </div>
+                          <div className="flex items-center text-muted-foreground">
+                            <Building2 className="mr-2 h-4 w-4" />
+                            {opp.sector}
+                          </div>
+                          <div className="flex items-center text-muted-foreground">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Échéance: {format(new Date(opp.deadline), "dd/MM/yyyy")}
+                          </div>
                         </div>
-                        <div className="flex items-center text-muted-foreground">
-                          <Building2 className="mr-2 h-4 w-4" />
-                          {opp.sector}
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedOpportunityDetails(opp);
+                              setShowOpportunityDialog(true);
+                            }}
+                          >
+                            Voir détails
+                          </Button>
+                          <Button 
+                            size="sm"
+                            onClick={() => {
+                              setSendOpportunityData({
+                                id: opp.id,
+                                title: opp.title,
+                                sector: opp.sector
+                              });
+                              setShowSendToOperatorsDialog(true);
+                            }}
+                          >
+                            <Send className="mr-2 h-4 w-4" />
+                            Proposer cette opportunité
+                          </Button>
                         </div>
-                        <div className="flex items-center text-muted-foreground">
-                          <Calendar className="mr-2 h-4 w-4" />
-                          Échéance: {opp.deadline}
-                        </div>
-                        <Button size="sm" className="ml-auto" onClick={() => {
-                          setSelectedOpportunity(opp);
-                          setShowMatchesDialog(true);
-                        }}>
-                          Voir les matches
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
           )}
@@ -884,6 +920,105 @@ export default function Collaborateurs() {
         })) || []}
         directionId={userDirection?.direction_id || null}
       />
+      
+      {/* Opportunity Details Dialog */}
+      <Dialog open={showOpportunityDialog} onOpenChange={setShowOpportunityDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Détails de l'opportunité</DialogTitle>
+          </DialogHeader>
+          {selectedOpportunityDetails && (
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-lg mb-2">{selectedOpportunityDetails.title}</h3>
+                <div className="flex gap-2 mb-3">
+                  {selectedOpportunityDetails.status && (
+                    <Badge variant={
+                      selectedOpportunityDetails.status === 'URGENT' ? 'destructive' :
+                      selectedOpportunityDetails.status === 'NOUVEAU' ? 'default' :
+                      selectedOpportunityDetails.status === 'RECOMMANDÉ' ? 'secondary' :
+                      'outline'
+                    }>
+                      {selectedOpportunityDetails.status}
+                    </Badge>
+                  )}
+                  <Badge variant="outline">{selectedOpportunityDetails.region}</Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Secteur</p>
+                  <p className="font-medium">{selectedOpportunityDetails.sector}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Destination</p>
+                  <p className="font-medium">
+                    {selectedOpportunityDetails.destination_country}
+                    {selectedOpportunityDetails.destination_city && `, ${selectedOpportunityDetails.destination_city}`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Valeur estimée</p>
+                  <p className="font-medium">
+                    {selectedOpportunityDetails.estimated_value.toLocaleString()} {selectedOpportunityDetails.currency}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Volume</p>
+                  <p className="font-medium">{selectedOpportunityDetails.volume}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Échéance</p>
+                  <p className="font-medium">
+                    {format(new Date(selectedOpportunityDetails.deadline), "dd MMMM yyyy", { locale: fr })}
+                  </p>
+                </div>
+                {selectedOpportunityDetails.compatibility_score && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Score de compatibilité</p>
+                    <p className="font-medium">{selectedOpportunityDetails.compatibility_score}%</p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Description</p>
+                <p className="text-sm">{selectedOpportunityDetails.description}</p>
+              </div>
+
+              {selectedOpportunityDetails.requirements && selectedOpportunityDetails.requirements.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Exigences</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    {selectedOpportunityDetails.requirements.map((req: string, idx: number) => (
+                      <li key={idx} className="text-sm">{req}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {sendOpportunityData && (
+        <SendToOperatorsDialog
+          open={showSendToOperatorsDialog}
+          onOpenChange={setShowSendToOperatorsDialog}
+          opportunityId={sendOpportunityData.id}
+          opportunityTitle={sendOpportunityData.title}
+          opportunitySector={sendOpportunityData.sector}
+        />
+      )}
+      {selectedCompanyId && (
+        <CompanyDetailsDialog
+          open={showCompanyDetailsDialog}
+          onOpenChange={setShowCompanyDetailsDialog}
+          companyId={selectedCompanyId}
+          companyName={selectedCompanyName}
+        />
+      )}
     </div>
   );
 }
