@@ -39,9 +39,27 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [mediaToDelete, setMediaToDelete] = useState<any>(null);
   const [directionsMap, setDirectionsMap] = useState<Record<string, string>>({});
+  const [communicationDirectionId, setCommunicationDirectionId] = useState<string | null>(null);
 
-  // Vérifier si l'utilisateur est du Service Communication
-  const isServiceCommunication = userDirection?.direction === "Communication";
+  // Récupérer l'ID de la direction Communication
+  useEffect(() => {
+    const fetchCommunicationDirection = async () => {
+      const { data } = await supabase
+        .from("directions")
+        .select("id")
+        .eq("name", "Communication")
+        .single();
+      
+      if (data) {
+        setCommunicationDirectionId(data.id);
+      }
+    };
+    
+    fetchCommunicationDirection();
+  }, []);
+
+  // Vérifier si l'utilisateur est de la direction Communication
+  const isServiceCommunication = userDirection?.direction_id === communicationDirectionId;
 
   useEffect(() => {
     const fetchDirections = async () => {
