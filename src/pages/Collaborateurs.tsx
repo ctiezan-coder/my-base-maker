@@ -163,7 +163,7 @@ export default function Collaborateurs() {
 
   // Liste des collaborateurs depuis la base de données
   const collaborators = collaboratorsData?.map((profile) => ({
-    id: profile.id,
+    id: profile.user_id,
     name: profile.full_name,
     email: profile.email,
     role: profile.direction || "Collaborateur",
