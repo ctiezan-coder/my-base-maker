@@ -20,13 +20,21 @@ interface MediaDialogProps {
 export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<any>({
     title: "",
     description: "",
     file_url: "",
-    media_type: "Image",
+    media_type: "Newsletter",
     priority_level: "5",
     direction_id: "",
+    date_evenement: "",
+    lieu_evenement: "",
+    contexte_activite: "",
+    deroule: "",
+    parties_prenantes: "",
+    panelistes: "",
+    statut_workflow: "Demande",
   });
 
   const { data: directions } = useQuery({
@@ -44,15 +52,24 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
   useEffect(() => {
     if (media) {
       setFormData(media);
+      setFile(null);
     } else {
       setFormData({
         title: "",
         description: "",
         file_url: "",
-        media_type: "Image",
+        media_type: "Newsletter",
         priority_level: "5",
         direction_id: "",
+        date_evenement: "",
+        lieu_evenement: "",
+        contexte_activite: "",
+        deroule: "",
+        parties_prenantes: "",
+        panelistes: "",
+        statut_workflow: "Demande",
       });
+      setFile(null);
     }
   }, [media]);
 
@@ -61,10 +78,32 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
     setLoading(true);
 
     try {
+      let fileUrl = formData.file_url;
+
+      // Upload file if a new file is selected
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('documents')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        fileUrl = filePath;
+      }
+
+      const dataToSubmit = {
+        ...formData,
+        file_url: fileUrl,
+      };
+
       if (media) {
         const { error } = await supabase
           .from("media_content")
-          .update(formData)
+          .update(dataToSubmit)
           .eq("id", media.id);
 
         if (error) throw error;
@@ -72,7 +111,7 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
       } else {
         const { error } = await supabase
           .from("media_content")
-          .insert([formData]);
+          .insert([dataToSubmit]);
 
         if (error) throw error;
         toast({ title: "Média créé avec succès" });
@@ -137,29 +176,125 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Image">Image</SelectItem>
-                  <SelectItem value="Vidéo">Vidéo</SelectItem>
-                  <SelectItem value="Audio">Audio</SelectItem>
+                  <SelectItem value="Newsletter">Newsletter</SelectItem>
+                  <SelectItem value="Magazine">Magazine</SelectItem>
+                  <SelectItem value="Article presse">Article presse</SelectItem>
+                  <SelectItem value="Communiqué de presse">Communiqué de presse</SelectItem>
+                  <SelectItem value="Dossier de presse">Dossier de presse</SelectItem>
+                  <SelectItem value="Branding visuel">Branding visuel</SelectItem>
+                  <SelectItem value="Fond de scène">Fond de scène</SelectItem>
+                  <SelectItem value="Dépliant">Dépliant</SelectItem>
+                  <SelectItem value="Flyer">Flyer</SelectItem>
+                  <SelectItem value="Affiche">Affiche</SelectItem>
+                  <SelectItem value="Post réseaux sociaux">Post réseaux sociaux</SelectItem>
+                  <SelectItem value="Film institutionnel">Film institutionnel</SelectItem>
+                  <SelectItem value="Photo professionnelle">Photo professionnelle</SelectItem>
+                  <SelectItem value="Autre">Autre</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="date_evenement">Date de l'activité</Label>
+              <Input
+                id="date_evenement"
+                type="date"
+                value={formData.date_evenement || ""}
+                onChange={(e) => setFormData({ ...formData, date_evenement: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lieu_evenement">Lieu</Label>
+              <Input
+                id="lieu_evenement"
+                value={formData.lieu_evenement || ""}
+                onChange={(e) => setFormData({ ...formData, lieu_evenement: e.target.value })}
+                placeholder="Lieu de l'activité"
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
-            <Label htmlFor="file_url">URL du fichier</Label>
-            <Input
-              id="file_url"
-              value={formData.file_url}
-              onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
-              placeholder="https://..."
+            <Label htmlFor="contexte_activite">Contexte de l'activité</Label>
+            <Textarea
+              id="contexte_activite"
+              value={formData.contexte_activite || ""}
+              onChange={(e) => setFormData({ ...formData, contexte_activite: e.target.value })}
+              rows={3}
+              placeholder="Décrivez le contexte..."
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="deroule">Déroulé</Label>
+            <Textarea
+              id="deroule"
+              value={formData.deroule || ""}
+              onChange={(e) => setFormData({ ...formData, deroule: e.target.value })}
+              rows={3}
+              placeholder="Décrivez le déroulé de l'activité..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="parties_prenantes">Parties prenantes</Label>
+            <Textarea
+              id="parties_prenantes"
+              value={formData.parties_prenantes || ""}
+              onChange={(e) => setFormData({ ...formData, parties_prenantes: e.target.value })}
+              rows={2}
+              placeholder="Listez les parties prenantes..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="panelistes">Panélistes</Label>
+            <Textarea
+              id="panelistes"
+              value={formData.panelistes || ""}
+              onChange={(e) => setFormData({ ...formData, panelistes: e.target.value })}
+              rows={2}
+              placeholder="Listez les panélistes..."
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="statut_workflow">Statut</Label>
+            <Select
+              value={formData.statut_workflow}
+              onValueChange={(value) => setFormData({ ...formData, statut_workflow: value })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Demande">Demande</SelectItem>
+                <SelectItem value="En cours">En cours</SelectItem>
+                <SelectItem value="Livré">Traité</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="file">Fichier</Label>
+            <Input
+              id="file"
+              type="file"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              accept="image/*,video/*,audio/*,.pdf,.doc,.docx"
+            />
+            {formData.file_url && !file && (
+              <p className="text-sm text-muted-foreground">Fichier actuel enregistré</p>
+            )}
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              value={formData.description}
+              value={formData.description || ""}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={4}
             />
