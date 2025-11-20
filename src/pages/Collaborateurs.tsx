@@ -131,16 +131,20 @@ export default function Collaborateurs() {
 
   // Charger les collaborateurs depuis la base de données
   const { data: collaboratorsData, isLoading: isLoadingCollaborators } = useQuery({
-    queryKey: ['collaborators'],
+    queryKey: ['collaborators', user?.id],
     queryFn: async () => {
+      if (!user) return [];
+      
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
+        .neq('user_id', user.id)
         .order('full_name');
       
       if (error) throw error;
       return data;
-    }
+    },
+    enabled: !!user,
   });
 
   // Charger les tâches depuis la base de données
