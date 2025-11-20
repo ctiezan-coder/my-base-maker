@@ -16,11 +16,13 @@ import {
   UserCircle,
   ClipboardList,
   TrendingUp,
+  MessageSquare,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/" },
+  { icon: MessageSquare, label: "Messagerie", path: "/chat" },
   { icon: Building2, label: "Opérateurs", path: "/companies" },
   { icon: Globe, label: "Marchés Export", path: "/market-development" },
   { icon: Handshake, label: "Partenariats", path: "/partnerships" },
