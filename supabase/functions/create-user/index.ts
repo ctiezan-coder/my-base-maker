@@ -17,7 +17,7 @@ const createUserSchema = z.object({
   password: z.string().min(8).max(100),
   fullName: z.string().min(1).max(200),
   role: z.enum(['admin', 'manager', 'user']),
-  direction: z.string().optional()
+  directionId: z.string().uuid()
 })
 
 serve(async (req) => {
@@ -72,7 +72,7 @@ serve(async (req) => {
     // Get and validate the request body
     const body = await req.json()
     const validated = createUserSchema.parse(body)
-    const { email, password, fullName, role, direction } = validated
+    const { email, password, fullName, role, directionId } = validated
 
     // Create the user
     const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
@@ -81,6 +81,7 @@ serve(async (req) => {
       email_confirm: true,
       user_metadata: {
         full_name: fullName,
+        direction_id: directionId,
       }
     })
 
@@ -98,13 +99,11 @@ serve(async (req) => {
       )
     }
 
-    // Update profile with direction if provided
-    if (direction) {
-      await supabaseClient
-        .from('profiles')
-        .update({ direction })
-        .eq('user_id', newUser.user.id)
-    }
+    // Update profile with direction
+    await supabaseClient
+      .from('profiles')
+      .update({ direction_id: directionId })
+      .eq('user_id', newUser.user.id)
 
     // Assign role
     await supabaseClient

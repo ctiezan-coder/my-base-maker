@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import logo from '@/assets/aciex-logo.jpg';
@@ -20,6 +23,7 @@ const signupSchema = z.object({
   email: z.string().email('Email invalide'),
   password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
   confirmPassword: z.string(),
+  directionId: z.string().min(1, 'La direction est requise'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Les mots de passe ne correspondent pas",
   path: ["confirmPassword"],
@@ -31,10 +35,24 @@ export default function Auth() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [directionId, setDirectionId] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Fetch directions for signup
+  const { data: directions } = useQuery({
+    queryKey: ['directions-signup'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('directions')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
 
   useEffect(() => {
     if (user) {
@@ -82,7 +100,7 @@ export default function Auth() {
     e.preventDefault();
     
     try {
-      signupSchema.parse({ fullName, email, password, confirmPassword });
+      signupSchema.parse({ fullName, email, password, confirmPassword, directionId });
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -95,7 +113,20 @@ export default function Auth() {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName);
+    
+    // Sign up the user with direction_id in metadata
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          full_name: fullName,
+          direction_id: directionId,
+        }
+      }
+    });
+    
     setLoading(false);
 
     if (error) {
@@ -191,6 +222,21 @@ export default function Auth() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-direction">Direction *</Label>
+                  <Select value={directionId} onValueChange={setDirectionId} required>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionner votre direction" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {directions?.map((dir) => (
+                        <SelectItem key={dir.id} value={dir.id}>
+                          {dir.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Mot de passe</Label>

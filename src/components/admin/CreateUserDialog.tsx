@@ -15,7 +15,7 @@ const createUserSchema = z.object({
   fullName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
   password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
   role: z.enum(["admin", "manager", "user"]),
-  direction: z.string().optional(),
+  directionId: z.string().uuid("Direction requise"),
 });
 
 export function CreateUserDialog() {
@@ -24,7 +24,7 @@ export function CreateUserDialog() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"admin" | "manager" | "user">("user");
-  const [direction, setDirection] = useState<string>("");
+  const [directionId, setDirectionId] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -60,7 +60,7 @@ export function CreateUserDialog() {
           password: validated.password,
           fullName: validated.fullName,
           role: validated.role,
-          direction: validated.direction,
+          directionId: validated.directionId,
         }),
       });
 
@@ -94,7 +94,7 @@ export function CreateUserDialog() {
     setFullName("");
     setPassword("");
     setRole("user");
-    setDirection("");
+    setDirectionId("");
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -104,7 +104,7 @@ export function CreateUserDialog() {
       fullName,
       password,
       role,
-      direction: direction || undefined,
+      directionId,
     });
   };
 
@@ -175,14 +175,14 @@ export function CreateUserDialog() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="direction">Direction (optionnel)</Label>
-            <Select value={direction || undefined} onValueChange={(value) => setDirection(value)}>
+            <Label htmlFor="direction">Direction *</Label>
+            <Select value={directionId || undefined} onValueChange={(value) => setDirectionId(value)} required>
               <SelectTrigger>
-                <SelectValue placeholder="Aucune direction" />
+                <SelectValue placeholder="Sélectionner une direction" />
               </SelectTrigger>
               <SelectContent>
                 {directions?.map((dir) => (
-                  <SelectItem key={dir.id} value={dir.name}>
+                  <SelectItem key={dir.id} value={dir.id}>
                     {dir.name}
                   </SelectItem>
                 ))}
