@@ -74,6 +74,11 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
     setLoading(true);
 
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Utilisateur non connecté");
+      }
+
       let fileUrl = formData.file_url;
 
       // Upload file if a new file is selected
@@ -94,6 +99,7 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
       const dataToSubmit = {
         ...formData,
         file_url: fileUrl,
+        created_by: media ? formData.created_by : user.id,
       };
 
       if (media) {
