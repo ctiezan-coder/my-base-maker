@@ -21,6 +21,7 @@ import Admin from "./pages/Admin";
 import Collaborateurs from "./pages/Collaborateurs";
 import Imputations from "./pages/Imputations";
 import SuiviEvaluation from "./pages/SuiviEvaluation";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/" element={<Dashboard />}>
               <Route index element={<Index />} />
+              <Route path="chat" element={<Chat />} />
               <Route path="companies" element={<Companies />} />
               <Route path="trainings" element={<Trainings />} />
               <Route path="trainers" element={<Trainers />} />
