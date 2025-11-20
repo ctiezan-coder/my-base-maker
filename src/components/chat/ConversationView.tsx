@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -25,6 +25,7 @@ interface Message {
 
 export function ConversationView({ receiverId }: ConversationViewProps) {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch receiver profile
@@ -103,20 +104,9 @@ export function ConversationView({ receiverId }: ConversationViewProps) {
           table: "chat_messages",
         },
         () => {
-          // Refetch messages
-          supabase
-            .from("chat_messages")
-            .select("*")
-            .or(
-              `and(sender_id.eq.${user.id},receiver_ids.cs.{${receiverId}}),and(sender_id.eq.${receiverId},receiver_ids.cs.{${user.id}})`
-            )
-            .order("created_at", { ascending: true })
-            .then(({ data }) => {
-              if (data) {
-                // Trigger refetch via query invalidation would be better
-                window.location.reload();
-              }
-            });
+          queryClient.invalidateQueries({ 
+            queryKey: ["private-chat-messages", receiverId] 
+          });
         }
       )
       .subscribe();
@@ -124,7 +114,7 @@ export function ConversationView({ receiverId }: ConversationViewProps) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, receiverId]);
+  }, [user, receiverId, queryClient]);
 
   // Auto-scroll to bottom
   useEffect(() => {
