@@ -848,6 +848,7 @@ export type Database = {
             | Database["public"]["Enums"]["niveau_categorisation"]
             | null
           cibles: string | null
+          contexte_activite: string | null
           created_at: string
           created_by: string | null
           date_demande: string | null
@@ -855,6 +856,7 @@ export type Database = {
           date_livraison_effective: string | null
           date_livraison_prevue: string | null
           delai_traitement_semaines: number | null
+          deroule: string | null
           description: string | null
           direction_id: string
           enjeux: string | null
@@ -868,6 +870,8 @@ export type Database = {
           media_type: Database["public"]["Enums"]["media_type"]
           objectifs: string | null
           observations: string | null
+          panelistes: string | null
+          parties_prenantes: string | null
           partnership_id: string | null
           phase_communication:
             | Database["public"]["Enums"]["phase_communication"]
@@ -886,6 +890,7 @@ export type Database = {
             | Database["public"]["Enums"]["niveau_categorisation"]
             | null
           cibles?: string | null
+          contexte_activite?: string | null
           created_at?: string
           created_by?: string | null
           date_demande?: string | null
@@ -893,6 +898,7 @@ export type Database = {
           date_livraison_effective?: string | null
           date_livraison_prevue?: string | null
           delai_traitement_semaines?: number | null
+          deroule?: string | null
           description?: string | null
           direction_id: string
           enjeux?: string | null
@@ -906,6 +912,8 @@ export type Database = {
           media_type: Database["public"]["Enums"]["media_type"]
           objectifs?: string | null
           observations?: string | null
+          panelistes?: string | null
+          parties_prenantes?: string | null
           partnership_id?: string | null
           phase_communication?:
             | Database["public"]["Enums"]["phase_communication"]
@@ -926,6 +934,7 @@ export type Database = {
             | Database["public"]["Enums"]["niveau_categorisation"]
             | null
           cibles?: string | null
+          contexte_activite?: string | null
           created_at?: string
           created_by?: string | null
           date_demande?: string | null
@@ -933,6 +942,7 @@ export type Database = {
           date_livraison_effective?: string | null
           date_livraison_prevue?: string | null
           delai_traitement_semaines?: number | null
+          deroule?: string | null
           description?: string | null
           direction_id?: string
           enjeux?: string | null
@@ -946,6 +956,8 @@ export type Database = {
           media_type?: Database["public"]["Enums"]["media_type"]
           objectifs?: string | null
           observations?: string | null
+          panelistes?: string | null
+          parties_prenantes?: string | null
           partnership_id?: string | null
           phase_communication?:
             | Database["public"]["Enums"]["phase_communication"]
