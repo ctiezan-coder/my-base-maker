@@ -13,29 +13,26 @@ export default function Partnerships() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPartnership, setSelectedPartnership] = useState<any>(null);
 
-  // Get user's direction
-  const { data: userDirection } = useUserDirection();
+  // Get user's direction and role
   const { data: userRole } = useUserRole();
   const isAdmin = userRole === 'admin';
 
   const { data: partnerships, isLoading, refetch } = useQuery({
-    queryKey: ["partnerships", userDirection?.direction_id, isAdmin],
+    queryKey: ["partnerships"],
     queryFn: async () => {
-      let query = supabase
+      // Let RLS policies handle access control
+      // The user_has_direction_access function will filter based on:
+      // 1. User's primary direction
+      // 2. User's role assignments for partnerships module
+      // 3. Admin status
+      const { data, error } = await supabase
         .from("partnerships")
-        .select("*");
-
-      // Filter by direction unless user is admin
-      if (!isAdmin && userDirection?.direction_id) {
-        query = query.eq("direction_id", userDirection.direction_id);
-      }
-
-      const { data, error } = await query.order("created_at", { ascending: false });
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
-    enabled: isAdmin || !!userDirection?.direction_id,
   });
 
   const handleEdit = (partnership: any) => {
