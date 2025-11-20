@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Image as ImageIcon, Video } from "lucide-react";
-import { format } from "date-fns";
+import { Pencil, Trash2, Image as ImageIcon, Video, Calendar, Building2 } from "lucide-react";
+import { format, isPast, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
   AlertDialog,
@@ -14,7 +14,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useUserDirection } from "@/hooks/useUserDirection";
 
 interface MediaGridProps {
   mediaItems: any[];
@@ -24,8 +34,13 @@ interface MediaGridProps {
 }
 
 export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGridProps) {
+  const { toast } = useToast();
+  const { data: userDirection } = useUserDirection();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [mediaToDelete, setMediaToDelete] = useState<any>(null);
+  
+  // Vérifier si l'utilisateur est du Service Communication
+  const isServiceCommunication = userDirection?.direction === "Communication";
 
   const handleDeleteClick = (media: any) => {
     setMediaToDelete(media);
@@ -40,8 +55,45 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
     }
   };
 
+  const handleStatusChange = async (mediaId: string, newStatus: "Demande" | "En cours" | "Validé" | "Livré" | "Annulé") => {
+    try {
+      const { error } = await supabase
+        .from("media_content")
+        .update({ statut_workflow: newStatus })
+        .eq("id", mediaId);
+
+      if (error) throw error;
+
+      toast({ title: "Statut mis à jour avec succès" });
+      // Recharger la page pour voir les changements
+      window.location.reload();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
+    }
+  };
+
   const getMediaIcon = (type: string) => {
     return type === "Vidéo" ? Video : ImageIcon;
+  };
+
+  const getDateColorClass = (dateEvenement: string | null) => {
+    if (!dateEvenement) return "text-muted-foreground";
+    
+    const eventDate = new Date(dateEvenement);
+    const daysUntil = differenceInDays(eventDate, new Date());
+    
+    if (isPast(eventDate)) {
+      return "text-destructive"; // Rouge si passé
+    } else if (daysUntil <= 7) {
+      return "text-orange-500"; // Orange si dans moins de 7 jours
+    } else if (daysUntil <= 30) {
+      return "text-yellow-600"; // Jaune si dans moins de 30 jours
+    }
+    return "text-green-600"; // Vert si plus de 30 jours
   };
 
   if (isLoading) {
@@ -65,6 +117,8 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {mediaItems.map((media) => {
           const MediaIcon = getMediaIcon(media.media_type);
+          const dateColorClass = getDateColorClass(media.date_evenement);
+          
           return (
             <Card key={media.id}>
               <CardHeader>
@@ -74,9 +128,22 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
                       <MediaIcon className="w-5 h-5" />
                       {media.title}
                     </CardTitle>
-                    <Badge variant="secondary" className="mt-2">
-                      {media.media_type}
-                    </Badge>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge variant="secondary">
+                        {media.media_type}
+                      </Badge>
+                      {media.statut_workflow && (
+                        <Badge 
+                          variant={
+                            media.statut_workflow === "Livré" ? "default" :
+                            media.statut_workflow === "En cours" ? "outline" :
+                            "secondary"
+                          }
+                        >
+                          {media.statut_workflow}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="sm" onClick={() => onEdit(media)}>
@@ -88,7 +155,7 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
                 {media.file_url && (
                   <div className="aspect-video bg-muted rounded-lg overflow-hidden">
                     {media.media_type === "Image" ? (
@@ -104,12 +171,49 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
                     )}
                   </div>
                 )}
-                {media.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {media.description}
-                  </p>
-                )}
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                
+                <div className="space-y-2">
+                  {media.directions && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Building2 className="w-4 h-4 text-muted-foreground" />
+                      <span className="font-medium">{media.directions.name}</span>
+                    </div>
+                  )}
+                  
+                  {media.date_evenement && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                      <span className={`font-medium ${dateColorClass}`}>
+                        {format(new Date(media.date_evenement), "dd MMM yyyy", { locale: fr })}
+                      </span>
+                    </div>
+                  )}
+                  
+                  {isServiceCommunication && (
+                    <div className="pt-2 border-t">
+                      <label className="text-xs text-muted-foreground mb-1 block">
+                        Changer le statut
+                      </label>
+                      <Select
+                        value={media.statut_workflow || "Demande"}
+                        onValueChange={(value) => handleStatusChange(media.id, value as "Demande" | "En cours" | "Validé" | "Livré" | "Annulé")}
+                      >
+                        <SelectTrigger className="h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Demande">Demande</SelectItem>
+                          <SelectItem value="En cours">En cours</SelectItem>
+                          <SelectItem value="Validé">Validé</SelectItem>
+                          <SelectItem value="Livré">Livré</SelectItem>
+                          <SelectItem value="Annulé">Annulé</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
                   <span>
                     {format(new Date(media.created_at), "dd MMM yyyy", { locale: fr })}
                   </span>
