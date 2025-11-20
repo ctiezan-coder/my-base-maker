@@ -42,16 +42,21 @@ export default function Auth() {
   const { toast } = useToast();
 
   // Fetch directions for signup
-  const { data: directions } = useQuery({
+  const { data: directions, isLoading: directionsLoading, error: directionsError } = useQuery({
     queryKey: ['directions-signup'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('directions')
         .select('*')
         .order('name');
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching directions:', error);
+        throw error;
+      }
+      console.log('Directions loaded:', data);
       return data;
     },
+    enabled: true,
   });
 
   useEffect(() => {
@@ -227,14 +232,28 @@ export default function Auth() {
                   <Label htmlFor="signup-direction">Direction *</Label>
                   <Select value={directionId} onValueChange={setDirectionId} required>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner votre direction" />
+                      <SelectValue placeholder={
+                        directionsLoading 
+                          ? "Chargement..." 
+                          : directionsError 
+                            ? "Erreur de chargement" 
+                            : "Sélectionner votre direction"
+                      } />
                     </SelectTrigger>
-                    <SelectContent>
-                      {directions?.map((dir) => (
-                        <SelectItem key={dir.id} value={dir.id}>
-                          {dir.name}
-                        </SelectItem>
-                      ))}
+                    <SelectContent className="z-[100] bg-popover">
+                      {directionsLoading ? (
+                        <SelectItem value="loading" disabled>Chargement...</SelectItem>
+                      ) : directionsError ? (
+                        <SelectItem value="error" disabled>Erreur de chargement</SelectItem>
+                      ) : directions && directions.length > 0 ? (
+                        directions.map((dir) => (
+                          <SelectItem key={dir.id} value={dir.id}>
+                            {dir.name}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <SelectItem value="empty" disabled>Aucune direction disponible</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
