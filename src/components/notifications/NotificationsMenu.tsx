@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell } from "lucide-react";
+import { Bell, MessageSquare, AlertCircle, Info, Calendar, FileText, Users, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -23,6 +23,8 @@ interface Notification {
   type: string;
   is_read: boolean;
   created_at: string;
+  reference_table: string | null;
+  reference_id: string | null;
 }
 
 export function NotificationsMenu() {
@@ -61,7 +63,7 @@ export function NotificationsMenu() {
     },
   });
 
-  // Real-time updates
+  // Real-time updates avec son de notification
   useEffect(() => {
     if (!user) return;
 
@@ -76,8 +78,18 @@ export function NotificationsMenu() {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          const newNotification = payload.new as Notification;
           queryClient.invalidateQueries({ queryKey: ["notifications"] });
-          toast.success("Nouvelle notification");
+          
+          // Jouer un son de notification
+          const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0ICYqJDIoLOvuqefpZuYlZOMiYWDhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0ICYqJDIoLOvuqefpZuYlZOMiYWDhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0ICYqJDIoLOvuqefpZuYlZOMiYWDhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0ICYqJDIoLOvuqefpZuYlZOMiYWDhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0A==');
+          audio.volume = 0.3;
+          audio.play().catch(e => console.log('Could not play notification sound:', e));
+          
+          // Afficher un toast avec le titre de la notification
+          toast.info(newNotification.title, {
+            description: newNotification.message,
+          });
         }
       )
       .subscribe();
@@ -92,6 +104,23 @@ export function NotificationsMenu() {
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.is_read) {
       markAsReadMutation.mutate(notification.id);
+    }
+  };
+
+  const getNotificationIcon = (notification: Notification) => {
+    if (notification.reference_table === 'chat_messages') {
+      return <MessageSquare className="h-4 w-4 text-primary" />;
+    }
+    
+    switch (notification.type) {
+      case 'success':
+        return <Sparkles className="h-4 w-4 text-green-500" />;
+      case 'warning':
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      case 'error':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return <Info className="h-4 w-4 text-blue-500" />;
     }
   };
 
@@ -129,27 +158,32 @@ export function NotificationsMenu() {
                 className="p-3 cursor-pointer hover:bg-muted"
                 onClick={() => handleNotificationClick(notification)}
               >
-                <div className="flex flex-col gap-1 w-full">
-                  <div className="flex items-start justify-between gap-2">
-                    <p
-                      className={`text-sm font-medium ${
-                        !notification.is_read ? "font-bold" : ""
-                      }`}
-                    >
-                      {notification.title}
-                    </p>
-                    {!notification.is_read && (
-                      <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
-                    )}
+                <div className="flex gap-3 w-full">
+                  <div className="flex-shrink-0 mt-1">
+                    {getNotificationIcon(notification)}
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {notification.message}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {format(parseISO(notification.created_at), "dd MMM yyyy HH:mm", {
-                      locale: fr,
-                    })}
-                  </p>
+                  <div className="flex flex-col gap-1 flex-1">
+                    <div className="flex items-start justify-between gap-2">
+                      <p
+                        className={`text-sm font-medium ${
+                          !notification.is_read ? "font-bold" : ""
+                        }`}
+                      >
+                        {notification.title}
+                      </p>
+                      {!notification.is_read && (
+                        <div className="h-2 w-2 rounded-full bg-primary flex-shrink-0 mt-1" />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {notification.message}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {format(parseISO(notification.created_at), "dd MMM yyyy HH:mm", {
+                        locale: fr,
+                      })}
+                    </p>
+                  </div>
                 </div>
               </DropdownMenuItem>
             ))

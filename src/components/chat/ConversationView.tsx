@@ -28,6 +28,57 @@ export function ConversationView({ receiverId }: ConversationViewProps) {
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // Marquer les notifications de messages comme lues quand on ouvre la conversation
+  useEffect(() => {
+    if (!user || !receiverId) return;
+
+    const markMessagesAsRead = async () => {
+      // Récupérer les IDs des messages non lus de ce sender
+      const { data: unreadNotifications } = await supabase
+        .from('notifications')
+        .select('id, reference_id')
+        .eq('user_id', user.id)
+        .eq('reference_table', 'chat_messages')
+        .eq('is_read', false);
+
+      if (!unreadNotifications || unreadNotifications.length === 0) return;
+
+      // Récupérer les messages de ce sender
+      const messageIds = unreadNotifications
+        .map(n => n.reference_id)
+        .filter(Boolean);
+
+      if (messageIds.length === 0) return;
+
+      const { data: messages } = await supabase
+        .from('chat_messages')
+        .select('id, sender_id')
+        .in('id', messageIds)
+        .eq('sender_id', receiverId);
+
+      if (!messages || messages.length === 0) return;
+
+      // Marquer les notifications correspondantes comme lues
+      const notificationIds = unreadNotifications
+        .filter(n => messages.some(m => m.id === n.reference_id))
+        .map(n => n.id);
+
+      if (notificationIds.length > 0) {
+        await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .in('id', notificationIds);
+
+        // Invalider les requêtes de notifications
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        queryClient.invalidateQueries({ queryKey: ['unread-messages-count'] });
+        queryClient.invalidateQueries({ queryKey: ['unread-messages-by-user'] });
+      }
+    };
+
+    markMessagesAsRead();
+  }, [user, receiverId, queryClient]);
+
   // Fetch receiver profile
   const { data: receiverProfile } = useQuery({
     queryKey: ["user-profile", receiverId],
