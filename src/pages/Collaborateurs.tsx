@@ -11,8 +11,6 @@ import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog
 import { CompanyDetailsDialog } from "@/components/companies/CompanyDetailsDialog";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useUserDirection } from "@/hooks/useUserDirection";
-import { useUnreadMessages } from "@/hooks/useUnreadMessages";
-import { useUnreadMessagesByUser } from "@/hooks/useUnreadMessagesByUser";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,8 +78,6 @@ export default function Collaborateurs() {
 
   // Chat functionality
   const { messages, isLoading: isLoadingMessages, sendMessage, isSending } = useChatMessages(selectedCollaborators);
-  const { unreadCount } = useUnreadMessages();
-  const { unreadByUser } = useUnreadMessagesByUser();
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -446,19 +442,11 @@ export default function Collaborateurs() {
             </Button>
             <Button
               variant={activeSection === 'chat' ? 'default' : 'ghost'}
-              className="w-full justify-start relative"
+              className="w-full justify-start"
               onClick={() => setActiveSection('chat')}
             >
               <MessageSquare className="mr-2 h-4 w-4" />
               Tchat
-              {unreadCount > 0 && (
-                <Badge 
-                  variant="destructive" 
-                  className="ml-auto h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs"
-                >
-                  {unreadCount}
-                </Badge>
-              )}
             </Button>
           </nav>
 
@@ -911,8 +899,12 @@ export default function Collaborateurs() {
                     <ScrollArea className="h-[500px] pr-4">
                       <div className="space-y-4">
                         {collaborators.map((collab) => {
-                          const hasUnread = unreadByUser[collab.id] > 0;
-                          const unreadCountForUser = unreadByUser[collab.id] || 0;
+                          const initials = collab.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2);
                           
                           return (
                             <div key={collab.id} className="flex items-start space-x-3">
@@ -929,23 +921,21 @@ export default function Collaborateurs() {
                                   }
                                 }}
                               />
-                              <div className="flex-1">
+                              <div className="flex items-center gap-3 flex-1">
+                                <Avatar>
+                                  <AvatarFallback>{initials}</AvatarFallback>
+                                </Avatar>
                                 <label
                                   htmlFor={collab.id}
-                                  className="flex items-center gap-2 cursor-pointer"
+                                  className="flex-1 cursor-pointer"
                                 >
-                                  <div className="flex-1">
+                                  <div>
                                     <div className="flex items-center gap-2">
-                                      <p className={`text-sm font-medium leading-none ${hasUnread ? 'font-bold' : ''}`}>
+                                      <p className="text-sm font-medium leading-none">
                                         {collab.name}
                                       </p>
                                       {collab.online && (
                                         <span className="h-2 w-2 rounded-full bg-green-500" />
-                                      )}
-                                      {hasUnread && (
-                                        <Badge variant="destructive" className="h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs">
-                                          {unreadCountForUser}
-                                        </Badge>
                                       )}
                                     </div>
                                     <p className="text-xs text-muted-foreground mt-1">
