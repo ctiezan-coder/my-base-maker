@@ -17,20 +17,28 @@ export type AppModule =
 export type AppRole = 'admin' | 'manager' | 'user';
 
 export function useModulePermission(
-  directionId: string | null,
   module: AppModule,
   requiredRole: AppRole = 'user'
 ) {
   const { user } = useAuth();
 
   return useQuery({
-    queryKey: ['modulePermission', user?.id, directionId, module, requiredRole],
+    queryKey: ['modulePermission', user?.id, module, requiredRole],
     queryFn: async () => {
-      if (!user || !directionId) return false;
+      if (!user) return false;
+
+      // Get user's direction
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('direction_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile?.direction_id) return false;
 
       const { data, error } = await supabase.rpc('has_module_permission', {
         _user_id: user.id,
-        _direction_id: directionId,
+        _direction_id: profile.direction_id,
         _module: module,
         _required_role: requiredRole,
       });
@@ -42,7 +50,7 @@ export function useModulePermission(
 
       return data || false;
     },
-    enabled: !!user && !!directionId,
+    enabled: !!user,
   });
 }
 
