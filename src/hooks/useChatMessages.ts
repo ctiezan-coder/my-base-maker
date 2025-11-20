@@ -111,7 +111,17 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
         },
         (payload) => {
           console.log('New message received:', payload);
+          const newMessage = payload.new as any;
+          
+          // Invalider les requêtes pour rafraîchir les messages
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+          
+          // Si le message n'est pas de l'utilisateur actuel, jouer un son
+          if (newMessage.sender_id !== user.id) {
+            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0A==');
+            audio.volume = 0.2;
+            audio.play().catch(e => console.log('Could not play message sound:', e));
+          }
         }
       )
       .subscribe();

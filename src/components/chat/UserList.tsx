@@ -4,7 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useUnreadMessagesByUser } from "@/hooks/useUnreadMessagesByUser";
 
 interface UserListProps {
   selectedUserId: string | null;
@@ -13,6 +15,7 @@ interface UserListProps {
 
 export function UserList({ selectedUserId, onSelectUser }: UserListProps) {
   const { user } = useAuth();
+  const { unreadByUser } = useUnreadMessagesByUser();
 
   const { data: users, isLoading } = useQuery({
     queryKey: ["chat-users"],
@@ -67,13 +70,16 @@ export function UserList({ selectedUserId, onSelectUser }: UserListProps) {
               .join("")
               .toUpperCase()
               .slice(0, 2);
+            
+            const hasUnread = (unreadByUser[u.user_id] || 0) > 0;
+            const unreadCountForUser = unreadByUser[u.user_id] || 0;
 
             return (
               <button
                 key={u.user_id}
                 onClick={() => onSelectUser(u.user_id)}
                 className={cn(
-                  "w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left",
+                  "w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left relative",
                   selectedUserId === u.user_id
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted"
@@ -83,7 +89,12 @@ export function UserList({ selectedUserId, onSelectUser }: UserListProps) {
                   <AvatarFallback>{initials}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{u.full_name}</p>
+                  <p className={cn(
+                    "font-medium truncate",
+                    hasUnread && "font-bold"
+                  )}>
+                    {u.full_name}
+                  </p>
                   <p className={cn(
                     "text-xs truncate",
                     selectedUserId === u.user_id
@@ -93,6 +104,14 @@ export function UserList({ selectedUserId, onSelectUser }: UserListProps) {
                     {u.email}
                   </p>
                 </div>
+                {hasUnread && (
+                  <Badge 
+                    variant="destructive" 
+                    className="h-5 min-w-[20px] flex items-center justify-center px-1.5 text-xs"
+                  >
+                    {unreadCountForUser}
+                  </Badge>
+                )}
               </button>
             );
           })}
