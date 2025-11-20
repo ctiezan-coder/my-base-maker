@@ -122,10 +122,12 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
   if (!mediaItems || mediaItems.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Aucun média trouvé
+        {isLoading ? "Chargement..." : "Aucun média trouvé"}
       </div>
     );
   }
+
+  console.log("MediaItems:", mediaItems);
 
   return (
     <>
@@ -206,28 +208,38 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
                     </div>
                   )}
                   
-                  {isServiceCommunication && (
-                    <div className="pt-2 border-t">
-                      <label className="text-xs text-muted-foreground mb-1 block">
-                        Changer le statut
-                      </label>
-                      <Select
-                        value={media.statut_workflow || "Demande"}
-                        onValueChange={(value) => handleStatusChange(media.id, value as "Demande" | "En cours" | "Validé" | "Livré" | "Annulé")}
-                      >
-                        <SelectTrigger className="h-8">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Demande">Demande</SelectItem>
-                          <SelectItem value="En cours">En cours</SelectItem>
-                          <SelectItem value="Validé">Validé</SelectItem>
-                          <SelectItem value="Livré">Livré</SelectItem>
-                          <SelectItem value="Annulé">Annulé</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
+                  {/* Affichage du statut pour tous */}
+                  <div className="pt-2 border-t">
+                    {isServiceCommunication ? (
+                      <>
+                        <label className="text-xs text-muted-foreground mb-1 block">
+                          Changer le statut
+                        </label>
+                        <Select
+                          value={media.statut_workflow || "Demande"}
+                          onValueChange={(value) => handleStatusChange(media.id, value as "Demande" | "En cours" | "Validé" | "Livré" | "Annulé")}
+                        >
+                          <SelectTrigger className="h-8">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Demande">Demande</SelectItem>
+                            <SelectItem value="En cours">En cours</SelectItem>
+                            <SelectItem value="Validé">Validé</SelectItem>
+                            <SelectItem value="Livré">Livré</SelectItem>
+                            <SelectItem value="Annulé">Annulé</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">Statut</span>
+                        <Badge variant={media.statut_workflow === "Livré" ? "default" : "secondary"}>
+                          {media.statut_workflow || "Demande"}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-2 border-t">
