@@ -1698,6 +1698,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      has_any_module_permission: {
+        Args: {
+          _module: Database["public"]["Enums"]["app_module"]
+          _required_role?: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_module_permission: {
         Args: {
           _direction_id: string
