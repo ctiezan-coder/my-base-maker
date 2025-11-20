@@ -20,7 +20,7 @@ export default function Media() {
     queryFn: async () => {
       let query = supabase
         .from("media_content")
-        .select("*, directions(name)")
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (search) {
