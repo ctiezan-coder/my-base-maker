@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserDirection } from "@/hooks/useUserDirection";
@@ -38,10 +38,25 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
   const { data: userDirection } = useUserDirection();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [mediaToDelete, setMediaToDelete] = useState<any>(null);
-  
+  const [directionsMap, setDirectionsMap] = useState<Record<string, string>>({});
+
   // Vérifier si l'utilisateur est du Service Communication
   const isServiceCommunication = userDirection?.direction === "Communication";
 
+  useEffect(() => {
+    const fetchDirections = async () => {
+      const { data, error } = await supabase.from("directions").select("id, name");
+      if (!error && data) {
+        const map: Record<string, string> = {};
+        data.forEach((direction: any) => {
+          map[direction.id] = direction.name;
+        });
+        setDirectionsMap(map);
+      }
+    };
+
+    fetchDirections();
+  }, []);
   const handleDeleteClick = (media: any) => {
     setMediaToDelete(media);
     setDeleteDialogOpen(true);
@@ -173,10 +188,12 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
                 )}
                 
                 <div className="space-y-2">
-                  {media.directions && (
+                  {media.direction_id && (
                     <div className="flex items-center gap-2 text-sm">
                       <Building2 className="w-4 h-4 text-muted-foreground" />
-                      <span className="font-medium">{media.directions.name}</span>
+                      <span className="font-medium">
+                        {directionsMap[media.direction_id] || "Direction inconnue"}
+                      </span>
                     </div>
                   )}
                   
