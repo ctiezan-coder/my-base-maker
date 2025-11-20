@@ -22,7 +22,7 @@ export default function Media() {
         .from("media_content")
         .select(`
           *,
-          directions:direction_id (
+          directions!media_content_direction_id_fkey (
             id,
             name
           )
