@@ -54,6 +54,7 @@ const App = () => (
               <Route path="admin" element={<Admin />} />
               <Route path="permissions" element={<UserPermissions />} />
               <Route path="collaborateurs" element={<Collaborateurs />} />
+              <Route path="chat" element={<Chat />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
