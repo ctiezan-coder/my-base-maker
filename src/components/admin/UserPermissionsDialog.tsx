@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -19,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
@@ -45,6 +43,13 @@ const MODULES = [
   { value: "suivi_evaluation", label: "Suivi & Évaluation" },
 ];
 
+const ROLE_OPTIONS = [
+  { value: "none", label: "Aucun accès" },
+  { value: "user", label: "Lecture" },
+  { value: "manager", label: "Lecture/Écriture" },
+  { value: "admin", label: "Admin" },
+];
+
 export function UserPermissionsDialog({
   user,
   open,
@@ -52,23 +57,9 @@ export function UserPermissionsDialog({
 }: UserPermissionsDialogProps) {
   const queryClient = useQueryClient();
   const [globalRole, setGlobalRole] = useState<string>("user");
-  const [selectedDirection, setSelectedDirection] = useState<string>("");
   const [modulePermissions, setModulePermissions] = useState<
     Record<string, string>
   >({});
-
-  // Fetch directions
-  const { data: directions } = useQuery({
-    queryKey: ["directions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("directions")
-        .select("*")
-        .order("name");
-      if (error) throw error;
-      return data;
-    },
-  });
 
   // Initialize states
   useEffect(() => {
@@ -80,26 +71,17 @@ export function UserPermissionsDialog({
         : "user";
       setGlobalRole(highestRole);
 
-      // Set first direction as selected
-      if (directions && directions.length > 0) {
-        setSelectedDirection(directions[0].id);
-      }
-    }
-  }, [user, directions]);
-
-  // Update module permissions when direction changes
-  useEffect(() => {
-    if (selectedDirection && user) {
-      const directionAssignments = user.assignments.filter(
-        (a: any) => a.direction_id === selectedDirection
-      );
+      // Load module permissions
       const permissions: Record<string, string> = {};
-      directionAssignments.forEach((a: any) => {
-        permissions[a.module] = a.role;
+      MODULES.forEach((module) => {
+        const assignment = user.assignments.find(
+          (a: any) => a.module === module.value
+        );
+        permissions[module.value] = assignment?.role || "none";
       });
       setModulePermissions(permissions);
     }
-  }, [selectedDirection, user]);
+  }, [user]);
 
   // Save global role
   const saveGlobalRoleMutation = useMutation({
@@ -131,24 +113,32 @@ export function UserPermissionsDialog({
     },
   });
 
-  // Save direction permissions
-  const saveDirectionPermissionsMutation = useMutation({
+  // Save module permissions
+  const saveModulePermissionsMutation = useMutation({
     mutationFn: async () => {
-      if (!selectedDirection) return;
+      // Get user's primary direction
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("direction_id")
+        .eq("user_id", user.user_id)
+        .single();
 
-      // Delete existing assignments for this direction
+      if (!profile?.direction_id) {
+        throw new Error("Direction de l'utilisateur non trouvée");
+      }
+
+      // Delete existing assignments for this user
       await supabase
         .from("user_role_assignments")
         .delete()
-        .eq("user_id", user.user_id)
-        .eq("direction_id", selectedDirection);
+        .eq("user_id", user.user_id);
 
-      // Insert new assignments
+      // Insert new assignments for all modules using user's primary direction
       const assignments = Object.entries(modulePermissions)
         .filter(([_, role]) => role !== "none")
         .map(([module, role]) => ({
           user_id: user.user_id,
-          direction_id: selectedDirection,
+          direction_id: profile.direction_id,
           module: module as any,
           role: role as "admin" | "manager" | "user",
         }));
@@ -157,13 +147,12 @@ export function UserPermissionsDialog({
         const { error } = await supabase
           .from("user_role_assignments")
           .insert(assignments);
-
         if (error) throw error;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-users-permissions"] });
-      toast.success("Permissions de direction mises à jour");
+      toast.success("Permissions des modules mises à jour");
     },
     onError: (error: Error) => {
       toast.error("Erreur lors de la mise à jour des permissions", {
@@ -183,109 +172,93 @@ export function UserPermissionsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
-          <DialogTitle>Gérer les permissions de {user.full_name}</DialogTitle>
-          <DialogDescription>{user.email}</DialogDescription>
+          <DialogTitle>Gérer les permissions - {user?.full_name}</DialogTitle>
+          <DialogDescription>
+            Gérez le rôle global et les permissions par module de l'utilisateur
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue="global" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="global">Rôle Global</TabsTrigger>
-            <TabsTrigger value="directions">Accès aux Directions</TabsTrigger>
+            <TabsTrigger value="modules">Permissions par Module</TabsTrigger>
           </TabsList>
 
           <TabsContent value="global" className="space-y-4">
             <Card className="p-4">
-              <div className="space-y-3">
-                <Label>Rôle global de l'utilisateur</Label>
-                <Select value={globalRole} onValueChange={setGlobalRole}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="user">Utilisateur</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="admin">Administrateur</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground">
-                  {globalRole === "admin" &&
-                    "Accès complet à toutes les fonctionnalités et données"}
-                  {globalRole === "manager" &&
-                    "Peut gérer les utilisateurs et les données"}
-                  {globalRole === "user" && "Accès basique aux fonctionnalités"}
-                </p>
-                <Button
-                  onClick={() => saveGlobalRoleMutation.mutate(globalRole)}
-                  disabled={saveGlobalRoleMutation.isPending}
-                >
-                  Enregistrer le rôle global
-                </Button>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Rôle global</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Définissez le rôle principal de l'utilisateur dans le système
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="global-role">Rôle</Label>
+                  <Select value={globalRole} onValueChange={setGlobalRole}>
+                    <SelectTrigger id="global-role" className="w-[200px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="user">Utilisateur</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="admin">Administrateur</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="pt-4">
+                  <Button
+                    onClick={() => saveGlobalRoleMutation.mutate(globalRole)}
+                    disabled={saveGlobalRoleMutation.isPending}
+                  >
+                    {saveGlobalRoleMutation.isPending
+                      ? "Enregistrement..."
+                      : "Enregistrer le rôle"}
+                  </Button>
+                </div>
               </div>
             </Card>
           </TabsContent>
 
-          <TabsContent value="directions" className="space-y-4">
-            <div className="space-y-3">
-              <Label>Sélectionner une direction</Label>
-              <Select
-                value={selectedDirection}
-                onValueChange={setSelectedDirection}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choisir une direction" />
-                </SelectTrigger>
-                <SelectContent>
-                  {directions?.map((dir) => (
-                    <SelectItem key={dir.id} value={dir.id}>
-                      {dir.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <TabsContent value="modules" className="space-y-4">
+            <Card className="p-4">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">
+                    Permissions par module
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Définissez les permissions de l'utilisateur pour chaque module de la plateforme
+                  </p>
+                </div>
 
-            {selectedDirection && (
-              <Card className="p-4">
-                <ScrollArea className="h-[400px]">
+                <ScrollArea className="h-[400px] pr-4">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-semibold">
-                        Permissions par module
-                      </h4>
-                      <Badge variant="outline">
-                        {
-                          Object.values(modulePermissions).filter(
-                            (r) => r !== "none"
-                          ).length
-                        }{" "}
-                        / {MODULES.length}
-                      </Badge>
-                    </div>
-
                     {MODULES.map((module) => (
                       <div
                         key={module.value}
-                        className="flex items-center justify-between py-2 border-b"
+                        className="flex items-center justify-between p-3 border rounded-lg"
                       >
-                        <span className="text-sm font-medium">
-                          {module.label}
-                        </span>
+                        <div>
+                          <Label className="font-medium">{module.label}</Label>
+                        </div>
                         <Select
                           value={modulePermissions[module.value] || "none"}
                           onValueChange={(value) =>
                             handleModuleRoleChange(module.value, value)
                           }
                         >
-                          <SelectTrigger className="w-[150px]">
+                          <SelectTrigger className="w-[180px]">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="none">Aucun accès</SelectItem>
-                            <SelectItem value="user">Lecture</SelectItem>
-                            <SelectItem value="manager">
-                              Lecture/Écriture
-                            </SelectItem>
-                            <SelectItem value="admin">Admin</SelectItem>
+                            {ROLE_OPTIONS.map((role) => (
+                              <SelectItem key={role.value} value={role.value}>
+                                {role.label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </div>
@@ -293,16 +266,18 @@ export function UserPermissionsDialog({
                   </div>
                 </ScrollArea>
 
-                <DialogFooter className="mt-4">
+                <div className="pt-4 flex gap-2">
                   <Button
-                    onClick={() => saveDirectionPermissionsMutation.mutate()}
-                    disabled={saveDirectionPermissionsMutation.isPending}
+                    onClick={() => saveModulePermissionsMutation.mutate()}
+                    disabled={saveModulePermissionsMutation.isPending}
                   >
-                    Enregistrer les permissions
+                    {saveModulePermissionsMutation.isPending
+                      ? "Enregistrement..."
+                      : "Enregistrer les permissions"}
                   </Button>
-                </DialogFooter>
-              </Card>
-            )}
+                </div>
+              </div>
+            </Card>
           </TabsContent>
         </Tabs>
       </DialogContent>
