@@ -23,7 +23,6 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
   const [file, setFile] = useState<File | null>(null);
   const [formData, setFormData] = useState<any>({
     title: "",
-    description: "",
     file_url: "",
     media_type: "Newsletter",
     priority_level: "5",
@@ -34,7 +33,6 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
     deroule: "",
     parties_prenantes: "",
     panelistes: "",
-    statut_workflow: "Demande",
   });
 
   const { data: directions } = useQuery({
@@ -56,7 +54,6 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
     } else {
       setFormData({
         title: "",
-        description: "",
         file_url: "",
         media_type: "Newsletter",
         priority_level: "5",
@@ -67,7 +64,6 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
         deroule: "",
         parties_prenantes: "",
         panelistes: "",
-        statut_workflow: "Demande",
       });
       setFile(null);
     }
@@ -261,23 +257,6 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="statut_workflow">Statut</Label>
-            <Select
-              value={formData.statut_workflow}
-              onValueChange={(value) => setFormData({ ...formData, statut_workflow: value })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Demande">Demande</SelectItem>
-                <SelectItem value="En cours">En cours</SelectItem>
-                <SelectItem value="Livré">Traité</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="file">Fichier</Label>
             <Input
               id="file"
@@ -288,16 +267,6 @@ export function MediaDialog({ open, onOpenChange, media, onClose }: MediaDialogP
             {formData.file_url && !file && (
               <p className="text-sm text-muted-foreground">Fichier actuel enregistré</p>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description || ""}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-            />
           </div>
 
           <div className="flex justify-end gap-2">
