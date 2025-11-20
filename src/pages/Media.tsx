@@ -20,11 +20,17 @@ export default function Media() {
     queryFn: async () => {
       let query = supabase
         .from("media_content")
-        .select("*")
+        .select(`
+          *,
+          directions:direction_id (
+            id,
+            name
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+        query = query.or(`title.ilike.%${search}%`);
       }
 
       const { data, error } = await query;
