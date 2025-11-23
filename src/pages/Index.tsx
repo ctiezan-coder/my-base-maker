@@ -11,9 +11,26 @@ const Index = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate('/auth');
-    }
+    const checkAuth = async () => {
+      if (!loading) {
+        if (!user) {
+          navigate('/auth');
+        } else {
+          // Check account status
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('account_status')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (profile && profile.account_status !== 'approved') {
+            navigate('/pending-approval');
+          }
+        }
+      }
+    };
+    
+    checkAuth();
   }, [user, loading, navigate]);
 
   if (loading) {

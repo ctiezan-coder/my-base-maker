@@ -7,8 +7,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Users, Lock, Trash2, Edit } from "lucide-react";
+import { Shield, Users, Lock, Trash2, CheckCircle, UserCog } from "lucide-react";
 import { RoleAssignmentDialog } from "./RoleAssignmentDialog";
+import { UserPermissionsDialog } from "./UserPermissionsDialog";
+import { AccountApprovalDialog } from "./AccountApprovalDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +28,10 @@ interface UserData {
   full_name: string;
   email: string;
   direction: string | null;
+  direction_id: string | null;
+  directions?: { name: string } | null;
   role: string;
+  account_status?: string;
   created_at: string;
 }
 
@@ -35,14 +40,23 @@ export function UserManagementTable() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
+  const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
 
   const { data: users, isLoading } = useQuery({
     queryKey: ['adminUsers'],
     queryFn: async () => {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select(`
+          *,
+          directions (
+            name
+          )
+        `)
+        .order('created_at', { ascending: false});
 
       const { data: roles } = await supabase
         .from('user_roles')
@@ -96,10 +110,10 @@ export function UserManagementTable() {
   });
 
   const updateDirectionMutation = useMutation({
-    mutationFn: async ({ userId, direction }: { userId: string; direction: string | null }) => {
+    mutationFn: async ({ userId, directionId }: { userId: string; directionId: string | null }) => {
       const { error } = await supabase
         .from('profiles')
-        .update({ direction })
+        .update({ direction_id: directionId })
         .eq('user_id', userId);
 
       if (error) throw error;
@@ -122,11 +136,9 @@ export function UserManagementTable() {
 
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      // Get the session for auth header
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Non authentifié");
 
-      // Call edge function to delete user
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`, {
         method: 'POST',
         headers: {
@@ -185,6 +197,7 @@ export function UserManagementTable() {
               <TableHead>Utilisateur</TableHead>
               <TableHead>Direction</TableHead>
               <TableHead>Rôle</TableHead>
+              <TableHead>Statut</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -205,11 +218,11 @@ export function UserManagementTable() {
                 <TableCell>
                   {userData.user_id !== user?.id ? (
                     <Select
-                      value={userData.direction || undefined}
+                      value={userData.direction_id || undefined}
                       onValueChange={(value) =>
                         updateDirectionMutation.mutate({
                           userId: userData.user_id,
-                          direction: value || null,
+                          directionId: value || null,
                         })
                       }
                     >
@@ -218,14 +231,14 @@ export function UserManagementTable() {
                       </SelectTrigger>
                       <SelectContent>
                         {directions?.map((dir) => (
-                          <SelectItem key={dir.id} value={dir.name}>
+                          <SelectItem key={dir.id} value={dir.id}>
                             {dir.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   ) : (
-                    <span className="text-sm">{userData.direction || "Aucune"}</span>
+                    <span className="text-sm">{userData.directions?.name || "Aucune"}</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -233,7 +246,7 @@ export function UserManagementTable() {
                     <Badge variant={getRoleBadgeVariant(userData.role)}>
                       {userData.role}
                     </Badge>
-                    {userData.user_id !== user?.id ? (
+                    {userData.user_id !== user?.id && (
                     <Select
                       value={userData.role}
                       onValueChange={(value: 'admin' | 'manager' | 'user') =>
@@ -252,16 +265,61 @@ export function UserManagementTable() {
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">(Vous)</span>
                     )}
                   </div>
+                </TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={
+                      userData.account_status === 'approved' ? 'default' :
+                      userData.account_status === 'pending' ? 'secondary' :
+                      userData.account_status === 'suspended' ? 'destructive' : 'outline'
+                    }
+                  >
+                    {userData.account_status === 'approved' ? 'Approuvé' :
+                     userData.account_status === 'pending' ? 'En attente' :
+                     userData.account_status === 'suspended' ? 'Suspendu' : 'Rejeté'}
+                  </Badge>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     {userData.user_id !== user?.id && (
                       <>
-                        <RoleAssignmentDialog userId={userData.user_id} userEmail={userData.email} />
+                        {userData.account_status !== 'approved' && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedUser(userData);
+                              setApprovalDialogOpen(true);
+                            }}
+                            title="Gérer l'approbation"
+                          >
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedUser(userData);
+                            setRoleDialogOpen(true);
+                          }}
+                          title="Gérer le rôle"
+                        >
+                          <Shield className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedUser(userData);
+                            setPermissionsDialogOpen(true);
+                          }}
+                          title="Gérer les permissions"
+                        >
+                          <UserCog className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -278,6 +336,28 @@ export function UserManagementTable() {
           </TableBody>
         </Table>
       </div>
+
+      {selectedUser && (
+        <>
+          <AccountApprovalDialog
+            userId={selectedUser.user_id}
+            userName={selectedUser.full_name}
+            userEmail={selectedUser.email}
+            currentStatus={selectedUser.account_status || 'pending'}
+            open={approvalDialogOpen}
+            onOpenChange={setApprovalDialogOpen}
+          />
+          <RoleAssignmentDialog 
+            userId={selectedUser.user_id}
+            userEmail={selectedUser.email}
+          />
+          <UserPermissionsDialog
+            user={selectedUser}
+            open={permissionsDialogOpen}
+            onOpenChange={setPermissionsDialogOpen}
+          />
+        </>
+      )}
 
       <AlertDialog open={!!deleteUserId} onOpenChange={() => setDeleteUserId(null)}>
         <AlertDialogContent>
