@@ -49,6 +49,18 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
     },
   });
 
+  const { data: users } = useQuery({
+    queryKey: ['users-for-assignment'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email')
+        .order('full_name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const { data: attachments, refetch: refetchAttachments } = useQuery({
     queryKey: ['imputation-attachments', imputation?.id],
     queryFn: async () => {
@@ -75,6 +87,7 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
     etat: "En attente",
     direction_id: null,
     created_by: user?.id || null,
+    assigned_to: null,
   });
 
   useEffect(() => {
@@ -90,6 +103,7 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
         etat: imputation.etat,
         direction_id: imputation.direction_id,
         created_by: imputation.created_by,
+        assigned_to: imputation.assigned_to,
       });
     } else {
       setFormData({
@@ -103,6 +117,7 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
         etat: "En attente",
         direction_id: null,
         created_by: user?.id || null,
+        assigned_to: null,
       });
     }
   }, [imputation, user]);
@@ -395,23 +410,47 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="etat">État *</Label>
-            <Select
-              value={formData.etat}
-              onValueChange={(value: any) =>
-                setFormData({ ...formData, etat: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="En attente">En attente</SelectItem>
-                <SelectItem value="En cours">En cours</SelectItem>
-                <SelectItem value="Terminé">Terminé</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="etat">État *</Label>
+              <Select
+                value={formData.etat}
+                onValueChange={(value: any) =>
+                  setFormData({ ...formData, etat: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="En attente">En attente</SelectItem>
+                  <SelectItem value="En cours">En cours</SelectItem>
+                  <SelectItem value="Terminé">Terminé</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="assigned_to">Personne assignée</Label>
+              <Select
+                value={formData.assigned_to || ""}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, assigned_to: value || null })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une personne" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Aucune</SelectItem>
+                  {users?.map((user) => (
+                    <SelectItem key={user.user_id} value={user.user_id}>
+                      {user.full_name} ({user.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* File Upload Section */}

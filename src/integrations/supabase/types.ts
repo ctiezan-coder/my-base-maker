@@ -643,6 +643,7 @@ export type Database = {
       }
       imputations: {
         Row: {
+          assigned_to: string | null
           created_at: string
           created_by: string | null
           date_imputation: string | null
@@ -658,6 +659,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string
           created_by?: string | null
           date_imputation?: string | null
@@ -673,6 +675,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string
           created_by?: string | null
           date_imputation?: string | null
