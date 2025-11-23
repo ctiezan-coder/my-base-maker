@@ -113,10 +113,16 @@ export default function Imputations() {
   ).sort((a, b) => b - a);
 
   const filteredImputations = imputations.filter((imputation) => {
-    const matchesSearch =
-      imputation.provenance.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      imputation.objet.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      imputation.imputation.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = searchTerm === "" ||
+      imputation.provenance.toLowerCase().includes(searchLower) ||
+      imputation.objet.toLowerCase().includes(searchLower) ||
+      imputation.imputation.toLowerCase().includes(searchLower) ||
+      imputation.etat.toLowerCase().includes(searchLower) ||
+      (imputation.observations?.toLowerCase().includes(searchLower) || false) ||
+      imputation.date_reception.includes(searchTerm) ||
+      (imputation.date_imputation?.includes(searchTerm) || false) ||
+      (imputation.date_realisation?.includes(searchTerm) || false);
 
     const matchesEtat = filterEtat === "all" || imputation.etat === filterEtat;
     
