@@ -146,9 +146,28 @@ export default function Admin() {
     return matchesSearch && matchesRole && matchesDirection;
   });
 
-  // Don't render if loading, not approved, or not admin
-  if (profileLoading || roleLoading || !currentProfile || currentProfile.account_status !== 'approved' || !isAdmin) {
-    return null;
+  // Show loading state
+  if (profileLoading || roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render if not approved or not admin (redirects will happen in useEffect)
+  if (!currentProfile || currentProfile.account_status !== 'approved' || !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Shield className="w-16 h-16 text-muted-foreground mx-auto" />
+          <p className="text-muted-foreground">Vérification des permissions...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
