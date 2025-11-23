@@ -130,6 +130,23 @@ export default function Auth() {
     }
 
     setLoading(true);
+
+    // Vérifier si l'email existe déjà
+    const { data: existingProfile } = await supabase
+      .from("profiles")
+      .select("email")
+      .eq("email", email.toLowerCase().trim())
+      .maybeSingle();
+
+    if (existingProfile) {
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Compte existant",
+        description: "Un compte avec cet email existe déjà",
+      });
+      return;
+    }
     
     // Sign up the user with direction_id in metadata
     const { error } = await supabase.auth.signUp({
