@@ -1,12 +1,13 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Pencil, Trash2, TrendingUp, TrendingDown, Minus, Eye } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useState } from "react";
 import type { KpiTracking } from "@/types/kpi";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { KpiDetailsDialog } from "./KpiDetailsDialog";
 
 interface KpiTableProps {
   kpis: KpiTracking[];
@@ -19,6 +20,8 @@ interface KpiTableProps {
 export function KpiTable({ kpis, isLoading, onEdit, onDelete, canManage = false }: KpiTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [kpiToDelete, setKpiToDelete] = useState<KpiTracking | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [kpiToView, setKpiToView] = useState<KpiTracking | null>(null);
 
   const handleDeleteClick = (kpi: KpiTracking) => {
     setKpiToDelete(kpi);
@@ -31,6 +34,11 @@ export function KpiTable({ kpis, isLoading, onEdit, onDelete, canManage = false 
       setDeleteDialogOpen(false);
       setKpiToDelete(null);
     }
+  };
+
+  const handleViewClick = (kpi: KpiTracking) => {
+    setKpiToView(kpi);
+    setViewDialogOpen(true);
   };
 
   const getPerformanceIndicator = (value: number, target?: number | null) => {
@@ -122,29 +130,45 @@ export function KpiTable({ kpis, isLoading, onEdit, onDelete, canManage = false 
                 {kpi.notes || "-"}
               </TableCell>
               <TableCell className="text-right">
-                {canManage && (
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEdit(kpi)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick(kpi)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                )}
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleViewClick(kpi)}
+                    title="Voir les détails"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  {canManage && (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(kpi)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteClick(kpi)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <KpiDetailsDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        kpi={kpiToView}
+      />
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
