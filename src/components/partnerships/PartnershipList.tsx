@@ -11,6 +11,7 @@ interface PartnershipListProps {
   partnerships: any[];
   isLoading: boolean;
   onEdit: (partnership: any) => void;
+  canManage?: boolean;
 }
 
 const statusColors = {
@@ -19,7 +20,7 @@ const statusColors = {
   "suspendu": "destructive",
 } as const;
 
-export function PartnershipList({ partnerships, isLoading, onEdit }: PartnershipListProps) {
+export function PartnershipList({ partnerships, isLoading, onEdit, canManage = true }: PartnershipListProps) {
   const { data: projectsMap = {} } = useQuery({
     queryKey: ["partnership-projects-map"],
     queryFn: async () => {
@@ -131,9 +132,11 @@ export function PartnershipList({ partnerships, isLoading, onEdit }: Partnership
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(partnership)}>
-                  <Pencil className="w-4 h-4" />
-                </Button>
+                {canManage && (
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(partnership)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

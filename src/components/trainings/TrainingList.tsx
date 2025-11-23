@@ -9,9 +9,10 @@ interface TrainingListProps {
   trainings: any[];
   isLoading: boolean;
   onEdit: (training: any) => void;
+  canManage?: boolean;
 }
 
-export function TrainingList({ trainings, isLoading, onEdit }: TrainingListProps) {
+export function TrainingList({ trainings, isLoading, onEdit, canManage = true }: TrainingListProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -68,9 +69,11 @@ export function TrainingList({ trainings, isLoading, onEdit }: TrainingListProps
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(training)}>
-                  <Pencil className="w-4 h-4" />
-                </Button>
+                {canManage && (
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(training)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}

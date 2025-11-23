@@ -66,6 +66,7 @@ export default function Trainings() {
             trainings={trainings || []}
             isLoading={isLoading}
             onEdit={handleEdit}
+            canManage={canManageTrainings}
           />
         </CardContent>
       </Card>

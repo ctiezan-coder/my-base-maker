@@ -70,6 +70,7 @@ export default function Projects() {
             projects={projects || []}
             isLoading={isLoading}
             onEdit={handleEdit}
+            canManage={canManageProjects}
           />
         </CardContent>
       </Card>
