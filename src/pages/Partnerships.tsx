@@ -71,6 +71,7 @@ export default function Partnerships() {
             partnerships={partnerships || []}
             isLoading={isLoading}
             onEdit={handleEdit}
+            canManage={canManagePartnerships}
           />
         </CardContent>
       </Card>

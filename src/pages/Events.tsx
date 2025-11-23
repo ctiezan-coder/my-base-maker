@@ -240,6 +240,7 @@ export default function Events() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             viewMode={viewMode}
+            canManage={canManageEvents}
           />
         </CardContent>
       </Card>

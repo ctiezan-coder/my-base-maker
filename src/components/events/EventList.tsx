@@ -22,9 +22,10 @@ interface EventListProps {
   onEdit: (event: any) => void;
   onDelete: (event: any) => void;
   viewMode?: "grid" | "list";
+  canManage?: boolean;
 }
 
-export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "grid" }: EventListProps) {
+export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "grid", canManage = true }: EventListProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<any>(null);
 
@@ -124,14 +125,16 @@ export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "gri
                       </div>
                     </div>
                     
-                    <div className="flex gap-1 ml-4">
-                      <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
+                    {canManage && (
+                      <div className="flex gap-1 ml-4">
+                        <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -163,14 +166,16 @@ export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "gri
                       {event.event_type}
                     </Badge>
                   </div>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </div>
+                  {canManage && (
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">

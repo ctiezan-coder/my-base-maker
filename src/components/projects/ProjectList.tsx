@@ -9,6 +9,7 @@ interface ProjectListProps {
   projects: any[];
   isLoading: boolean;
   onEdit: (project: any) => void;
+  canManage?: boolean;
 }
 
 const statusColors = {
@@ -18,7 +19,7 @@ const statusColors = {
   "suspendu": "destructive",
 } as const;
 
-export function ProjectList({ projects, isLoading, onEdit }: ProjectListProps) {
+export function ProjectList({ projects, isLoading, onEdit, canManage = true }: ProjectListProps) {
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
@@ -80,9 +81,11 @@ export function ProjectList({ projects, isLoading, onEdit }: ProjectListProps) {
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(project)}>
-                  <Pencil className="w-4 h-4" />
-                </Button>
+                {canManage && (
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(project)}>
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}
