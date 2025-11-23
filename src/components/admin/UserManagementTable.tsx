@@ -163,11 +163,12 @@ export function UserManagementTable() {
       });
       setDeleteUserId(null);
     },
-    onError: () => {
+    onError: (error: Error) => {
+      console.error('Delete user error:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible de supprimer l'utilisateur",
+        description: error.message || "Impossible de supprimer l'utilisateur",
       });
     },
   });
