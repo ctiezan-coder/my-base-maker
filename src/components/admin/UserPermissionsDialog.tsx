@@ -64,9 +64,9 @@ export function UserPermissionsDialog({
   // Initialize states
   useEffect(() => {
     if (user) {
-      const highestRole = user.roles.includes("admin")
+      const highestRole = user.roles?.includes("admin")
         ? "admin"
-        : user.roles.includes("manager")
+        : user.roles?.includes("manager")
         ? "manager"
         : "user";
       setGlobalRole(highestRole);
@@ -74,7 +74,7 @@ export function UserPermissionsDialog({
       // Load module permissions
       const permissions: Record<string, string> = {};
       MODULES.forEach((module) => {
-        const assignment = user.assignments.find(
+        const assignment = user.assignments?.find(
           (a: any) => a.module === module.value
         );
         permissions[module.value] = assignment?.role || "none";
