@@ -13,9 +13,10 @@ interface KpiTableProps {
   isLoading: boolean;
   onEdit: (kpi: KpiTracking) => void;
   onDelete: (kpi: KpiTracking) => void;
+  canManage?: boolean;
 }
 
-export function KpiTable({ kpis, isLoading, onEdit, onDelete }: KpiTableProps) {
+export function KpiTable({ kpis, isLoading, onEdit, onDelete, canManage = false }: KpiTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [kpiToDelete, setKpiToDelete] = useState<KpiTracking | null>(null);
 
@@ -121,22 +122,24 @@ export function KpiTable({ kpis, isLoading, onEdit, onDelete }: KpiTableProps) {
                 {kpi.notes || "-"}
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEdit(kpi)}
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteClick(kpi)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+                {canManage && (
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEdit(kpi)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteClick(kpi)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ))}

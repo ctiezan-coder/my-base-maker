@@ -23,9 +23,10 @@ interface DocumentListProps {
   isLoading: boolean;
   onEdit: (document: any) => void;
   onDelete: (document: any) => void;
+  canManage?: boolean;
 }
 
-export function DocumentList({ documents, isLoading, onEdit, onDelete }: DocumentListProps) {
+export function DocumentList({ documents, isLoading, onEdit, onDelete, canManage = false }: DocumentListProps) {
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<any>(null);
@@ -125,12 +126,16 @@ export function DocumentList({ documents, isLoading, onEdit, onDelete }: Documen
                       <Download className="w-4 h-4" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="sm" onClick={() => onEdit(doc)}>
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(doc)}>
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
+                  {canManage && (
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => onEdit(doc)}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(doc)}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </CardHeader>

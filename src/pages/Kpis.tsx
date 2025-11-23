@@ -153,6 +153,7 @@ export default function Kpis() {
             isLoading={isLoading}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            canManage={canManageKpis}
           />
         </CardContent>
       </Card>

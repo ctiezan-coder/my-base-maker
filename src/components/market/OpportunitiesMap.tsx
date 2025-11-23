@@ -9,6 +9,7 @@ import { SendToOperatorsDialog } from './SendToOperatorsDialog';
 interface OpportunitiesMapProps {
   opportunities: ExportOpportunity[];
   onOpportunityClick?: (opportunity: ExportOpportunity) => void;
+  canManage?: boolean;
 }
 
 // Fix for default marker icons in Leaflet with Vite
@@ -19,7 +20,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: OpportunitiesMapProps) => {
+export const OpportunitiesMap = ({ opportunities, onOpportunityClick, canManage = false }: OpportunitiesMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const markersLayer = useRef<L.LayerGroup | null>(null);
@@ -257,6 +258,7 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
             >
               📋 Voir détails
             </button>
+            ${canManage ? `
             <button 
               class="opp-send-btn"
               data-opp-id="${opp.id}"
@@ -278,6 +280,7 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick }: Opportun
             >
               📤 Envoyer
             </button>
+            ` : ''}
           </div>
         `;
         

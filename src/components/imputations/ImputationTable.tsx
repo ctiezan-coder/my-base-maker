@@ -30,9 +30,10 @@ import type { Imputation } from "@/types/imputation";
 interface ImputationTableProps {
   imputations: Imputation[];
   onEdit: (imputation: Imputation) => void;
+  canManage?: boolean;
 }
 
-export function ImputationTable({ imputations, onEdit }: ImputationTableProps) {
+export function ImputationTable({ imputations, onEdit, canManage = false }: ImputationTableProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -138,22 +139,24 @@ export function ImputationTable({ imputations, onEdit }: ImputationTableProps) {
                 <TableCell>{formatDate(imputation.date_realisation)}</TableCell>
                 <TableCell>{getStatusBadge(imputation.etat)}</TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(imputation)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeleteId(imputation.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {canManage && (
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(imputation)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setDeleteId(imputation.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

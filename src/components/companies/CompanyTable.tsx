@@ -20,9 +20,10 @@ interface CompanyTableProps {
   isLoading: boolean;
   onEdit: (company: any) => void;
   onDelete: (company: any) => void;
+  canManage?: boolean;
 }
 
-export function CompanyTable({ companies, isLoading, onEdit, onDelete }: CompanyTableProps) {
+export function CompanyTable({ companies, isLoading, onEdit, onDelete, canManage = false }: CompanyTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [companyToDelete, setCompanyToDelete] = useState<any>(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
@@ -125,12 +126,16 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete }: Company
                   <Button variant="ghost" size="sm" onClick={() => handleViewDetails(company)} title="Voir détails">
                     <Eye className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => onEdit(company)} title="Modifier">
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(company)} title="Supprimer">
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
+                  {canManage && (
+                    <>
+                      <Button variant="ghost" size="sm" onClick={() => onEdit(company)} title="Modifier">
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(company)} title="Supprimer">
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
