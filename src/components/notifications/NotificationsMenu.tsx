@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Bell, MessageSquare, AlertCircle, Info, Calendar, FileText, Users, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,6 +31,7 @@ interface Notification {
 export function NotificationsMenu() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
 
   const { data: notifications = [] } = useQuery({
@@ -105,9 +107,21 @@ export function NotificationsMenu() {
     if (!notification.is_read) {
       markAsReadMutation.mutate(notification.id);
     }
+    
+    // Navigate based on reference table
+    if (notification.reference_table === 'profiles' && notification.title.includes("inscription")) {
+      setOpen(false);
+      navigate('/admin');
+    } else if (notification.reference_table === 'chat_messages') {
+      setOpen(false);
+      navigate('/chat');
+    }
   };
 
   const getNotificationIcon = (notification: Notification) => {
+    if (notification.reference_table === 'profiles' && notification.title.includes("inscription")) {
+      return <Users className="h-4 w-4 text-blue-500" />;
+    }
     if (notification.reference_table === 'chat_messages') {
       return <MessageSquare className="h-4 w-4 text-primary" />;
     }
