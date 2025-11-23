@@ -124,8 +124,10 @@ export function KpiDetailsDialog({ open, onOpenChange, kpi }: KpiDetailsDialogPr
 
           {kpi.notes && (
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Détails</label>
-              <div className="bg-muted/50 rounded-lg p-4 whitespace-pre-wrap text-sm">
+              <label className="text-sm font-medium text-muted-foreground">
+                {kpi.notes.includes('Liste des') ? 'Liste détaillée' : 'Notes'}
+              </label>
+              <div className="bg-muted/50 rounded-lg p-4 whitespace-pre-line text-sm leading-relaxed">
                 {kpi.notes}
               </div>
             </div>
