@@ -177,15 +177,14 @@ export default function Auth() {
           description: "Une erreur s'est produite lors de l'inscription",
         });
       }
-      } else {
-        toast({
-          title: "Inscription réussie",
-          description: "Votre demande d'inscription a été envoyée. Un administrateur doit approuver votre compte avant que vous puissiez accéder à la plateforme.",
-          duration: 8000,
-        });
-        // Optionally redirect to pending approval page after signup
-        navigate('/pending-approval');
-      }
+    } else {
+      toast({
+        title: "Inscription réussie",
+        description: "Un email de vérification a été envoyé à votre adresse @cotedivoirexport.ci. Veuillez confirmer votre email avant de vous connecter.",
+        duration: 8000,
+      });
+      setIsLogin(true); // Revenir à l'écran de connexion
+    }
   };
 
   return (
