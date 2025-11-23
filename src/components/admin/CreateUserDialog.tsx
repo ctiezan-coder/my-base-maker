@@ -13,7 +13,7 @@ import { z } from "zod";
 const createUserSchema = z.object({
   email: z.string().email("Email invalide"),
   fullName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  password: z.string().min(8, "Le mot de passe doit contenir au moins 8 caractères"),
   role: z.enum(["admin", "manager", "user"]),
   directionId: z.string().uuid("Direction requise"),
 });
@@ -154,9 +154,9 @@ export function CreateUserDialog() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minimum 6 caractères"
+              placeholder="Minimum 8 caractères"
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
 
