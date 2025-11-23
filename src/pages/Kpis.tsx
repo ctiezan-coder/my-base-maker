@@ -10,9 +10,11 @@ import { KpiTable } from "@/components/kpis/KpiTable";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { KpiTracking } from "@/types/kpi";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 export default function Kpis() {
   const { toast } = useToast();
+  const { canAccess: canManageKpis } = useCanAccessModule("kpis", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedKpi, setSelectedKpi] = useState<KpiTracking | null>(null);
@@ -107,10 +109,12 @@ export default function Kpis() {
             Tableau de bord des indicateurs de performance clés
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouveau KPI
-        </Button>
+        {canManageKpis && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau KPI
+          </Button>
+        )}
       </div>
 
       <Card>

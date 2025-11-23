@@ -11,6 +11,7 @@ import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog
 import { CompanyDetailsDialog } from "@/components/companies/CompanyDetailsDialog";
 import { useChatMessages } from "@/hooks/useChatMessages";
 import { useUserDirection } from "@/hooks/useUserDirection";
+import { useUserRole } from "@/hooks/useUserRole";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,6 +51,8 @@ type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
 export default function Collaborateurs() {
   const { user } = useAuth();
   const { data: userDirection } = useUserDirection();
+  const { data: userRole } = useUserRole();
+  const canManage = userRole === 'admin' || userRole === 'manager';
   const queryClient = useQueryClient();
   const [activeSection, setActiveSection] = useState<Section>('mes-pme');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -587,13 +590,15 @@ export default function Collaborateurs() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-3xl font-bold">Mes tâches</h2>
-                <Button onClick={() => {
-                  setSelectedTask(null);
-                  setShowTaskDialog(true);
-                }}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouvelle tâche
-                </Button>
+                {canManage && (
+                  <Button onClick={() => {
+                    setSelectedTask(null);
+                    setShowTaskDialog(true);
+                  }}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Nouvelle tâche
+                  </Button>
+                )}
               </div>
 
               <div className="grid gap-4">

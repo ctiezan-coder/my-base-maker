@@ -8,9 +8,11 @@ import { Plus, Search, Image as ImageIcon } from "lucide-react";
 import { MediaDialog } from "@/components/media/MediaDialog";
 import { MediaGrid } from "@/components/media/MediaGrid";
 import { useToast } from "@/hooks/use-toast";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 export default function Media() {
   const { toast } = useToast();
+  const { canAccess: canManageMedia } = useCanAccessModule("media", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
@@ -76,10 +78,12 @@ export default function Media() {
             Gestion des images, vidéos et contenus multimédias
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouveau média
-        </Button>
+        {canManageMedia && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau média
+          </Button>
+        )}
       </div>
 
       <Card>

@@ -12,9 +12,11 @@ import { FileUploadDialog } from "@/components/documents/FileUploadDialog";
 import { FolderTreeView } from "@/components/documents/FolderTreeView";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 export default function Documents() {
   const { toast } = useToast();
+  const { canAccess: canManageDocuments } = useCanAccessModule("documents", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [folderDialogOpen, setFolderDialogOpen] = useState(false);
@@ -183,18 +185,22 @@ export default function Documents() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setFolderDialogOpen(true)}>
-            <FolderPlus className="w-4 h-4 mr-2" />
-            {currentFolderId ? "Nouveau sous-dossier" : "Nouveau dossier"}
-          </Button>
-          <Button variant="outline" onClick={() => setUploadDialogOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Importer un fichier
-          </Button>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau document
-          </Button>
+          {canManageDocuments && (
+            <>
+              <Button variant="outline" onClick={() => setFolderDialogOpen(true)}>
+                <FolderPlus className="w-4 h-4 mr-2" />
+                {currentFolderId ? "Nouveau sous-dossier" : "Nouveau dossier"}
+              </Button>
+              <Button variant="outline" onClick={() => setUploadDialogOpen(true)}>
+                <Upload className="w-4 h-4 mr-2" />
+                Importer un fichier
+              </Button>
+              <Button onClick={() => setDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nouveau document
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

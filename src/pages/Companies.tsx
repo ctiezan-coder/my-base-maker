@@ -14,11 +14,13 @@ import { useToast } from "@/hooks/use-toast";
 import type { Company } from "@/types/company";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 const ITEMS_PER_PAGE = 15;
 
 export default function Companies() {
   const { toast } = useToast();
+  const { canAccess: canManageCompanies } = useCanAccessModule("companies", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
@@ -230,14 +232,18 @@ export default function Companies() {
             <Download className="w-4 h-4 mr-2" />
             Exporter Excel
           </Button>
-          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Import en masse
-          </Button>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvel opérateur
-          </Button>
+          {canManageCompanies && (
+            <>
+              <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+                <Upload className="w-4 h-4 mr-2" />
+                Import en masse
+              </Button>
+              <Button onClick={() => setDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nouvel opérateur
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
