@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Shield, Users, Lock, ArrowLeft, Clock, UserCheck, UserPlus, Search } from 'lucide-react';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { UserManagementTable } from '@/components/admin/UserManagementTable';
+import { AllowedEmailsManager } from '@/components/admin/AllowedEmailsManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -201,6 +202,7 @@ export default function Admin() {
             <TabsTrigger value="roles">Rôles & Permissions</TabsTrigger>
             <TabsTrigger value="directions">Directions</TabsTrigger>
             <TabsTrigger value="logs">Logs d'activité</TabsTrigger>
+            <TabsTrigger value="emails">Emails autorisés</TabsTrigger>
           </TabsList>
 
           {/* TAB 1: Users */}
@@ -524,6 +526,11 @@ export default function Admin() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* TAB 5: Allowed Emails */}
+          <TabsContent value="emails" className="space-y-6">
+            <AllowedEmailsManager />
           </TabsContent>
         </Tabs>
       </main>
