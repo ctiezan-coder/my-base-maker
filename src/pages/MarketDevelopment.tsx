@@ -226,6 +226,7 @@ export default function MarketDevelopment() {
         <TabsContent value="opportunities" className="space-y-6">
           <OpportunitiesMap 
             opportunities={opportunities}
+            canManage={canManageMarket}
             onOpportunityClick={(opportunity) => {
               setSelectedOpportunity(opportunity);
               setDialogMode("view");

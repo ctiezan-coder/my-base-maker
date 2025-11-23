@@ -431,6 +431,7 @@ export default function Companies() {
             isLoading={isLoading}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            canManage={canManageCompanies}
           />
           
           {totalPages > 1 && (

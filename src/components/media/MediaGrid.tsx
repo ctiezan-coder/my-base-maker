@@ -31,9 +31,10 @@ interface MediaGridProps {
   isLoading: boolean;
   onEdit: (media: any) => void;
   onDelete: (media: any) => void;
+  canManage?: boolean;
 }
 
-export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGridProps) {
+export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete, canManage = false }: MediaGridProps) {
   const { toast } = useToast();
   const { data: userDirection } = useUserDirection();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -181,12 +182,16 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete }: MediaGrid
                     </div>
                   </div>
                   <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={() => onEdit(media)}>
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(media)}>
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                    {canManage && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => onEdit(media)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(media)}>
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardHeader>

@@ -296,6 +296,7 @@ export default function Imputations() {
           <ImputationTable
             imputations={filteredImputations}
             onEdit={handleEdit}
+            canManage={canManageImputations}
           />
         </CardContent>
       </Card>

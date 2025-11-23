@@ -382,6 +382,7 @@ export default function Documents() {
               isLoading={isLoading}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              canManage={canManageDocuments}
             />
           </div>
           )}

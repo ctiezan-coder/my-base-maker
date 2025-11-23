@@ -106,6 +106,7 @@ export default function Media() {
             isLoading={isLoading}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            canManage={canManageMedia}
           />
         </CardContent>
       </Card>
