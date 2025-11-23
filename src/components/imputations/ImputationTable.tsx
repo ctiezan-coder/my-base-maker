@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
@@ -36,6 +36,24 @@ export function ImputationTable({ imputations, onEdit }: ImputationTableProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  // Récupérer les profils utilisateurs pour afficher les noms
+  const { data: profiles } = useQuery({
+    queryKey: ['profiles-for-imputations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, full_name');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const getUserName = (userId: string | null | undefined) => {
+    if (!userId) return "-";
+    const profile = profiles?.find(p => p.user_id === userId);
+    return profile?.full_name || "-";
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -99,6 +117,7 @@ export function ImputationTable({ imputations, onEdit }: ImputationTableProps) {
               <TableHead>Provenance</TableHead>
               <TableHead>Objet</TableHead>
               <TableHead>Imputation</TableHead>
+              <TableHead>Personne assignée</TableHead>
               <TableHead>Date imputation</TableHead>
               <TableHead>Date réalisation</TableHead>
               <TableHead>État</TableHead>
@@ -114,6 +133,7 @@ export function ImputationTable({ imputations, onEdit }: ImputationTableProps) {
                   {imputation.objet}
                 </TableCell>
                 <TableCell>{imputation.imputation}</TableCell>
+                <TableCell>{getUserName(imputation.assigned_to)}</TableCell>
                 <TableCell>{formatDate(imputation.date_imputation)}</TableCell>
                 <TableCell>{formatDate(imputation.date_realisation)}</TableCell>
                 <TableCell>{getStatusBadge(imputation.etat)}</TableCell>
