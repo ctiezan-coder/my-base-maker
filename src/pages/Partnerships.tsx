@@ -6,16 +6,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Plus, Handshake } from "lucide-react";
 import { PartnershipDialog } from "@/components/partnerships/PartnershipDialog";
 import { PartnershipList } from "@/components/partnerships/PartnershipList";
-import { useUserDirection } from "@/hooks/useUserDirection";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 export default function Partnerships() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedPartnership, setSelectedPartnership] = useState<any>(null);
-
-  // Get user's direction and role
-  const { data: userRole } = useUserRole();
-  const isAdmin = userRole === 'admin';
+  const { canAccess: canManagePartnerships } = useCanAccessModule("partnerships", "manager");
 
   const { data: partnerships, isLoading, refetch } = useQuery({
     queryKey: ["partnerships"],
@@ -58,10 +54,12 @@ export default function Partnerships() {
             Gestion des partenaires et conventions
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouveau partenariat
-        </Button>
+        {canManagePartnerships && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau partenariat
+          </Button>
+        )}
       </div>
 
       <Card>

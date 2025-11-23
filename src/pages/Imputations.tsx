@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useUserDirection } from "@/hooks/useUserDirection";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import {
   Select,
   SelectContent,
@@ -27,29 +27,22 @@ export default function Imputations() {
   const [selectedImputation, setSelectedImputation] = useState<Imputation | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  // Get user's direction
   const { data: userDirection } = useUserDirection();
-  const { data: userRole } = useUserRole();
-  const isAdmin = userRole === 'admin';
+  const { canAccess: canManageImputations } = useCanAccessModule("imputations", "manager");
 
   const { data: imputations = [], isLoading } = useQuery({
-    queryKey: ['imputations', userDirection?.direction_id, isAdmin],
+    queryKey: ['imputations', userDirection?.direction_id],
     queryFn: async () => {
-      let query = supabase
+      // RLS policies will filter based on user's permissions
+      const { data, error } = await supabase
         .from('imputations')
-        .select('*');
+        .select('*')
+        .order('date_reception', { ascending: false });
 
-      // Filter by direction unless user is admin
-      if (!isAdmin && userDirection?.direction_id) {
-        query = query.eq('direction_id', userDirection.direction_id);
-      }
-
-      const { data, error } = await query.order('date_reception', { ascending: false });
       if (error) throw error;
       return data as Imputation[];
     },
-    enabled: isAdmin || !!userDirection?.direction_id,
+    enabled: !!userDirection?.direction_id,
   });
 
   const { data: directions } = useQuery({
@@ -196,10 +189,12 @@ export default function Imputations() {
             Suivi des documents entrants et de leur traitement
           </p>
         </div>
-        <Button onClick={handleNew}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nouvelle Imputation
-        </Button>
+        {canManageImputations && (
+          <Button onClick={handleNew}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvelle Imputation
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}

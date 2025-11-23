@@ -8,9 +8,12 @@ import { Plus, Search, Users } from "lucide-react";
 import { TrainerDialog } from "@/components/trainers/TrainerDialog";
 import { TrainerTable } from "@/components/trainers/TrainerTable";
 import { useToast } from "@/hooks/use-toast";
+import { useUserRole } from "@/hooks/useUserRole";
 
 export default function Trainers() {
   const { toast } = useToast();
+  const { data: userRole } = useUserRole();
+  const canManage = userRole === 'admin' || userRole === 'manager';
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTrainer, setSelectedTrainer] = useState<any>(null);
@@ -76,10 +79,12 @@ export default function Trainers() {
             Gestion des formateurs et intervenants
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouveau formateur
-        </Button>
+        {canManage && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau formateur
+          </Button>
+        )}
       </div>
 
       <Card>

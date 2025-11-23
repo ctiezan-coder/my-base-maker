@@ -12,9 +12,11 @@ import { EventList } from "@/components/events/EventList";
 import { EventsStatsCards } from "@/components/events/EventsStatsCards";
 import { EventSearchDialog } from "@/components/events/EventSearchDialog";
 import { useToast } from "@/hooks/use-toast";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 export default function Events() {
   const { toast } = useToast();
+  const { canAccess: canManageEvents } = useCanAccessModule("events", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
@@ -124,18 +126,22 @@ export default function Events() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            onClick={() => setSearchDialogOpen(true)}
-            variant="outline"
-            className="gap-2"
-          >
-            <Search className="w-4 h-4" />
-            Recherche Auto
-          </Button>
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvel événement
-          </Button>
+          {canManageEvents && (
+            <>
+              <Button 
+                onClick={() => setSearchDialogOpen(true)}
+                variant="outline"
+                className="gap-2"
+              >
+                <Search className="w-4 h-4" />
+                Recherche Auto
+              </Button>
+              <Button onClick={() => setDialogOpen(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Nouvel événement
+              </Button>
+            </>
+          )}
         </div>
       </div>
 

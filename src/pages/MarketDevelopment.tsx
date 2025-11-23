@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Search, Filter, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } 
 
 export default function MarketDevelopment() {
   const { toast } = useToast();
+  const { canAccess: canManageMarket } = useCanAccessModule("market_development", "manager");
   const [searchTerm, setSearchTerm] = useState("");
   const [sectorFilter, setSectorFilter] = useState<string>("all");
   const [regionFilter, setRegionFilter] = useState<string | "all">("all");
@@ -204,7 +206,7 @@ export default function MarketDevelopment() {
         </div>
         <Button
           onClick={handleUpdateMarketData}
-          disabled={isUpdating}
+          disabled={isUpdating || !canManageMarket}
           variant="outline"
           className="gap-2"
         >

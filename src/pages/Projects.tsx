@@ -7,35 +7,27 @@ import { Plus, FolderKanban } from "lucide-react";
 import { ProjectDialog } from "@/components/projects/ProjectDialog";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { useUserDirection } from "@/hooks/useUserDirection";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 export default function Projects() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
-
-  // Get user's direction
   const { data: userDirection } = useUserDirection();
-  const { data: userRole } = useUserRole();
-  const isAdmin = userRole === 'admin';
+  const { canAccess: canManageProjects } = useCanAccessModule("projects", "manager");
 
   const { data: projects, isLoading, refetch } = useQuery({
-    queryKey: ["projects", userDirection?.direction_id, isAdmin],
+    queryKey: ["projects", userDirection?.direction_id],
     queryFn: async () => {
-      let query = supabase
+      // RLS policies will filter based on user's permissions
+      const { data, error } = await supabase
         .from("projects")
-        .select("*");
-
-      // Filter by direction unless user is admin
-      if (!isAdmin && userDirection?.direction_id) {
-        query = query.eq("direction_id", userDirection.direction_id);
-      }
-
-      const { data, error } = await query.order("created_at", { ascending: false });
+        .select("*")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
       return data;
     },
-    enabled: isAdmin || !!userDirection?.direction_id,
+    enabled: !!userDirection?.direction_id,
   });
 
   const handleEdit = (project: any) => {
@@ -61,10 +53,12 @@ export default function Projects() {
             Gestion et suivi des projets en cours
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouveau projet
-        </Button>
+        {canManageProjects && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouveau projet
+          </Button>
+        )}
       </div>
 
       <Card>

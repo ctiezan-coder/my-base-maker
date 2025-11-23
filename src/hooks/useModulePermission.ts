@@ -12,7 +12,9 @@ export type AppModule =
   | 'market_development'
   | 'partnerships'
   | 'media'
-  | 'collaborators';
+  | 'collaborators'
+  | 'imputations'
+  | 'suivi_evaluation';
 
 export type AppRole = 'admin' | 'manager' | 'user';
 

@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Plus, GraduationCap } from "lucide-react";
 import { TrainingDialog } from "@/components/trainings/TrainingDialog";
 import { TrainingList } from "@/components/trainings/TrainingList";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
 export default function Trainings() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<any>(null);
+  const { canAccess: canManageTrainings } = useCanAccessModule("trainings", "manager");
 
   const { data: trainings, isLoading, refetch } = useQuery({
     queryKey: ["trainings"],
@@ -47,10 +49,12 @@ export default function Trainings() {
             Gestion des formations et événements
           </p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nouvelle formation
-        </Button>
+        {canManageTrainings && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvelle formation
+          </Button>
+        )}
       </div>
 
       <Card>
