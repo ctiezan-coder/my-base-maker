@@ -131,7 +131,7 @@ export default function Auth() {
 
     setLoading(true);
 
-    // Vérifier si l'email existe déjà
+    // Vérifier si l'email existe déjà dans profiles
     const { data: existingProfile } = await supabase
       .from("profiles")
       .select("email")
@@ -144,6 +144,21 @@ export default function Auth() {
         variant: "destructive",
         title: "Compte existant",
         description: "Un compte avec cet email existe déjà",
+      });
+      return;
+    }
+
+    // Vérifier si l'email est dans la liste blanche
+    const { data: isAllowed } = await supabase
+      .rpc("is_email_allowed", { check_email: email.toLowerCase().trim() });
+
+    if (!isAllowed) {
+      setLoading(false);
+      toast({
+        variant: "destructive",
+        title: "Email non autorisé",
+        description: "Cet email n'est pas autorisé à s'inscrire. Contactez un administrateur pour être ajouté à la liste des emails autorisés.",
+        duration: 8000,
       });
       return;
     }

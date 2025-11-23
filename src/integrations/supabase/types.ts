@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowed_emails: {
+        Row: {
+          added_by: string | null
+          created_at: string | null
+          email: string
+          id: string
+          notes: string | null
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          notes?: string | null
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
       business_connections: {
         Row: {
           company_id: string | null
@@ -1773,6 +1797,7 @@ export type Database = {
         Returns: boolean
       }
       is_account_approved: { Args: { _user_id: string }; Returns: boolean }
+      is_email_allowed: { Args: { check_email: string }; Returns: boolean }
       user_has_direction_access: {
         Args: { _direction_id: string; _user_id: string }
         Returns: boolean
