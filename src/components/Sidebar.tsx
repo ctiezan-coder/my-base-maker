@@ -17,6 +17,7 @@ import {
   ClipboardList,
   TrendingUp,
   MessageSquare,
+  Archive,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
@@ -36,6 +37,7 @@ const menuItems = [
   { icon: TrendingUp, label: "Suivi & Évaluation", path: "/suivi-evaluation", module: "suivi_evaluation" as const },
   { icon: Image, label: "Médias", path: "/media", module: "media" as const },
   { icon: BarChart3, label: "KPIs", path: "/kpis", module: "kpis" as const },
+  { icon: Archive, label: "Archive Activités", path: "/activities-archive", module: null },
 ];
 
 export function Sidebar() {

@@ -24,6 +24,7 @@ import SuiviEvaluation from "./pages/SuiviEvaluation";
 import Chat from "./pages/Chat";
 import UserPermissions from "./pages/UserPermissions";
 import PendingApproval from "./pages/PendingApproval";
+import ActivitiesArchive from "./pages/ActivitiesArchive";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="admin" element={<Admin />} />
               <Route path="permissions" element={<UserPermissions />} />
               <Route path="collaborateurs" element={<Collaborateurs />} />
+              <Route path="activities-archive" element={<ActivitiesArchive />} />
               <Route path="chat" element={<Chat />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
