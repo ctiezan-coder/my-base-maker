@@ -15,13 +15,12 @@ import { Button } from '@/components/ui/button';
 
 export default function Admin() {
   const navigate = useNavigate();
-  const isAdmin = useHasRole('admin');
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [directionFilter, setDirectionFilter] = useState('all');
 
-  // Check account status
+  // Check account status FIRST - most important check
   const { data: currentProfile, isLoading: profileLoading } = useQuery({
     queryKey: ['currentUserProfile'],
     queryFn: async () => {
@@ -38,6 +37,10 @@ export default function Admin() {
     },
   });
 
+  // Then check admin role
+  const isAdmin = useHasRole('admin');
+
+  // Redirect logic - check profile status first
   useEffect(() => {
     if (profileLoading) return;
     
@@ -48,10 +51,15 @@ export default function Admin() {
     
     if (currentProfile.account_status !== 'approved') {
       navigate('/pending-approval');
+      toast({
+        variant: 'destructive',
+        title: 'Compte en attente',
+        description: 'Votre compte doit être approuvé pour accéder à cette page',
+      });
       return;
     }
     
-    if (!isAdmin) {
+    if (isAdmin === false) {
       navigate('/');
       toast({
         variant: 'destructive',
@@ -137,7 +145,10 @@ export default function Admin() {
     return matchesSearch && matchesRole && matchesDirection;
   });
 
-  if (profileLoading || !isAdmin) return null;
+  // Don't render if loading, not approved, or not admin
+  if (profileLoading || !currentProfile || currentProfile.account_status !== 'approved' || !isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen">
