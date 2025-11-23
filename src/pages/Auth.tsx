@@ -14,13 +14,21 @@ import { z } from 'zod';
 import logo from '@/assets/aciex-logo.jpg';
 
 const loginSchema = z.object({
-  email: z.string().email('Email invalide'),
+  email: z.string()
+    .email('Email invalide')
+    .refine((email) => email.endsWith('@cotedivoirexport.ci'), {
+      message: 'Seuls les emails @cotedivoirexport.ci sont autorisés',
+    }),
   password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
 });
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Le nom complet est requis'),
-  email: z.string().email('Email invalide'),
+  email: z.string()
+    .email('Email invalide')
+    .refine((email) => email.endsWith('@cotedivoirexport.ci'), {
+      message: 'Seuls les emails @cotedivoirexport.ci sont autorisés',
+    }),
   password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
   confirmPassword: z.string(),
   directionId: z.string().min(1, 'La direction est requise'),
@@ -185,7 +193,7 @@ export default function Auth() {
                   <Input
                     id="login-email"
                     type="email"
-                    placeholder="votre@email.com"
+                    placeholder="prenom.nom@cotedivoirexport.ci"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -225,7 +233,7 @@ export default function Auth() {
                   <Input
                     id="signup-email"
                     type="email"
-                    placeholder="votre@email.com"
+                    placeholder="prenom.nom@cotedivoirexport.ci"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
