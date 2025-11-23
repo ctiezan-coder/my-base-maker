@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import logo from '@/assets/aciex-logo.jpg';
+import { useUserRole } from '@/hooks/useUserRole';
+import { QuickApprovalPanel } from '@/components/admin/QuickApprovalPanel';
 
 const loginSchema = z.object({
   email: z.string()
@@ -48,6 +50,8 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
 
   // Fetch directions for signup
   const { data: directions, isLoading: directionsLoading, error: directionsError } = useQuery({
@@ -169,7 +173,8 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-secondary/10 p-4">
-      <Card className="w-full max-w-md shadow-elegant">
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="w-full shadow-elegant">
         <CardHeader className="space-y-2 text-center">
           <div className="flex justify-center mb-4">
             <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-24 w-auto" />
@@ -296,6 +301,13 @@ export default function Auth() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {isAdmin && (
+        <div className="hidden lg:block">
+          <QuickApprovalPanel />
+        </div>
+      )}
+      </div>
     </div>
   );
 }
