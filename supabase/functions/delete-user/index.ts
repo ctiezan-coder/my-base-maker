@@ -43,12 +43,20 @@ serve(async (req) => {
     }
 
     // Check if user is admin
-    const { data: roles } = await supabaseClient
+    const { data: roles, error: roleError } = await supabaseClient
       .from('user_roles')
       .select('role')
       .eq('user_id', user.id)
       .eq('role', 'admin')
-      .single()
+      .maybeSingle()
+
+    if (roleError) {
+      console.error('Error checking role:', roleError)
+      return new Response(
+        JSON.stringify({ error: 'Error checking permissions' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     if (!roles) {
       return new Response(
