@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useHasRole } from '@/hooks/useUserRole';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Users, Lock, ArrowLeft, Clock, UserCheck, UserPlus, Search } from 'lucide-react';
@@ -37,12 +37,13 @@ export default function Admin() {
     },
   });
 
-  // Then check admin role
-  const isAdmin = useHasRole('admin');
+  // Check admin role with loading state
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
+  const isAdmin = userRole === 'admin';
 
   // Redirect logic - check profile status first
   useEffect(() => {
-    if (profileLoading) return;
+    if (profileLoading || roleLoading) return;
     
     if (!currentProfile) {
       navigate('/auth');
@@ -59,7 +60,7 @@ export default function Admin() {
       return;
     }
     
-    if (isAdmin === false) {
+    if (!isAdmin) {
       navigate('/');
       toast({
         variant: 'destructive',
@@ -67,7 +68,7 @@ export default function Admin() {
         description: 'Vous n\'avez pas les permissions nécessaires',
       });
     }
-  }, [isAdmin, currentProfile, profileLoading, navigate, toast]);
+  }, [isAdmin, currentProfile, profileLoading, roleLoading, navigate, toast]);
 
   const { data: users } = useQuery({
     queryKey: ['adminUsers'],
@@ -146,7 +147,7 @@ export default function Admin() {
   });
 
   // Don't render if loading, not approved, or not admin
-  if (profileLoading || !currentProfile || currentProfile.account_status !== 'approved' || !isAdmin) {
+  if (profileLoading || roleLoading || !currentProfile || currentProfile.account_status !== 'approved' || !isAdmin) {
     return null;
   }
 
