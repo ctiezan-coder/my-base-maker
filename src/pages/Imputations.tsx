@@ -23,6 +23,7 @@ export default function Imputations() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterEtat, setFilterEtat] = useState<string>("all");
   const [filterDirection, setFilterDirection] = useState<string>("all");
+  const [filterYear, setFilterYear] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedImputation, setSelectedImputation] = useState<Imputation | null>(null);
   const { toast } = useToast();
@@ -104,6 +105,13 @@ export default function Imputations() {
     };
   }, [toast, queryClient]);
 
+  // Extract unique years from imputations
+  const availableYears = Array.from(
+    new Set(
+      imputations.map((imp) => new Date(imp.date_reception).getFullYear())
+    )
+  ).sort((a, b) => b - a);
+
   const filteredImputations = imputations.filter((imputation) => {
     const matchesSearch =
       imputation.provenance.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,7 +123,11 @@ export default function Imputations() {
     const matchesDirection =
       filterDirection === "all" || imputation.direction_id === filterDirection;
 
-    return matchesSearch && matchesEtat && matchesDirection;
+    const matchesYear =
+      filterYear === "all" ||
+      new Date(imputation.date_reception).getFullYear().toString() === filterYear;
+
+    return matchesSearch && matchesEtat && matchesDirection && matchesYear;
   });
 
   const stats = {
@@ -277,6 +289,20 @@ export default function Imputations() {
                 {directions?.map((direction) => (
                   <SelectItem key={direction.id} value={direction.id}>
                     {direction.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger className="w-full md:w-[140px]">
+                <SelectValue placeholder="Toutes années" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes années</SelectItem>
+                {availableYears.map((year) => (
+                  <SelectItem key={year} value={year.toString()}>
+                    {year}
                   </SelectItem>
                 ))}
               </SelectContent>
