@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,6 +11,7 @@ import { CalendarIcon, Download } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { toast } from "sonner";
+import { useReportGeneration } from "@/hooks/useReportGeneration";
 
 type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
 
@@ -37,18 +40,43 @@ export function ReportDialog({ open, onOpenChange, reportType }: ReportDialogPro
   const [dateTo, setDateTo] = useState<Date>();
   const [selectedPme, setSelectedPme] = useState<string>("");
   const [period, setPeriod] = useState<string>("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const pmeList = [
-    "Cacao Excellence CI",
-    "BioKarité Côte d'Ivoire",
-    "Textile Africain Premium",
-    "Anacarde Export Plus"
-  ];
+  const { generateReport } = useReportGeneration();
 
-  const handleGenerate = () => {
-    console.log("Génération du rapport:", { reportType, dateFrom, dateTo, selectedPme, period });
-    toast.success("Rapport généré avec succès");
-    onOpenChange(false);
+  // Charger la liste des PME depuis la base de données
+  const { data: companiesData } = useQuery({
+    queryKey: ['companies-for-report'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('id, company_name')
+        .order('company_name');
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  const pmeList = companiesData || [];
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    try {
+      await generateReport({
+        reportType,
+        dateFrom,
+        dateTo,
+        selectedPme,
+        period
+      });
+      toast.success("Rapport généré et téléchargé avec succès");
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(error.message || "Erreur lors de la génération du rapport");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -71,8 +99,8 @@ export function ReportDialog({ open, onOpenChange, reportType }: ReportDialogPro
                 </SelectTrigger>
                 <SelectContent>
                   {pmeList.map((pme) => (
-                    <SelectItem key={pme} value={pme}>
-                      {pme}
+                    <SelectItem key={pme.id} value={pme.id}>
+                      {pme.company_name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -142,12 +170,12 @@ export function ReportDialog({ open, onOpenChange, reportType }: ReportDialogPro
           )}
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isGenerating}>
               Annuler
             </Button>
-            <Button onClick={handleGenerate}>
+            <Button onClick={handleGenerate} disabled={isGenerating}>
               <Download className="mr-2 h-4 w-4" />
-              Générer le rapport
+              {isGenerating ? "Génération en cours..." : "Générer le rapport"}
             </Button>
           </div>
         </div>
