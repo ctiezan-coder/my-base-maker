@@ -10,30 +10,34 @@ const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (!loading) {
-        if (!user) {
-          navigate('/auth');
-        } else {
-          // Check account status
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('account_status')
-            .eq('user_id', user.id)
-            .single();
-          
-          if (profile && profile.account_status !== 'approved') {
-            navigate('/pending-approval');
-          }
-        }
-      }
-    };
-    
-    checkAuth();
-  }, [user, loading, navigate]);
+  // Check user profile and account status
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('account_status')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user,
+  });
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !profileLoading) {
+      if (!user) {
+        navigate('/auth');
+      } else if (profile && profile.account_status !== 'approved') {
+        navigate('/pending-approval');
+      }
+    }
+  }, [user, loading, profile, profileLoading, navigate]);
+
+  if (loading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -44,7 +48,7 @@ const Index = () => {
     );
   }
 
-  if (!user) {
+  if (!user || profileError) {
     return null;
   }
 
