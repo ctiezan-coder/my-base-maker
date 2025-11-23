@@ -433,16 +433,16 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
             <div className="space-y-2">
               <Label htmlFor="assigned_to">Personne assignée</Label>
               <Select
-                value={formData.assigned_to || ""}
+                value={formData.assigned_to || "none"}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, assigned_to: value || null })
+                  setFormData({ ...formData, assigned_to: value === "none" ? null : value })
                 }
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner une personne" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucune</SelectItem>
+                  <SelectItem value="none">Aucune</SelectItem>
                   {users?.map((user) => (
                     <SelectItem key={user.user_id} value={user.user_id}>
                       {user.full_name} ({user.email})
