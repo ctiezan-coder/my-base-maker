@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
-type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
+type ReportType = "monthly" | "pme" | "opportunities" | "tasks" | "pme_global";
 
 interface ReportParams {
   reportType: ReportType;
@@ -14,6 +14,20 @@ interface ReportParams {
 }
 
 export function useReportGeneration() {
+  // Fonction helper pour créer une feuille de statistiques avec graphiques
+  const createStatsSheet = (stats: any[], title: string) => {
+    const ws = XLSX.utils.json_to_sheet(stats);
+    
+    // Définir la largeur des colonnes
+    const colWidths = [
+      { wch: 30 }, // Colonne A
+      { wch: 15 }, // Colonne B
+    ];
+    ws['!cols'] = colWidths;
+    
+    return ws;
+  };
+
   const generateMonthlyReport = async (dateFrom: Date, dateTo: Date) => {
     const fromStr = format(dateFrom, "yyyy-MM-dd");
     const toStr = format(dateTo, "yyyy-MM-dd");
@@ -102,6 +116,35 @@ export function useReportGeneration() {
     })) || [];
     const wsKpis = XLSX.utils.json_to_sheet(kpisData);
     XLSX.utils.book_append_sheet(workbook, wsKpis, 'KPIs');
+
+    // Feuille Statistiques générales
+    const statsData = [{
+      'Indicateur': 'Total événements',
+      'Valeur': events.data?.length || 0
+    }, {
+      'Indicateur': 'Total formations',
+      'Valeur': trainings.data?.length || 0
+    }, {
+      'Indicateur': 'Total partenariats',
+      'Valeur': partnerships.data?.length || 0
+    }, {
+      'Indicateur': 'Total projets',
+      'Valeur': projects.data?.length || 0
+    }, {
+      'Indicateur': 'Total imputations',
+      'Valeur': imputations.data?.length || 0
+    }, {
+      'Indicateur': 'Imputations en attente',
+      'Valeur': imputations.data?.filter(i => i.etat === 'En attente').length || 0
+    }, {
+      'Indicateur': 'Imputations en cours',
+      'Valeur': imputations.data?.filter(i => i.etat === 'En cours').length || 0
+    }, {
+      'Indicateur': 'Imputations terminées',
+      'Valeur': imputations.data?.filter(i => i.etat === 'Terminé').length || 0
+    }];
+    const wsStats = createStatsSheet(statsData, 'Statistiques');
+    XLSX.utils.book_append_sheet(workbook, wsStats, 'Statistiques');
 
     return workbook;
   };
@@ -238,6 +281,176 @@ export function useReportGeneration() {
     return workbook;
   };
 
+  const generateGlobalPmeReport = async () => {
+    // Récupérer toutes les entreprises
+    const { data: companies } = await supabase
+      .from('companies')
+      .select('*')
+      .order('company_name');
+
+    if (!companies || companies.length === 0) {
+      throw new Error("Aucune entreprise trouvée");
+    }
+
+    const workbook = XLSX.utils.book_new();
+
+    // Feuille 1: Liste des PME
+    const companiesData = companies.map(c => ({
+      'Nom': c.company_name,
+      'RCCM': c.rccm_number,
+      'DFE': c.dfe_number,
+      'Secteur': c.activity_sector || 'N/A',
+      'Ville': c.city || 'N/A',
+      'Statut accompagnement': c.accompaniment_status || 'N/A',
+      'CA annuel (FCFA)': c.annual_turnover || 'N/A',
+      'Taille': c.company_size || 'N/A',
+      'Service export': c.has_export_service ? 'Oui' : 'Non',
+      'Marchés actuels': c.current_export_markets?.join(', ') || 'N/A',
+      'Marchés cibles': c.target_export_markets?.join(', ') || 'N/A',
+      'Contact': c.legal_representative_name || 'N/A',
+      'Téléphone': c.phone || 'N/A',
+      'Email': c.email || 'N/A'
+    }));
+    const wsCompanies = XLSX.utils.json_to_sheet(companiesData);
+    wsCompanies['!cols'] = [
+      { wch: 30 }, { wch: 15 }, { wch: 15 }, { wch: 20 },
+      { wch: 15 }, { wch: 20 }, { wch: 15 }, { wch: 12 },
+      { wch: 12 }, { wch: 25 }, { wch: 25 }, { wch: 25 },
+      { wch: 15 }, { wch: 25 }
+    ];
+    XLSX.utils.book_append_sheet(workbook, wsCompanies, 'PME');
+
+    // Statistiques par secteur
+    const sectorStats = companies.reduce((acc: any, c) => {
+      const sector = c.activity_sector || 'Non spécifié';
+      acc[sector] = (acc[sector] || 0) + 1;
+      return acc;
+    }, {});
+
+    const sectorData = Object.entries(sectorStats).map(([sector, count]) => ({
+      'Secteur': sector,
+      'Nombre d\'entreprises': count
+    }));
+    const wsSectors = createStatsSheet(sectorData, 'Par Secteur');
+    XLSX.utils.book_append_sheet(workbook, wsSectors, 'Par Secteur');
+
+    // Statistiques par statut d'accompagnement
+    const statusStats = companies.reduce((acc: any, c) => {
+      const status = c.accompaniment_status || 'Non défini';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+
+    const statusData = Object.entries(statusStats).map(([status, count]) => ({
+      'Statut': status,
+      'Nombre d\'entreprises': count
+    }));
+    const wsStatus = createStatsSheet(statusData, 'Par Statut');
+    XLSX.utils.book_append_sheet(workbook, wsStatus, 'Par Statut');
+
+    // Statistiques par taille
+    const sizeStats = companies.reduce((acc: any, c) => {
+      const size = c.company_size || 'Non spécifié';
+      acc[size] = (acc[size] || 0) + 1;
+      return acc;
+    }, {});
+
+    const sizeData = Object.entries(sizeStats).map(([size, count]) => ({
+      'Taille': size,
+      'Nombre d\'entreprises': count
+    }));
+    const wsSize = createStatsSheet(sizeData, 'Par Taille');
+    XLSX.utils.book_append_sheet(workbook, wsSize, 'Par Taille');
+
+    // Statistiques par ville
+    const cityStats = companies.reduce((acc: any, c) => {
+      const city = c.city || 'Non spécifié';
+      acc[city] = (acc[city] || 0) + 1;
+      return acc;
+    }, {});
+
+    const cityData = Object.entries(cityStats)
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
+      .map(([city, count]) => ({
+        'Ville': city,
+        'Nombre d\'entreprises': count
+      }));
+    const wsCity = createStatsSheet(cityData, 'Par Ville');
+    XLSX.utils.book_append_sheet(workbook, wsCity, 'Par Ville');
+
+    // Feuille Événements et participations
+    const { data: eventParticipations } = await supabase
+      .from('event_participants')
+      .select('*, event:events(*), company:companies(company_name)');
+
+    const eventsData = eventParticipations?.map(ep => ({
+      'Entreprise': ep.company?.company_name,
+      'Événement': ep.event?.title,
+      'Type': ep.event?.event_type,
+      'Date': format(new Date(ep.event?.start_date), 'dd/MM/yyyy', { locale: fr }),
+      'Statut': ep.status,
+      'Notes': ep.notes || 'N/A'
+    })) || [];
+    const wsEvents = XLSX.utils.json_to_sheet(eventsData);
+    XLSX.utils.book_append_sheet(workbook, wsEvents, 'Événements');
+
+    // Feuille Opportunités
+    const { data: applications } = await supabase
+      .from('opportunity_applications')
+      .select('*, opportunity:export_opportunities(*), company:companies(company_name)');
+
+    const opportunitiesData = applications?.map(app => ({
+      'Entreprise': app.company?.company_name,
+      'Opportunité': app.opportunity?.title,
+      'Pays': app.opportunity?.destination_country,
+      'Secteur': app.opportunity?.sector,
+      'Valeur estimée': `${app.opportunity?.estimated_value} ${app.opportunity?.currency || 'EUR'}`,
+      'Date candidature': format(new Date(app.application_date), 'dd/MM/yyyy', { locale: fr }),
+      'Statut': app.status
+    })) || [];
+    const wsOpportunities = XLSX.utils.json_to_sheet(opportunitiesData);
+    XLSX.utils.book_append_sheet(workbook, wsOpportunities, 'Opportunités');
+
+    // Statistiques générales
+    const generalStats = [{
+      'Indicateur': 'Total entreprises',
+      'Valeur': companies.length
+    }, {
+      'Indicateur': 'Avec service export',
+      'Valeur': companies.filter(c => c.has_export_service).length
+    }, {
+      'Indicateur': 'Sans service export',
+      'Valeur': companies.filter(c => !c.has_export_service).length
+    }, {
+      'Indicateur': 'Participations événements',
+      'Valeur': eventParticipations?.length || 0
+    }, {
+      'Indicateur': 'Candidatures opportunités',
+      'Valeur': applications?.length || 0
+    }, {
+      'Indicateur': 'Candidatures en cours',
+      'Valeur': applications?.filter(a => a.status === 'En cours').length || 0
+    }, {
+      'Indicateur': 'Candidatures acceptées',
+      'Valeur': applications?.filter(a => a.status === 'Accepté').length || 0
+    }];
+    const wsGeneralStats = createStatsSheet(generalStats, 'Vue Générale');
+    
+    // Insérer cette feuille en premier
+    XLSX.utils.book_append_sheet(workbook, wsGeneralStats, 'Vue Générale');
+    
+    // Réorganiser pour que Vue Générale soit en premier
+    const sheets = workbook.SheetNames;
+    const vueGeneraleIndex = sheets.indexOf('Vue Générale');
+    if (vueGeneraleIndex > 0) {
+      sheets.splice(vueGeneraleIndex, 1);
+      sheets.unshift('Vue Générale');
+      workbook.SheetNames = sheets;
+    }
+
+    return workbook;
+  };
+
   const generateTasksReport = async (dateFrom: Date, dateTo: Date) => {
     const fromStr = format(dateFrom, "yyyy-MM-dd");
     const toStr = format(dateTo, "yyyy-MM-dd");
@@ -291,6 +504,12 @@ export function useReportGeneration() {
 
     try {
       switch (params.reportType) {
+        case "pme_global": {
+          workbook = await generateGlobalPmeReport();
+          fileName = `Rapport_Global_PME_${format(new Date(), "dd-MM-yyyy")}.xlsx`;
+          break;
+        }
+
         case "monthly": {
           let dateFrom = params.dateFrom;
           let dateTo = params.dateTo;

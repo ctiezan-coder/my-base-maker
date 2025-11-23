@@ -46,7 +46,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type Section = 'mes-pme' | 'opportunites' | 'taches' | 'rapports' | 'chat' | 'historique';
-type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
+type ReportType = "monthly" | "pme" | "opportunities" | "tasks" | "pme_global";
 
 export default function Collaborateurs() {
   const { user } = useAuth();
@@ -805,6 +805,16 @@ export default function Collaborateurs() {
                         <div className="text-center">
                           <p className="font-semibold">Rapport PME</p>
                           <p className="text-xs text-muted-foreground">Par entreprise</p>
+                        </div>
+                      </Button>
+                      <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => {
+                        setReportType("pme_global");
+                        setShowReportDialog(true);
+                      }}>
+                        <Building2 className="h-6 w-6" />
+                        <div className="text-center">
+                          <p className="font-semibold">Rapport global PME</p>
+                          <p className="text-xs text-muted-foreground">Toutes les PME</p>
                         </div>
                       </Button>
                       <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2" onClick={() => {

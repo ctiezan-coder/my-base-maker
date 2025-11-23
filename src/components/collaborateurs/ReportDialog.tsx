@@ -13,7 +13,7 @@ import { fr } from "date-fns/locale";
 import { toast } from "sonner";
 import { useReportGeneration } from "@/hooks/useReportGeneration";
 
-type ReportType = "monthly" | "pme" | "opportunities" | "tasks";
+type ReportType = "monthly" | "pme" | "opportunities" | "tasks" | "pme_global";
 
 interface ReportDialogProps {
   open: boolean;
@@ -24,6 +24,7 @@ interface ReportDialogProps {
 const reportTitles: Record<ReportType, string> = {
   monthly: "Rapport mensuel d'activités",
   pme: "Rapport PME",
+  pme_global: "Rapport global PME",
   opportunities: "Rapport opportunités",
   tasks: "Rapport tâches"
 };
@@ -31,6 +32,7 @@ const reportTitles: Record<ReportType, string> = {
 const reportDescriptions: Record<ReportType, string> = {
   monthly: "Générez un rapport complet de vos activités sur une période donnée",
   pme: "Rapport détaillé sur une PME spécifique",
+  pme_global: "Vue d'ensemble de toutes les PME avec statistiques et analyses",
   opportunities: "Analyse des opportunités et matches",
   tasks: "Suivi et performance de vos tâches"
 };
