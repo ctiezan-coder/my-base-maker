@@ -21,7 +21,36 @@ export default function Admin() {
   const [roleFilter, setRoleFilter] = useState('all');
   const [directionFilter, setDirectionFilter] = useState('all');
 
+  // Check account status
+  const { data: currentProfile, isLoading: profileLoading } = useQuery({
+    queryKey: ['currentUserProfile'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('account_status')
+        .eq('user_id', user.id)
+        .single();
+      
+      return data;
+    },
+  });
+
   useEffect(() => {
+    if (profileLoading) return;
+    
+    if (!currentProfile) {
+      navigate('/auth');
+      return;
+    }
+    
+    if (currentProfile.account_status !== 'approved') {
+      navigate('/pending-approval');
+      return;
+    }
+    
     if (!isAdmin) {
       navigate('/');
       toast({
@@ -30,7 +59,7 @@ export default function Admin() {
         description: 'Vous n\'avez pas les permissions nécessaires',
       });
     }
-  }, [isAdmin, navigate, toast]);
+  }, [isAdmin, currentProfile, profileLoading, navigate, toast]);
 
   const { data: users } = useQuery({
     queryKey: ['adminUsers'],
@@ -108,7 +137,7 @@ export default function Admin() {
     return matchesSearch && matchesRole && matchesDirection;
   });
 
-  if (!isAdmin) return null;
+  if (profileLoading || !isAdmin) return null;
 
   return (
     <div className="min-h-screen">
@@ -165,8 +194,10 @@ export default function Admin() {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-muted-foreground text-sm font-semibold">Actifs</p>
-                      <p className="text-3xl font-bold mt-2">{users?.length || 0}</p>
+                      <p className="text-muted-foreground text-sm font-semibold">Approuvés</p>
+                      <p className="text-3xl font-bold mt-2">
+                        {users?.filter(u => u.account_status === 'approved').length || 0}
+                      </p>
                     </div>
                     <div className="bg-green-100 dark:bg-green-900/20 rounded-full p-3">
                       <UserCheck className="text-green-600 w-6 h-6" />
@@ -180,7 +211,9 @@ export default function Admin() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-muted-foreground text-sm font-semibold">En attente</p>
-                      <p className="text-3xl font-bold mt-2">0</p>
+                      <p className="text-3xl font-bold mt-2">
+                        {users?.filter(u => u.account_status === 'pending').length || 0}
+                      </p>
                     </div>
                     <div className="bg-yellow-100 dark:bg-yellow-900/20 rounded-full p-3">
                       <Clock className="text-yellow-600 w-6 h-6" />
