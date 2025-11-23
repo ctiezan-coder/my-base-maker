@@ -148,12 +148,15 @@ export default function Auth() {
           description: "Une erreur s'est produite lors de l'inscription",
         });
       }
-    } else {
-      toast({
-        title: "Inscription réussie",
-        description: "Votre compte a été créé avec succès",
-      });
-    }
+      } else {
+        toast({
+          title: "Inscription réussie",
+          description: "Votre demande d'inscription a été envoyée. Un administrateur doit approuver votre compte avant que vous puissiez accéder à la plateforme.",
+          duration: 8000,
+        });
+        // Optionally redirect to pending approval page after signup
+        navigate('/pending-approval');
+      }
   };
 
   return (

@@ -23,6 +23,7 @@ import Imputations from "./pages/Imputations";
 import SuiviEvaluation from "./pages/SuiviEvaluation";
 import Chat from "./pages/Chat";
 import UserPermissions from "./pages/UserPermissions";
+import PendingApproval from "./pages/PendingApproval";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/" element={<Dashboard />}>
               <Route index element={<Index />} />
               <Route path="chat" element={<Chat />} />

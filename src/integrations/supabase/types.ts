@@ -1274,6 +1274,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           avatar_url: string | null
           created_at: string
           direction: string | null
@@ -1285,6 +1286,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_status?: string
           avatar_url?: string | null
           created_at?: string
           direction?: string | null
@@ -1296,6 +1298,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_status?: string
           avatar_url?: string | null
           created_at?: string
           direction?: string | null
@@ -1722,6 +1725,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_approved: { Args: { _user_id: string }; Returns: boolean }
       user_has_direction_access: {
         Args: { _direction_id: string; _user_id: string }
         Returns: boolean
