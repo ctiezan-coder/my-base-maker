@@ -1,18 +1,25 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useHasRole } from '@/hooks/useUserRole';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Users, Lock } from 'lucide-react';
+import { Shield, Users, Lock, ArrowLeft, Clock, UserCheck, UserPlus, Search } from 'lucide-react';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { UserManagementTable } from '@/components/admin/UserManagementTable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 export default function Admin() {
   const navigate = useNavigate();
   const isAdmin = useHasRole('admin');
   const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [directionFilter, setDirectionFilter] = useState('all');
 
   useEffect(() => {
     if (!isAdmin) {
@@ -30,7 +37,13 @@ export default function Admin() {
     queryFn: async () => {
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          directions (
+            id,
+            name
+          )
+        `)
         .order('created_at', { ascending: false });
 
       const { data: roles } = await supabase
@@ -45,99 +58,411 @@ export default function Admin() {
     enabled: isAdmin,
   });
 
+  const { data: directions } = useQuery({
+    queryKey: ['directions'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('directions')
+        .select('*')
+        .order('name');
+      return data || [];
+    },
+    enabled: isAdmin,
+  });
+
+  const { data: activityLogs } = useQuery({
+    queryKey: ['permissionHistory'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('permission_history')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (!data) return [];
+      
+      // Fetch user details separately
+      const userIds = [...new Set([...data.map(d => d.user_id), ...data.map(d => d.target_user_id)])];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email')
+        .in('user_id', userIds);
+      
+      return data.map(log => ({
+        ...log,
+        user: profiles?.find(p => p.user_id === log.user_id),
+        target_user: profiles?.find(p => p.user_id === log.target_user_id),
+      }));
+    },
+    enabled: isAdmin,
+  });
+
+  const filteredUsers = users?.filter(user => {
+    const matchesSearch = searchTerm === '' || 
+      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesRole = roleFilter === 'all' || user.role === roleFilter;
+    const matchesDirection = directionFilter === 'all' || user.direction_id === directionFilter;
+    
+    return matchesSearch && matchesRole && matchesDirection;
+  });
+
   if (!isAdmin) return null;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Administration</h1>
-          <p className="text-muted-foreground mt-2">
-            Gérez les utilisateurs, leurs rôles et permissions
-          </p>
+    <div className="min-h-screen">
+      {/* Header */}
+      <header className="bg-card shadow-md border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-lg p-2">
+                <Shield className="text-white w-8 h-8" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Administration</h1>
+                <p className="text-sm text-muted-foreground">Gestion des utilisateurs, rôles et permissions</p>
+              </div>
+            </div>
+            <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center space-x-2">
+              <ArrowLeft className="w-5 h-5" />
+              <span>Retour</span>
+            </Button>
+          </div>
         </div>
-        <CreateUserDialog />
-      </div>
+      </header>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Utilisateurs</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{users?.length || 0}</div>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="bg-card">
+            <TabsTrigger value="users">Utilisateurs</TabsTrigger>
+            <TabsTrigger value="roles">Rôles & Permissions</TabsTrigger>
+            <TabsTrigger value="directions">Directions</TabsTrigger>
+            <TabsTrigger value="logs">Logs d'activité</TabsTrigger>
+          </TabsList>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Administrateurs</CardTitle>
-            <Shield className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {users?.filter(u => u.role === 'admin').length || 0}
-            </div>
-          </CardContent>
-        </Card>
+          {/* TAB 1: Users */}
+          <TabsContent value="users" className="space-y-6">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="border-l-4 border-l-blue-600">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-sm font-semibold">Total utilisateurs</p>
+                      <p className="text-3xl font-bold mt-2">{users?.length || 0}</p>
+                    </div>
+                    <div className="bg-blue-100 dark:bg-blue-900/20 rounded-full p-3">
+                      <Users className="text-blue-600 w-6 h-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Managers</CardTitle>
-            <Lock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {users?.filter(u => u.role === 'manager').length || 0}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+              <Card className="border-l-4 border-l-green-600">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-sm font-semibold">Actifs</p>
+                      <p className="text-3xl font-bold mt-2">{users?.length || 0}</p>
+                    </div>
+                    <div className="bg-green-100 dark:bg-green-900/20 rounded-full p-3">
+                      <UserCheck className="text-green-600 w-6 h-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestion des utilisateurs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <UserManagementTable />
-        </CardContent>
-      </Card>
+              <Card className="border-l-4 border-l-yellow-600">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-sm font-semibold">En attente</p>
+                      <p className="text-3xl font-bold mt-2">0</p>
+                    </div>
+                    <div className="bg-yellow-100 dark:bg-yellow-900/20 rounded-full p-3">
+                      <Clock className="text-yellow-600 w-6 h-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Description des rôles</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-destructive mt-0.5" />
-            <div>
-              <p className="font-medium">Administrateur</p>
-              <p className="text-sm text-muted-foreground">
-                Accès complet à toutes les fonctionnalités, gestion des utilisateurs et configuration système
-              </p>
+              <Card className="border-l-4 border-l-purple-600">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-muted-foreground text-sm font-semibold">Administrateurs</p>
+                      <p className="text-3xl font-bold mt-2">
+                        {users?.filter(u => u.role === 'admin').length || 0}
+                      </p>
+                    </div>
+                    <div className="bg-purple-100 dark:bg-purple-900/20 rounded-full p-3">
+                      <Shield className="text-purple-600 w-6 h-6" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Lock className="w-5 h-5 text-primary mt-0.5" />
-            <div>
-              <p className="font-medium">Manager</p>
-              <p className="text-sm text-muted-foreground">
-                Peut gérer les données de sa direction, créer et modifier les contenus
-              </p>
+
+            {/* Actions and Filters */}
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold">Liste des utilisateurs</h3>
+                  <CreateUserDialog />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <Input
+                      placeholder="Rechercher un utilisateur..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                  
+                  <Select value={roleFilter} onValueChange={setRoleFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Tous les rôles" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les rôles</SelectItem>
+                      <SelectItem value="admin">Administrateur</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                      <SelectItem value="user">Utilisateur</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={directionFilter} onValueChange={setDirectionFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Toutes les directions" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les directions</SelectItem>
+                      {directions?.map((dir) => (
+                        <SelectItem key={dir.id} value={dir.id}>
+                          {dir.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <UserManagementTable />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TAB 2: Roles & Permissions */}
+          <TabsContent value="roles" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Role Cards */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold">Rôles disponibles</h3>
+                </div>
+
+                <Card className="border-l-4 border-l-purple-600">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 className="text-lg font-bold flex items-center">
+                          <Shield className="w-5 h-5 mr-2 text-purple-600" />
+                          Administrateur
+                        </h4>
+                        <p className="text-sm text-muted-foreground mt-1">Accès complet à toutes les fonctionnalités</p>
+                        <span className="inline-block mt-2 text-xs bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300 px-2 py-1 rounded-full">
+                          {users?.filter(u => u.role === 'admin').length || 0} utilisateurs
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center text-green-600">
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        <span>Gestion utilisateurs</span>
+                      </div>
+                      <div className="flex items-center text-green-600">
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        <span>Toutes les directions</span>
+                      </div>
+                      <div className="flex items-center text-green-600">
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        <span>Modification/Suppression</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-green-600">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 className="text-lg font-bold flex items-center">
+                          <Lock className="w-5 h-5 mr-2 text-green-600" />
+                          Manager
+                        </h4>
+                        <p className="text-sm text-muted-foreground mt-1">Gestion de sa direction</p>
+                        <span className="inline-block mt-2 text-xs bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300 px-2 py-1 rounded-full">
+                          {users?.filter(u => u.role === 'manager').length || 0} utilisateurs
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center text-green-600">
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        <span>Vue direction complète</span>
+                      </div>
+                      <div className="flex items-center text-green-600">
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        <span>Création et modification</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-l-4 border-l-blue-600">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 className="text-lg font-bold flex items-center">
+                          <Users className="w-5 h-5 mr-2 text-blue-600" />
+                          Utilisateur
+                        </h4>
+                        <p className="text-sm text-muted-foreground mt-1">Accès en lecture</p>
+                        <span className="inline-block mt-2 text-xs bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
+                          {users?.filter(u => u.role === 'user').length || 0} utilisateurs
+                        </span>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center text-green-600">
+                        <UserCheck className="w-4 h-4 mr-2" />
+                        <span>Lecture données direction</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Permissions Matrix */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Matrice de permissions</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2 pr-4">Module</th>
+                          <th className="text-center py-2 px-2">Admin</th>
+                          <th className="text-center py-2 px-2">Manager</th>
+                          <th className="text-center py-2 px-2">User</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        <tr>
+                          <td className="py-3 pr-4 font-semibold">Tableau de bord</td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 pr-4 font-semibold">Gestion PME</td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                          <td className="text-center"><span className="text-blue-600 mx-auto">👁️</span></td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 pr-4 font-semibold">Opportunités</td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                          <td className="text-center"><span className="text-blue-600 mx-auto">👁️</span></td>
+                        </tr>
+                        <tr>
+                          <td className="py-3 pr-4 font-semibold">Administration</td>
+                          <td className="text-center"><UserCheck className="w-4 h-4 text-green-600 mx-auto" /></td>
+                          <td className="text-center"><span className="text-red-600 mx-auto">❌</span></td>
+                          <td className="text-center"><span className="text-red-600 mx-auto">❌</span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <Users className="w-5 h-5 text-muted-foreground mt-0.5" />
-            <div>
-              <p className="font-medium">Utilisateur</p>
-              <p className="text-sm text-muted-foreground">
-                Accès en lecture aux données de sa direction
-              </p>
+          </TabsContent>
+
+          {/* TAB 3: Directions */}
+          <TabsContent value="directions" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {directions?.map((direction) => (
+                <Card key={direction.id}>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 className="text-xl font-bold">{direction.name}</h4>
+                        <p className="text-sm text-muted-foreground mt-1">{direction.description}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Utilisateurs:</span>
+                        <span className="font-semibold">
+                          {users?.filter(u => u.direction_id === direction.id).length || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Priorité:</span>
+                        <span className="font-semibold">{direction.priority}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </TabsContent>
+
+          {/* TAB 4: Activity Logs */}
+          <TabsContent value="logs" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Dernières activités</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {activityLogs?.map((log) => (
+                    <div key={log.id} className="flex items-start space-x-4 p-4 bg-muted/50 rounded-lg">
+                      <div className="bg-blue-100 dark:bg-blue-900/20 rounded-full p-2">
+                        <Shield className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold">{log.action}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {log.user?.full_name} a modifié les permissions de {log.target_user?.full_name}
+                          {log.module && ` pour le module ${log.module}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {new Date(log.created_at).toLocaleString('fr-FR')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  {(!activityLogs || activityLogs.length === 0) && (
+                    <p className="text-center text-muted-foreground py-8">
+                      Aucune activité récente
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   );
 }
