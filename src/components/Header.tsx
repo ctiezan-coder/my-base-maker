@@ -13,12 +13,20 @@ export const Header = () => {
   const { toast } = useToast();
   
   const handleSignOut = async () => {
-    await signOut();
-    toast({
-      title: "Déconnexion",
-      description: "Vous avez été déconnecté avec succès",
-    });
-    navigate('/auth');
+    try {
+      await signOut();
+      toast({
+        title: "Déconnexion",
+        description: "Vous avez été déconnecté avec succès",
+      });
+      navigate('/auth');
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de se déconnecter",
+      });
+    }
   };
   
   return (
