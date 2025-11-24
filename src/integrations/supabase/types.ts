@@ -14,6 +14,117 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          account_type: string
+          balance: number | null
+          created_at: string
+          id: string
+          notes: string | null
+          parent_account_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          account_type: string
+          balance?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          parent_account_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          account_type?: string
+          balance?: number | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          parent_account_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_accounts_parent_account_id_fkey"
+            columns: ["parent_account_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounting_entries: {
+        Row: {
+          account_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          description: string
+          direction_id: string | null
+          entry_date: string
+          entry_number: string
+          entry_type: Database["public"]["Enums"]["accounting_entry_type"]
+          id: string
+          project_id: string | null
+          reference: string | null
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          description: string
+          direction_id?: string | null
+          entry_date: string
+          entry_number: string
+          entry_type: Database["public"]["Enums"]["accounting_entry_type"]
+          id?: string
+          project_id?: string | null
+          reference?: string | null
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          direction_id?: string | null
+          entry_date?: string
+          entry_number?: string
+          entry_type?: Database["public"]["Enums"]["accounting_entry_type"]
+          id?: string
+          project_id?: string | null
+          reference?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_entries_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_entries_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       allowed_emails: {
         Row: {
           added_by: string | null
@@ -409,6 +520,152 @@ export type Database = {
           },
         ]
       }
+      employees: {
+        Row: {
+          address: string | null
+          birth_date: string | null
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string
+          direction_id: string | null
+          email: string
+          emergency_contact: string | null
+          employee_number: string
+          first_name: string
+          hire_date: string
+          id: string
+          last_name: string
+          manager_id: string | null
+          notes: string | null
+          phone: string | null
+          position: string
+          salary: number | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          birth_date?: string | null
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          direction_id?: string | null
+          email: string
+          emergency_contact?: string | null
+          employee_number: string
+          first_name: string
+          hire_date: string
+          id?: string
+          last_name: string
+          manager_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          position: string
+          salary?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          birth_date?: string | null
+          contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          direction_id?: string | null
+          email?: string
+          emergency_contact?: string | null
+          employee_number?: string
+          first_name?: string
+          hire_date?: string
+          id?: string
+          last_name?: string
+          manager_id?: string | null
+          notes?: string | null
+          phone?: string | null
+          position?: string
+          salary?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipments: {
+        Row: {
+          assigned_to: string | null
+          brand: string | null
+          created_at: string
+          direction_id: string | null
+          equipment_type: string
+          id: string
+          location: string | null
+          model: string | null
+          name: string
+          notes: string | null
+          purchase_date: string | null
+          serial_number: string | null
+          status: string
+          updated_at: string
+          warranty_expiry: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          brand?: string | null
+          created_at?: string
+          direction_id?: string | null
+          equipment_type: string
+          id?: string
+          location?: string | null
+          model?: string | null
+          name: string
+          notes?: string | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          warranty_expiry?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          brand?: string | null
+          created_at?: string
+          direction_id?: string | null
+          equipment_type?: string
+          id?: string
+          location?: string | null
+          model?: string | null
+          name?: string
+          notes?: string | null
+          purchase_date?: string | null
+          serial_number?: string | null
+          status?: string
+          updated_at?: string
+          warranty_expiry?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipments_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_participants: {
         Row: {
           company_id: string
@@ -771,6 +1028,69 @@ export type Database = {
           },
         ]
       }
+      leave_requests: {
+        Row: {
+          approval_date: string | null
+          approved_by: string | null
+          created_at: string
+          employee_id: string
+          end_date: string
+          id: string
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          notes: string | null
+          reason: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["leave_status"]
+          total_days: number
+          updated_at: string
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          employee_id: string
+          end_date: string
+          id?: string
+          leave_type: Database["public"]["Enums"]["leave_type"]
+          notes?: string | null
+          reason?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          total_days: number
+          updated_at?: string
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          created_at?: string
+          employee_id?: string
+          end_date?: string
+          id?: string
+          leave_type?: Database["public"]["Enums"]["leave_type"]
+          notes?: string | null
+          reason?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["leave_status"]
+          total_days?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leave_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       market_alert_preferences: {
         Row: {
           countries: string[] | null
@@ -1056,6 +1376,107 @@ export type Database = {
             columns: ["partnership_id"]
             isOneToOne: false
             referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_orders: {
+        Row: {
+          actual_cost: number | null
+          advance_amount: number | null
+          created_at: string
+          created_by: string | null
+          destination: string
+          direction_id: string | null
+          duration_days: number
+          employee_id: string
+          end_date: string
+          estimated_budget: number | null
+          id: string
+          mission_number: string
+          notes: string | null
+          project_id: string | null
+          purpose: string
+          report: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["mission_status"]
+          updated_at: string
+          validated_by: string | null
+          validation_date: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          advance_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          destination: string
+          direction_id?: string | null
+          duration_days: number
+          employee_id: string
+          end_date: string
+          estimated_budget?: number | null
+          id?: string
+          mission_number: string
+          notes?: string | null
+          project_id?: string | null
+          purpose: string
+          report?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["mission_status"]
+          updated_at?: string
+          validated_by?: string | null
+          validation_date?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          advance_amount?: number | null
+          created_at?: string
+          created_by?: string | null
+          destination?: string
+          direction_id?: string | null
+          duration_days?: number
+          employee_id?: string
+          end_date?: string
+          estimated_budget?: number | null
+          id?: string
+          mission_number?: string
+          notes?: string | null
+          project_id?: string | null
+          purpose?: string
+          report?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["mission_status"]
+          updated_at?: string
+          validated_by?: string | null
+          validation_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_orders_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_orders_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_orders_validated_by_fkey"
+            columns: ["validated_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -1493,6 +1914,239 @@ export type Database = {
           },
         ]
       }
+      purchase_order_lines: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          item_name: string
+          order_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_name: string
+          order_id: string
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          item_name?: string
+          order_id?: string
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_lines_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          actual_delivery_date: string | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          direction_id: string | null
+          expected_delivery_date: string | null
+          id: string
+          notes: string | null
+          order_date: string
+          order_number: string
+          procurement_type: Database["public"]["Enums"]["procurement_type"]
+          project_id: string | null
+          status: Database["public"]["Enums"]["order_status"]
+          supplier_id: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          actual_delivery_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          direction_id?: string | null
+          expected_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date: string
+          order_number: string
+          procurement_type: Database["public"]["Enums"]["procurement_type"]
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          supplier_id?: string | null
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          actual_delivery_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          direction_id?: string | null
+          expected_delivery_date?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          order_number?: string
+          procurement_type?: Database["public"]["Enums"]["procurement_type"]
+          project_id?: string | null
+          status?: Database["public"]["Enums"]["order_status"]
+          supplier_id?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppliers: {
+        Row: {
+          address: string | null
+          bank_account: string | null
+          category: string | null
+          contact_person: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          rating: number | null
+          tax_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          bank_account?: string | null
+          category?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          rating?: number | null
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          bank_account?: string | null
+          category?: string | null
+          contact_person?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          rating?: number | null
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          assigned_to: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at: string
+          description: string
+          direction_id: string | null
+          equipment_id: string | null
+          id: string
+          priority: Database["public"]["Enums"]["ticket_priority"]
+          requester_id: string
+          resolution: string | null
+          resolved_at: string | null
+          status: Database["public"]["Enums"]["ticket_status"]
+          ticket_number: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          description: string
+          direction_id?: string | null
+          equipment_id?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          requester_id: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          description?: string
+          direction_id?: string | null
+          equipment_id?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["ticket_priority"]
+          requester_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          status?: Database["public"]["Enums"]["ticket_status"]
+          ticket_number?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assigned_to: string | null
@@ -1804,6 +2458,7 @@ export type Database = {
       }
     }
     Enums: {
+      accounting_entry_type: "Débit" | "Crédit"
       app_module:
         | "companies"
         | "projects"
@@ -1832,6 +2487,7 @@ export type Database = {
         | "Contrat signé"
         | "En cours"
         | "Terminé"
+      contract_type: "CDI" | "CDD" | "Stage" | "Consultant" | "Temporaire"
       document_category:
         | "Convention exportation"
         | "Agrément"
@@ -1856,6 +2512,14 @@ export type Database = {
         | "Note"
         | "Présentation"
       gender: "Homme" | "Femme"
+      leave_status: "En attente" | "Approuvé" | "Refusé" | "Annulé"
+      leave_type:
+        | "Congé annuel"
+        | "Congé maladie"
+        | "Congé maternité"
+        | "Congé paternité"
+        | "Permission"
+        | "Autre"
       market_region:
         | "Europe"
         | "Afrique"
@@ -1887,6 +2551,13 @@ export type Database = {
         | "Couverture événement"
         | "Support présentation"
         | "Autre"
+      mission_status:
+        | "Brouillon"
+        | "En attente validation"
+        | "Validée"
+        | "En cours"
+        | "Terminée"
+        | "Annulée"
       niveau_categorisation: "Niveau 1" | "Niveau 2" | "Niveau 3"
       opportunity_status:
         | "URGENT"
@@ -1894,12 +2565,20 @@ export type Database = {
         | "RECOMMANDÉ"
         | "EN_COURS"
         | "FERMÉ"
+      order_status:
+        | "Brouillon"
+        | "Validée"
+        | "En cours"
+        | "Reçue"
+        | "Clôturée"
+        | "Annulée"
       participation_type: "Foires" | "Salons" | "Jamais"
       phase_communication:
         | "Avant événement"
         | "Pendant événement"
         | "Après événement"
       priority_level: "1" | "3" | "5"
+      procurement_type: "Gré à gré" | "Appel d'offres" | "Consultation"
       registration_status:
         | "En attente"
         | "Confirmée"
@@ -1914,6 +2593,17 @@ export type Database = {
         | "Intervenant"
       statut_workflow: "Demande" | "En cours" | "Validé" | "Livré" | "Annulé"
       support_type: "Financier" | "Non financier" | "Les deux"
+      ticket_category:
+        | "Informatique"
+        | "Réseau"
+        | "Matériel"
+        | "Logiciel"
+        | "Téléphonie"
+        | "Automobile"
+        | "Infrastructure"
+        | "Autre"
+      ticket_priority: "Basse" | "Moyenne" | "Haute" | "Urgente"
+      ticket_status: "Ouvert" | "En cours" | "En attente" | "Résolu" | "Fermé"
       training_type:
         | "Formation"
         | "Atelier"
@@ -2060,6 +2750,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      accounting_entry_type: ["Débit", "Crédit"],
       app_module: [
         "companies",
         "projects",
@@ -2083,6 +2774,7 @@ export const Constants = {
         "En cours",
         "Terminé",
       ],
+      contract_type: ["CDI", "CDD", "Stage", "Consultant", "Temporaire"],
       document_category: [
         "Convention exportation",
         "Agrément",
@@ -2108,6 +2800,15 @@ export const Constants = {
         "Présentation",
       ],
       gender: ["Homme", "Femme"],
+      leave_status: ["En attente", "Approuvé", "Refusé", "Annulé"],
+      leave_type: [
+        "Congé annuel",
+        "Congé maladie",
+        "Congé maternité",
+        "Congé paternité",
+        "Permission",
+        "Autre",
+      ],
       market_region: [
         "Europe",
         "Afrique",
@@ -2141,6 +2842,14 @@ export const Constants = {
         "Support présentation",
         "Autre",
       ],
+      mission_status: [
+        "Brouillon",
+        "En attente validation",
+        "Validée",
+        "En cours",
+        "Terminée",
+        "Annulée",
+      ],
       niveau_categorisation: ["Niveau 1", "Niveau 2", "Niveau 3"],
       opportunity_status: [
         "URGENT",
@@ -2149,6 +2858,14 @@ export const Constants = {
         "EN_COURS",
         "FERMÉ",
       ],
+      order_status: [
+        "Brouillon",
+        "Validée",
+        "En cours",
+        "Reçue",
+        "Clôturée",
+        "Annulée",
+      ],
       participation_type: ["Foires", "Salons", "Jamais"],
       phase_communication: [
         "Avant événement",
@@ -2156,6 +2873,7 @@ export const Constants = {
         "Après événement",
       ],
       priority_level: ["1", "3", "5"],
+      procurement_type: ["Gré à gré", "Appel d'offres", "Consultation"],
       registration_status: [
         "En attente",
         "Confirmée",
@@ -2172,6 +2890,18 @@ export const Constants = {
       ],
       statut_workflow: ["Demande", "En cours", "Validé", "Livré", "Annulé"],
       support_type: ["Financier", "Non financier", "Les deux"],
+      ticket_category: [
+        "Informatique",
+        "Réseau",
+        "Matériel",
+        "Logiciel",
+        "Téléphonie",
+        "Automobile",
+        "Infrastructure",
+        "Autre",
+      ],
+      ticket_priority: ["Basse", "Moyenne", "Haute", "Urgente"],
+      ticket_status: ["Ouvert", "En cours", "En attente", "Résolu", "Fermé"],
       training_type: ["Formation", "Atelier", "Coaching", "Webinaire", "Autre"],
       type_activite: [
         "Séminaire",

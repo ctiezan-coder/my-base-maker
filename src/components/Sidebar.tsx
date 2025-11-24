@@ -18,6 +18,11 @@ import {
   TrendingUp,
   MessageSquare,
   Archive,
+  ShoppingCart,
+  Headphones,
+  UserCheck,
+  Plane,
+  Calculator,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
@@ -38,6 +43,11 @@ const menuItems = [
   { icon: Image, label: "Médias", path: "/media", module: "media" as const },
   { icon: BarChart3, label: "KPIs", path: "/kpis", module: "kpis" as const },
   { icon: Archive, label: "Archive Activités", path: "/activities-archive", module: null },
+  { icon: ShoppingCart, label: "Achats", path: "/achats", module: null },
+  { icon: Headphones, label: "Support", path: "/support", module: null },
+  { icon: UserCheck, label: "Ressources Humaines", path: "/rh", module: null },
+  { icon: Plane, label: "Missions", path: "/missions", module: null },
+  { icon: Calculator, label: "Comptabilité", path: "/comptabilite", module: null },
 ];
 
 export function Sidebar() {
