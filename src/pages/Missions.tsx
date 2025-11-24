@@ -4,9 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plane, MapPin, Calendar, DollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Plane, MapPin, Calendar, DollarSign, Plus } from "lucide-react";
+import { useHasRole } from "@/hooks/useUserRole";
+import { MissionOrderDialog } from "@/components/missions/MissionOrderDialog";
 
 export default function Missions() {
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const isManager = useHasRole('manager');
+
   const { data: missions } = useQuery({
     queryKey: ['mission_orders'],
     queryFn: async () => {
@@ -44,6 +50,12 @@ export default function Missions() {
           <h1 className="text-3xl font-bold">Module Gestion des Missions</h1>
           <p className="text-muted-foreground">Ordres de mission et déplacements</p>
         </div>
+        {isManager && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nouvel Ordre de Mission
+          </Button>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
@@ -133,6 +145,8 @@ export default function Missions() {
           </Table>
         </CardContent>
       </Card>
+
+      <MissionOrderDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 }
