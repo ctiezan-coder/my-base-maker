@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -28,7 +29,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { AccountDialog } from "./AccountDialog";
 
 const entrySchema = z.object({
   entry_number: z.string().min(1, "Le numéro d'écriture est requis"),
@@ -53,6 +56,7 @@ interface EntryDialogProps {
 export function EntryDialog({ open, onOpenChange, entry }: EntryDialogProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
 
   const { data: accounts } = useQuery({
     queryKey: ["accounting_accounts"],
@@ -138,6 +142,7 @@ export function EntryDialog({ open, onOpenChange, entry }: EntryDialogProps) {
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -184,20 +189,31 @@ export function EntryDialog({ open, onOpenChange, entry }: EntryDialogProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Compte *</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Sélectionner un compte" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {accounts?.map((account) => (
-                        <SelectItem key={account.id} value={account.id}>
-                          {account.account_number} - {account.account_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="flex gap-2">
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un compte" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {accounts?.map((account) => (
+                          <SelectItem key={account.id} value={account.id}>
+                            {account.account_number} - {account.account_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setIsAccountDialogOpen(true)}
+                      title="Créer un nouveau compte"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -337,5 +353,11 @@ export function EntryDialog({ open, onOpenChange, entry }: EntryDialogProps) {
         </Form>
       </DialogContent>
     </Dialog>
+    
+    <AccountDialog 
+      open={isAccountDialogOpen} 
+      onOpenChange={setIsAccountDialogOpen}
+    />
+  </>
   );
 }
