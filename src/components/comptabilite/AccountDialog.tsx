@@ -257,11 +257,10 @@ export function AccountDialog({ open, onOpenChange, account }: AccountDialogProp
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner une mission" />
+                          <SelectValue placeholder="Aucune mission" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Aucune mission</SelectItem>
                         {missions?.map((mission) => (
                           <SelectItem key={mission.id} value={mission.id}>
                             {mission.mission_number} - {mission.purpose}
@@ -283,11 +282,10 @@ export function AccountDialog({ open, onOpenChange, account }: AccountDialogProp
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Sélectionner un projet" />
+                          <SelectValue placeholder="Aucun projet" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Aucun projet</SelectItem>
                         {projects?.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
