@@ -29,6 +29,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { FileText, Upload, X } from "lucide-react";
+import { useState } from "react";
 
 const missionSchema = z.object({
   mission_number: z.string().min(1, "Le numéro d'ordre est requis"),
@@ -57,6 +59,8 @@ interface MissionOrderDialogProps {
 export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrderDialogProps) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [existingAttachments, setExistingAttachments] = useState<any[]>([]);
 
   const { data: employees } = useQuery({
     queryKey: ["employees"],
@@ -84,6 +88,73 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
       return data || [];
     },
   });
+
+  // Charger les pièces jointes existantes si on édite une mission
+  useQuery({
+    queryKey: ["mission_attachments", mission?.id],
+    queryFn: async () => {
+      if (!mission?.id) return [];
+      const { data } = await supabase
+        .from("mission_attachments")
+        .select("*")
+        .eq("mission_order_id", mission.id);
+      setExistingAttachments(data || []);
+      return data || [];
+    },
+    enabled: !!mission?.id && open,
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setUploadedFiles((prev) => [...prev, ...files]);
+  };
+
+  const removeFile = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const deleteExistingAttachment = async (attachmentId: string, filePath: string) => {
+    try {
+      // Supprimer le fichier du storage
+      await supabase.storage.from("mission-attachments").remove([filePath]);
+      
+      // Supprimer l'entrée de la base de données
+      await supabase.from("mission_attachments").delete().eq("id", attachmentId);
+      
+      setExistingAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
+      toast.success("Fichier supprimé");
+    } catch (error) {
+      console.error("Error deleting attachment:", error);
+      toast.error("Erreur lors de la suppression du fichier");
+    }
+  };
+
+  const uploadFiles = async (missionId: string) => {
+    if (uploadedFiles.length === 0) return;
+
+    for (const file of uploadedFiles) {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user!.id}/${missionId}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("mission-attachments")
+        .upload(fileName, file);
+
+      if (uploadError) {
+        console.error("Error uploading file:", uploadError);
+        continue;
+      }
+
+      await supabase.from("mission_attachments").insert({
+        mission_order_id: missionId,
+        file_name: file.name,
+        file_path: fileName,
+        file_size: file.size,
+        file_type: file.type,
+        uploaded_by: user!.id,
+      });
+    }
+  };
 
   const form = useForm<MissionFormData>({
     resolver: zodResolver(missionSchema),
@@ -121,6 +192,8 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
         project_id: data.project_id || null,
       };
 
+      let missionId = mission?.id;
+
       if (mission) {
         const { error } = await supabase
           .from("mission_orders")
@@ -128,14 +201,24 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
           .eq("id", mission.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("mission_orders").insert([payload as any]);
+        const { data: newMission, error } = await supabase
+          .from("mission_orders")
+          .insert([payload as any])
+          .select()
+          .single();
         if (error) throw error;
+        missionId = newMission.id;
       }
+
+      // Upload files
+      await uploadFiles(missionId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mission_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["mission_attachments"] });
       toast.success(mission ? "Ordre de mission modifié" : "Ordre de mission créé");
       form.reset();
+      setUploadedFiles([]);
       onOpenChange(false);
     },
     onError: (error) => {
@@ -393,6 +476,96 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
                 </FormItem>
               )}
             />
+
+            {/* Section des pièces jointes */}
+            <div className="space-y-3 pt-4 border-t">
+              <FormLabel className="flex items-center gap-2">
+                <FileText className="w-4 h-4" />
+                Pièces jointes
+              </FormLabel>
+
+              {/* Pièces jointes existantes */}
+              {existingAttachments.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Fichiers existants:</p>
+                  {existingAttachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between p-3 rounded-md border bg-muted/50"
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-primary" />
+                        <div>
+                          <p className="text-sm font-medium">{attachment.file_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(attachment.file_size / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteExistingAttachment(attachment.id, attachment.file_path)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Nouveaux fichiers à uploader */}
+              {uploadedFiles.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground">Nouveaux fichiers:</p>
+                  {uploadedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 rounded-md border bg-card"
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-primary" />
+                        <div>
+                          <p className="text-sm font-medium">{file.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {(file.size / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Bouton d'upload */}
+              <div>
+                <Input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => document.getElementById("file-upload")?.click()}
+                  className="w-full"
+                >
+                  <Upload className="w-4 h-4 mr-2" />
+                  Ajouter des fichiers
+                </Button>
+              </div>
+            </div>
 
             <div className="flex justify-end gap-2 pt-4">
               <Button
