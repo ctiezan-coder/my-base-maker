@@ -36,6 +36,8 @@ const accountSchema = z.object({
   parent_account_id: z.string().optional(),
   balance: z.string().default("0"),
   notes: z.string().optional(),
+  mission_id: z.string().optional(),
+  project_id: z.string().optional(),
 });
 
 type AccountFormData = z.infer<typeof accountSchema>;
@@ -60,11 +62,35 @@ export function AccountDialog({ open, onOpenChange, account }: AccountDialogProp
     },
   });
 
+  const { data: missions } = useQuery({
+    queryKey: ["mission_orders"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("mission_orders")
+        .select("id, mission_number, purpose, employee:employees(first_name, last_name)")
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+  });
+
+  const { data: projects } = useQuery({
+    queryKey: ["projects"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("projects")
+        .select("id, name, direction:directions(name)")
+        .order("created_at", { ascending: false });
+      return data || [];
+    },
+  });
+
   const form = useForm<AccountFormData>({
     resolver: zodResolver(accountSchema),
     defaultValues: account ? {
       ...account,
       balance: account.balance?.toString() || "0",
+      mission_id: account.mission_id || "",
+      project_id: account.project_id || "",
     } : {
       account_number: "",
       account_name: "",
@@ -72,6 +98,8 @@ export function AccountDialog({ open, onOpenChange, account }: AccountDialogProp
       parent_account_id: "",
       balance: "0",
       notes: "",
+      mission_id: "",
+      project_id: "",
     },
   });
 
@@ -81,6 +109,8 @@ export function AccountDialog({ open, onOpenChange, account }: AccountDialogProp
         ...data,
         balance: parseFloat(data.balance),
         parent_account_id: data.parent_account_id || null,
+        mission_id: data.mission_id || null,
+        project_id: data.project_id || null,
       };
 
       if (account) {
@@ -216,6 +246,60 @@ export function AccountDialog({ open, onOpenChange, account }: AccountDialogProp
                 </FormItem>
               )}
             />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="mission_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mission liée (optionnel)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une mission" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Aucune mission</SelectItem>
+                        {missions?.map((mission) => (
+                          <SelectItem key={mission.id} value={mission.id}>
+                            {mission.mission_number} - {mission.purpose}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="project_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Projet lié (optionnel)</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un projet" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">Aucun projet</SelectItem>
+                        {projects?.map((project) => (
+                          <SelectItem key={project.id} value={project.id}>
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
