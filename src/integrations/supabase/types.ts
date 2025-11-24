@@ -22,8 +22,10 @@ export type Database = {
           balance: number | null
           created_at: string
           id: string
+          mission_id: string | null
           notes: string | null
           parent_account_id: string | null
+          project_id: string | null
           updated_at: string
         }
         Insert: {
@@ -33,8 +35,10 @@ export type Database = {
           balance?: number | null
           created_at?: string
           id?: string
+          mission_id?: string | null
           notes?: string | null
           parent_account_id?: string | null
+          project_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -44,16 +48,32 @@ export type Database = {
           balance?: number | null
           created_at?: string
           id?: string
+          mission_id?: string | null
           notes?: string | null
           parent_account_id?: string | null
+          project_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "accounting_accounts_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "accounting_accounts_parent_account_id_fkey"
             columns: ["parent_account_id"]
             isOneToOne: false
             referencedRelation: "accounting_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_accounts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
         ]
