@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 import {
   LayoutDashboard,
   Building2,
@@ -26,23 +27,26 @@ import {
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { AppModule } from "@/hooks/useModulePermission";
 
-const menuItems = [
+interface MenuItem {
+  icon: any;
+  label: string;
+  path: string;
+  module: AppModule | null;
+}
+
+const dgItems: MenuItem[] = [
   { icon: LayoutDashboard, label: "Tableau de bord", path: "/", module: null },
   { icon: MessageSquare, label: "Messagerie", path: "/chat", module: null },
-  { icon: Building2, label: "Opérateurs", path: "/companies", module: "companies" as const },
-  { icon: Globe, label: "Marchés Export", path: "/market-development", module: "market_development" as const },
-  { icon: Handshake, label: "Partenariats", path: "/partnerships", module: "partnerships" as const },
-  { icon: FolderKanban, label: "Projets", path: "/projects", module: "projects" as const },
-  { icon: GraduationCap, label: "Formations", path: "/trainings", module: "trainings" as const },
-  { icon: Users, label: "Formateurs", path: "/trainers", module: "trainings" as const },
-  { icon: Calendar, label: "Événements", path: "/events", module: "events" as const },
-  { icon: FileText, label: "Documents", path: "/documents", module: "documents" as const },
-  { icon: ClipboardList, label: "Imputations", path: "/imputations", module: "imputations" as const },
-  { icon: TrendingUp, label: "Suivi & Évaluation", path: "/suivi-evaluation", module: "suivi_evaluation" as const },
-  { icon: Image, label: "Médias", path: "/media", module: "media" as const },
-  { icon: BarChart3, label: "KPIs", path: "/kpis", module: "kpis" as const },
-  { icon: Archive, label: "Archive Activités", path: "/activities-archive", module: null },
+  { icon: Building2, label: "Opérateurs", path: "/companies", module: "companies" },
+  { icon: FolderKanban, label: "Projets", path: "/projects", module: "projects" },
+  { icon: FileText, label: "Documents", path: "/documents", module: "documents" },
+  { icon: TrendingUp, label: "Suivi & Évaluation", path: "/suivi-evaluation", module: "suivi_evaluation" },
+  { icon: BarChart3, label: "KPIs", path: "/kpis", module: "kpis" },
+];
+
+const dafItems: MenuItem[] = [
   { icon: ShoppingCart, label: "Achats", path: "/achats", module: null },
   { icon: Headphones, label: "Support", path: "/support", module: null },
   { icon: UserCheck, label: "Ressources Humaines", path: "/rh", module: null },
@@ -50,22 +54,86 @@ const menuItems = [
   { icon: Calculator, label: "Comptabilité", path: "/comptabilite", module: null },
 ];
 
+const operationalItems: MenuItem[] = [
+  { icon: Globe, label: "Marchés Export", path: "/market-development", module: "market_development" },
+  { icon: Handshake, label: "Partenariats", path: "/partnerships", module: "partnerships" },
+  { icon: GraduationCap, label: "Formations", path: "/trainings", module: "trainings" },
+  { icon: Users, label: "Formateurs", path: "/trainers", module: "trainings" },
+  { icon: Calendar, label: "Événements", path: "/events", module: "events" },
+  { icon: Image, label: "Médias", path: "/media", module: "media" },
+  { icon: ClipboardList, label: "Imputations", path: "/imputations", module: "imputations" },
+  { icon: Archive, label: "Archive Activités", path: "/activities-archive", module: null },
+  { icon: UserCircle, label: "Espace Collaborateurs", path: "/collaborateurs", module: "collaborators" },
+];
+
+const MenuSection = ({ 
+  title, 
+  items, 
+  isAdmin 
+}: { 
+  title: string; 
+  items: MenuItem[]; 
+  isAdmin: boolean;
+}) => {
+  return (
+    <div className="space-y-2">
+      <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+        {title}
+      </h3>
+      {items.map((item) => {
+        const { canAccess } = useCanAccessModule(item.module || 'companies', 'user');
+        
+        if (!item.module || canAccess || isAdmin) {
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                )
+              }
+            >
+              <item.icon className="w-5 h-5" />
+              {item.label}
+            </NavLink>
+          );
+        }
+        return null;
+      })}
+    </div>
+  );
+};
+
 export function Sidebar() {
   const { data: userRole } = useUserRole();
   const isAdmin = userRole === 'admin';
 
   return (
-    <aside className="w-64 border-r border-border bg-card/50 min-h-[calc(100vh-4rem)] p-4">
-      <nav className="space-y-2">
-        {menuItems.map((item) => {
-          const { canAccess } = useCanAccessModule(item.module || 'companies', 'user');
-          
-          // Always show dashboard and chat
-          if (!item.module || canAccess || isAdmin) {
-            return (
+    <aside className="w-64 border-r border-border bg-card/50 min-h-[calc(100vh-4rem)] p-4 overflow-y-auto">
+      <nav className="space-y-6">
+        <MenuSection title="Direction Générale" items={dgItems} isAdmin={isAdmin} />
+        
+        <Separator />
+        
+        <MenuSection title="DAF" items={dafItems} isAdmin={isAdmin} />
+        
+        <Separator />
+        
+        <MenuSection title="Directions Opérationnelles" items={operationalItems} isAdmin={isAdmin} />
+        
+        {isAdmin && (
+          <>
+            <Separator />
+            <div className="space-y-2">
+              <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Administration
+              </h3>
               <NavLink
-                key={item.path}
-                to={item.path}
+                to="/admin"
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
@@ -75,59 +143,24 @@ export function Sidebar() {
                   )
                 }
               >
-                <item.icon className="w-5 h-5" />
-                {item.label}
+                <Shield className="w-5 h-5" />
+                Administration
               </NavLink>
-            );
-          }
-          return null;
-        })}
-        
-        <NavLink
-          to="/collaborateurs"
-          className={({ isActive }) =>
-            cn(
-              "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-              isActive
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground hover:bg-accent"
-            )
-          }
-        >
-          <UserCircle className="w-5 h-5" />
-          Espace Collaborateurs
-        </NavLink>
-        
-        {isAdmin && (
-          <>
-            <NavLink
-              to="/admin"
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )
-              }
-            >
-              <Shield className="w-5 h-5" />
-              Administration
-            </NavLink>
-            <NavLink
-              to="/permissions"
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )
-              }
-            >
-              <Shield className="w-5 h-5" />
-              Gestion Permissions
-            </NavLink>
+              <NavLink
+                to="/permissions"
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                  )
+                }
+              >
+                <Shield className="w-5 h-5" />
+                Gestion Permissions
+              </NavLink>
+            </div>
           </>
         )}
       </nav>
