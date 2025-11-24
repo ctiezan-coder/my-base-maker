@@ -4,10 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { DollarSign, TrendingUp, TrendingDown, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DollarSign, TrendingUp, TrendingDown, FileText, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useHasRole } from "@/hooks/useUserRole";
+import { EntryDialog } from "@/components/comptabilite/EntryDialog";
+import { AccountDialog } from "@/components/comptabilite/AccountDialog";
 
 export default function Comptabilite() {
+  const [isEntryDialogOpen, setIsEntryDialogOpen] = useState(false);
+  const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
+  const isAdminOrManager = useHasRole("manager");
+
   const { data: accounts } = useQuery({
     queryKey: ['accounting_accounts'],
     queryFn: async () => {
@@ -94,8 +102,14 @@ export default function Comptabilite() {
 
         <TabsContent value="entries" className="space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Dernières Écritures Comptables</CardTitle>
+              {isAdminOrManager && (
+                <Button onClick={() => setIsEntryDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvelle Écriture
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <Table>
@@ -141,8 +155,14 @@ export default function Comptabilite() {
 
         <TabsContent value="accounts" className="space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Plan Comptable</CardTitle>
+              {isAdminOrManager && (
+                <Button onClick={() => setIsAccountDialogOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau Compte
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <Table>
@@ -176,6 +196,16 @@ export default function Comptabilite() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <EntryDialog 
+        open={isEntryDialogOpen} 
+        onOpenChange={setIsEntryDialogOpen}
+      />
+      
+      <AccountDialog 
+        open={isAccountDialogOpen} 
+        onOpenChange={setIsAccountDialogOpen}
+      />
     </div>
   );
 }
