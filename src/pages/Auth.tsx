@@ -21,7 +21,11 @@ const loginSchema = z.object({
     .refine((email) => email.endsWith('@cotedivoirexport.ci'), {
       message: 'Seuls les emails @cotedivoirexport.ci sont autorisés',
     }),
-  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+  password: z.string()
+    .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
+    .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
+    .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
+    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre'),
 });
 
 const signupSchema = z.object({
@@ -31,7 +35,11 @@ const signupSchema = z.object({
     .refine((email) => email.endsWith('@cotedivoirexport.ci'), {
       message: 'Seuls les emails @cotedivoirexport.ci sont autorisés',
     }),
-  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères'),
+  password: z.string()
+    .min(8, 'Le mot de passe doit contenir au moins 8 caractères')
+    .regex(/[A-Z]/, 'Le mot de passe doit contenir au moins une majuscule')
+    .regex(/[a-z]/, 'Le mot de passe doit contenir au moins une minuscule')
+    .regex(/[0-9]/, 'Le mot de passe doit contenir au moins un chiffre'),
   confirmPassword: z.string(),
   directionId: z.string().min(1, 'La direction est requise'),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -313,6 +321,9 @@ export default function Auth() {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                   />
+                  <p className="text-xs text-muted-foreground">
+                    Minimum 8 caractères avec majuscule, minuscule et chiffre
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-confirm">Confirmer le mot de passe</Label>
