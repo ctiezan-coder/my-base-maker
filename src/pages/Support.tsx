@@ -7,9 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Ticket, AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { SupportTicketDialog } from "@/components/support/SupportTicketDialog";
 
 export default function Support() {
   const { user } = useAuth();
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const { data: tickets } = useQuery({
     queryKey: ['support_tickets'],
@@ -57,7 +59,7 @@ export default function Support() {
           <h1 className="text-3xl font-bold">Module Support & Maintenance</h1>
           <p className="text-muted-foreground">Gestion des tickets d'assistance</p>
         </div>
-        <Button>
+        <Button onClick={() => setDialogOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Nouveau Ticket
         </Button>
@@ -146,6 +148,8 @@ export default function Support() {
           </Table>
         </CardContent>
       </Card>
+
+      <SupportTicketDialog open={dialogOpen} onOpenChange={setDialogOpen} />
     </div>
   );
 }
