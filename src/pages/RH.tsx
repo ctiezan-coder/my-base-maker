@@ -4,10 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Users, Calendar, UserCheck, Briefcase } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, Calendar, UserCheck, Briefcase, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useHasRole } from "@/hooks/useUserRole";
+import { EmployeeDialog } from "@/components/rh/EmployeeDialog";
+import { LeaveRequestDialog } from "@/components/rh/LeaveRequestDialog";
 
 export default function RH() {
+  const [employeeDialogOpen, setEmployeeDialogOpen] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const isManager = useHasRole('manager');
+
   const { data: employees } = useQuery({
     queryKey: ['employees'],
     queryFn: async () => {
@@ -100,8 +108,14 @@ export default function RH() {
 
         <TabsContent value="employees" className="space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Liste des Employés</CardTitle>
+              {isManager && (
+                <Button onClick={() => setEmployeeDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouvel Employé
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <Table>
@@ -145,8 +159,14 @@ export default function RH() {
 
         <TabsContent value="leaves" className="space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Demandes de Congé</CardTitle>
+              {isManager && (
+                <Button onClick={() => setLeaveDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouvelle Demande
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <Table>
@@ -188,6 +208,9 @@ export default function RH() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <EmployeeDialog open={employeeDialogOpen} onOpenChange={setEmployeeDialogOpen} />
+      <LeaveRequestDialog open={leaveDialogOpen} onOpenChange={setLeaveDialogOpen} />
     </div>
   );
 }

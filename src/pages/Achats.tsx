@@ -7,8 +7,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Package, Users, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useHasRole } from "@/hooks/useUserRole";
+import { PurchaseOrderDialog } from "@/components/achats/PurchaseOrderDialog";
+import { SupplierDialog } from "@/components/achats/SupplierDialog";
 
 export default function Achats() {
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
+  const isManager = useHasRole('manager');
+
   const { data: suppliers } = useQuery({
     queryKey: ['suppliers'],
     queryFn: async () => {
@@ -92,8 +99,14 @@ export default function Achats() {
 
         <TabsContent value="orders" className="space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Liste des Commandes</CardTitle>
+              {isManager && (
+                <Button onClick={() => setOrderDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouvelle Commande
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <Table>
@@ -135,8 +148,14 @@ export default function Achats() {
 
         <TabsContent value="suppliers" className="space-y-4">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Liste des Fournisseurs</CardTitle>
+              {isManager && (
+                <Button onClick={() => setSupplierDialogOpen(true)}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Nouveau Fournisseur
+                </Button>
+              )}
             </CardHeader>
             <CardContent>
               <Table>
@@ -174,6 +193,9 @@ export default function Achats() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <PurchaseOrderDialog open={orderDialogOpen} onOpenChange={setOrderDialogOpen} />
+      <SupplierDialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen} />
     </div>
   );
 }
