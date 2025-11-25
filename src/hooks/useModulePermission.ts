@@ -14,7 +14,12 @@ export type AppModule =
   | 'media'
   | 'collaborators'
   | 'imputations'
-  | 'suivi_evaluation';
+  | 'suivi_evaluation'
+  | 'achats'
+  | 'support'
+  | 'rh'
+  | 'missions'
+  | 'comptabilite';
 
 export type AppRole = 'admin' | 'manager' | 'user';
 

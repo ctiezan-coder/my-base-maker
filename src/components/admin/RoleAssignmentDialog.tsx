@@ -23,7 +23,7 @@ import { Settings2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 
 type AppRole = 'admin' | 'manager' | 'user';
-type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators';
+type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators' | 'imputations' | 'suivi_evaluation' | 'achats' | 'support' | 'rh' | 'missions' | 'comptabilite';
 
 const MODULES: { value: AppModule; label: string }[] = [
   { value: 'companies', label: 'Entreprises' },
@@ -36,6 +36,13 @@ const MODULES: { value: AppModule; label: string }[] = [
   { value: 'partnerships', label: 'Partenariats' },
   { value: 'media', label: 'Médias' },
   { value: 'collaborators', label: 'Collaborateurs' },
+  { value: 'imputations', label: 'Imputations' },
+  { value: 'suivi_evaluation', label: 'Suivi & Évaluation' },
+  { value: 'achats', label: 'Achats' },
+  { value: 'support', label: 'Support' },
+  { value: 'rh', label: 'Ressources Humaines' },
+  { value: 'missions', label: 'Missions' },
+  { value: 'comptabilite', label: 'Comptabilité' },
 ];
 
 interface RoleAssignmentDialogProps {
@@ -57,6 +64,13 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
     partnerships: null,
     media: null,
     collaborators: null,
+    imputations: null,
+    suivi_evaluation: null,
+    achats: null,
+    support: null,
+    rh: null,
+    missions: null,
+    comptabilite: null,
   });
   const queryClient = useQueryClient();
 

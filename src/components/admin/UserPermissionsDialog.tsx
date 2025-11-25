@@ -41,6 +41,11 @@ const MODULES = [
   { value: "collaborators", label: "Collaborateurs" },
   { value: "imputations", label: "Imputations" },
   { value: "suivi_evaluation", label: "Suivi & Évaluation" },
+  { value: "achats", label: "Achats" },
+  { value: "support", label: "Support" },
+  { value: "rh", label: "Ressources Humaines" },
+  { value: "missions", label: "Missions" },
+  { value: "comptabilite", label: "Comptabilité" },
 ];
 
 const ROLE_OPTIONS = [
