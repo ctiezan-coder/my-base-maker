@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DollarSign, TrendingUp, TrendingDown, FileText, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useHasRole } from "@/hooks/useUserRole";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import { EntryDialog } from "@/components/comptabilite/EntryDialog";
 import { AccountDialog } from "@/components/comptabilite/AccountDialog";
 
 export default function Comptabilite() {
   const [isEntryDialogOpen, setIsEntryDialogOpen] = useState(false);
   const [isAccountDialogOpen, setIsAccountDialogOpen] = useState(false);
-  const isAdminOrManager = useHasRole("manager");
+  const { canAccess: isAdminOrManager } = useCanAccessModule('comptabilite', 'manager');
 
   const { data: accounts } = useQuery({
     queryKey: ['accounting_accounts'],
