@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Settings2 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useUserRole } from '@/hooks/useUserRole';
 
 type AppRole = 'admin' | 'manager' | 'user';
 type AppModule = 'companies' | 'projects' | 'documents' | 'events' | 'trainings' | 'kpis' | 'market_development' | 'partnerships' | 'media' | 'collaborators' | 'imputations' | 'suivi_evaluation' | 'achats' | 'support' | 'rh' | 'missions' | 'comptabilite';
@@ -53,6 +54,8 @@ interface RoleAssignmentDialogProps {
 export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedDirection, setSelectedDirection] = useState<string>('');
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
   const [selectedModules, setSelectedModules] = useState<Record<AppModule, AppRole | null>>({
     companies: null,
     projects: null,
@@ -159,6 +162,11 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
       [module]: role === 'none' ? null : role,
     }));
   };
+
+  // Ne pas afficher le bouton si non-admin
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

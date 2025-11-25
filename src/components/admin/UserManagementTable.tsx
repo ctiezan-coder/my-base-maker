@@ -11,6 +11,7 @@ import { Shield, Users, Lock, Trash2, CheckCircle, UserCog } from "lucide-react"
 import { RoleAssignmentDialog } from "./RoleAssignmentDialog";
 import { UserPermissionsDialog } from "./UserPermissionsDialog";
 import { AccountApprovalDialog } from "./AccountApprovalDialog";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,6 +40,8 @@ export function UserManagementTable() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
   const [approvalDialogOpen, setApprovalDialogOpen] = useState(false);
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
@@ -217,7 +220,7 @@ export function UserManagementTable() {
                   </div>
                 </TableCell>
                 <TableCell>
-                  {userData.user_id !== user?.id ? (
+                  {isAdmin && userData.user_id !== user?.id ? (
                     <Select
                       value={userData.direction_id || undefined}
                       onValueChange={(value) =>
@@ -247,7 +250,7 @@ export function UserManagementTable() {
                     <Badge variant={getRoleBadgeVariant(userData.role)}>
                       {userData.role}
                     </Badge>
-                    {userData.user_id !== user?.id && (
+                    {isAdmin && userData.user_id !== user?.id && (
                     <Select
                       value={userData.role}
                       onValueChange={(value: 'admin' | 'manager' | 'user') =>
@@ -284,7 +287,7 @@ export function UserManagementTable() {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    {userData.user_id !== user?.id && (
+                    {isAdmin && userData.user_id !== user?.id && (
                       <>
                         {userData.account_status !== 'approved' && (
                           <Button
