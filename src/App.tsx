@@ -9,7 +9,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Companies from "./pages/Companies";
 import Trainings from "./pages/Trainings";
-import Trainers from "./pages/Trainers";
 import Events from "./pages/Events";
 import Partnerships from "./pages/Partnerships";
 import Projects from "./pages/Projects";
@@ -49,7 +48,6 @@ const App = () => (
               <Route path="chat" element={<Chat />} />
               <Route path="companies" element={<Companies />} />
               <Route path="trainings" element={<Trainings />} />
-              <Route path="trainers" element={<Trainers />} />
               <Route path="events" element={<Events />} />
               <Route path="partnerships" element={<Partnerships />} />
               <Route path="projects" element={<Projects />} />

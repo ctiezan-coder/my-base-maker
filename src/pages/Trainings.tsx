@@ -3,17 +3,24 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Plus, GraduationCap } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, GraduationCap, Users } from "lucide-react";
 import { TrainingDialog } from "@/components/trainings/TrainingDialog";
 import { TrainingList } from "@/components/trainings/TrainingList";
+import { TrainerDialog } from "@/components/trainers/TrainerDialog";
+import { TrainerTable } from "@/components/trainers/TrainerTable";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Trainings() {
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
+  const [trainerDialogOpen, setTrainerDialogOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<any>(null);
+  const [selectedTrainer, setSelectedTrainer] = useState<any>(null);
   const { canAccess: canManageTrainings } = useCanAccessModule("trainings", "manager");
+  const { toast } = useToast();
 
-  const { data: trainings, isLoading, refetch } = useQuery({
+  const { data: trainings, isLoading: loadingTrainings, refetch: refetchTrainings } = useQuery({
     queryKey: ["trainings"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,15 +40,63 @@ export default function Trainings() {
     },
   });
 
-  const handleEdit = (training: any) => {
+  const { data: trainers, isLoading: loadingTrainers, refetch: refetchTrainers } = useQuery({
+    queryKey: ["trainers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trainers")
+        .select("*")
+        .order("full_name");
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const handleEditTraining = (training: any) => {
     setSelectedTraining(training);
-    setDialogOpen(true);
+    setTrainingDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
+  const handleEditTrainer = (trainer: any) => {
+    setSelectedTrainer(trainer);
+    setTrainerDialogOpen(true);
+  };
+
+  const handleCloseTrainingDialog = () => {
     setSelectedTraining(null);
-    setDialogOpen(false);
-    refetch();
+    setTrainingDialogOpen(false);
+    refetchTrainings();
+  };
+
+  const handleCloseTrainerDialog = () => {
+    setSelectedTrainer(null);
+    setTrainerDialogOpen(false);
+    refetchTrainers();
+  };
+
+  const handleDeleteTrainer = async (trainer: any) => {
+    try {
+      const { error } = await supabase
+        .from("trainers")
+        .delete()
+        .eq("id", trainer.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Formateur supprimé",
+        description: "Le formateur a été supprimé avec succès",
+      });
+
+      refetchTrainers();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: error.message,
+      });
+    }
   };
 
   return (
@@ -50,39 +105,83 @@ export default function Trainings() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <GraduationCap className="w-8 h-8 text-primary" />
-            Formations
+            Formations & Formateurs
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gestion des formations et événements
+            Gestion des formations, événements et formateurs
           </p>
         </div>
-        {canManageTrainings && (
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouvelle formation
-          </Button>
-        )}
       </div>
 
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold">Formations planifiées</h3>
-        </CardHeader>
-        <CardContent>
-          <TrainingList
-            trainings={trainings || []}
-            isLoading={isLoading}
-            onEdit={handleEdit}
-            canManage={canManageTrainings}
-          />
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="trainings" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="trainings" className="flex items-center gap-2">
+            <GraduationCap className="w-4 h-4" />
+            Formations
+          </TabsTrigger>
+          <TabsTrigger value="trainers" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Formateurs
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="trainings">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <h3 className="text-lg font-semibold">Formations planifiées</h3>
+              {canManageTrainings && (
+                <Button onClick={() => setTrainingDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Nouvelle formation
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              <TrainingList
+                trainings={trainings || []}
+                isLoading={loadingTrainings}
+                onEdit={handleEditTraining}
+                canManage={canManageTrainings}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="trainers">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <h3 className="text-lg font-semibold">Liste des formateurs</h3>
+              {canManageTrainings && (
+                <Button onClick={() => setTrainerDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Ajouter un formateur
+                </Button>
+              )}
+            </CardHeader>
+            <CardContent>
+              <TrainerTable
+                trainers={trainers || []}
+                isLoading={loadingTrainers}
+                onEdit={handleEditTrainer}
+                onDelete={handleDeleteTrainer}
+              />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <TrainingDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={trainingDialogOpen}
+        onOpenChange={setTrainingDialogOpen}
         training={selectedTraining}
-        onClose={handleCloseDialog}
+        onClose={handleCloseTrainingDialog}
+      />
+
+      <TrainerDialog
+        open={trainerDialogOpen}
+        onOpenChange={setTrainerDialogOpen}
+        trainer={selectedTrainer}
+        onClose={handleCloseTrainerDialog}
       />
     </div>
   );
