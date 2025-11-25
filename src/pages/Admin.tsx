@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Shield, Users, Lock, ArrowLeft, Clock, UserCheck, UserPlus, Search } from 'lucide-react';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { UserManagementTable } from '@/components/admin/UserManagementTable';
-import { UserPermissionsTable } from '@/components/admin/UserPermissionsTable';
 import { AllowedEmailsManager } from '@/components/admin/AllowedEmailsManager';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -137,75 +136,6 @@ export default function Admin() {
     enabled: isAdmin,
   });
 
-  // Fetch users with permissions for permissions tab
-  const { data: usersWithPermissions, isLoading: permissionsLoading } = useQuery({
-    queryKey: ["admin-users-permissions"],
-    queryFn: async () => {
-      let query = supabase
-        .from("profiles")
-        .select(`
-          user_id,
-          full_name,
-          email,
-          direction_id,
-          directions (
-            id,
-            name
-          )
-        `)
-        .order("full_name");
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      // Get roles for each user
-      const userIds = data.map((u) => u.user_id);
-      const { data: rolesData } = await supabase
-        .from("user_roles")
-        .select("user_id, role")
-        .in("user_id", userIds);
-
-      // Get role assignments for each user
-      const { data: assignmentsData } = await supabase
-        .from("user_role_assignments")
-        .select(`
-          user_id,
-          direction_id,
-          module,
-          role,
-          directions (
-            id,
-            name
-          )
-        `)
-        .in("user_id", userIds);
-
-      // Map roles and assignments to users
-      const rolesMap = new Map();
-      rolesData?.forEach((r) => {
-        if (!rolesMap.has(r.user_id)) {
-          rolesMap.set(r.user_id, []);
-        }
-        rolesMap.get(r.user_id).push(r.role);
-      });
-
-      const assignmentsMap = new Map();
-      assignmentsData?.forEach((a) => {
-        if (!assignmentsMap.has(a.user_id)) {
-          assignmentsMap.set(a.user_id, []);
-        }
-        assignmentsMap.get(a.user_id).push(a);
-      });
-
-      return data.map((u) => ({
-        ...u,
-        roles: rolesMap.get(u.user_id) || [],
-        assignments: assignmentsMap.get(u.user_id) || [],
-      }));
-    },
-    enabled: isAdmin,
-  });
-
   const filteredUsers = users?.filter(user => {
     const matchesSearch = searchTerm === '' || 
       user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -269,8 +199,7 @@ export default function Admin() {
         <Tabs defaultValue="users" className="space-y-6">
           <TabsList className="bg-card">
             <TabsTrigger value="users">Utilisateurs</TabsTrigger>
-            <TabsTrigger value="permissions">Permissions</TabsTrigger>
-            <TabsTrigger value="roles">Rôles</TabsTrigger>
+            <TabsTrigger value="roles">Rôles & Permissions</TabsTrigger>
             <TabsTrigger value="directions">Directions</TabsTrigger>
             <TabsTrigger value="logs">Logs d'activité</TabsTrigger>
             <TabsTrigger value="emails">Emails autorisés</TabsTrigger>
@@ -394,22 +323,7 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          {/* TAB 2: Permissions */}
-          <TabsContent value="permissions" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestion des permissions utilisateurs</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Gérez les rôles globaux et les permissions par module pour chaque utilisateur
-                </p>
-              </CardHeader>
-              <CardContent>
-                <UserPermissionsTable users={usersWithPermissions || []} isLoading={permissionsLoading} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* TAB 3: Roles */}
+          {/* TAB 2: Roles & Permissions */}
           <TabsContent value="roles" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Role Cards */}
@@ -549,7 +463,7 @@ export default function Admin() {
             </div>
           </TabsContent>
 
-          {/* TAB 4: Directions */}
+          {/* TAB 3: Directions */}
           <TabsContent value="directions" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {directions?.map((direction) => (
@@ -579,7 +493,7 @@ export default function Admin() {
             </div>
           </TabsContent>
 
-          {/* TAB 5: Activity Logs */}
+          {/* TAB 4: Activity Logs */}
           <TabsContent value="logs" className="space-y-6">
             <Card>
               <CardHeader>
@@ -614,7 +528,7 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          {/* TAB 6: Allowed Emails */}
+          {/* TAB 5: Allowed Emails */}
           <TabsContent value="emails" className="space-y-6">
             <AllowedEmailsManager />
           </TabsContent>

@@ -22,6 +22,7 @@ import Collaborateurs from "./pages/Collaborateurs";
 import Imputations from "./pages/Imputations";
 import SuiviEvaluation from "./pages/SuiviEvaluation";
 import Chat from "./pages/Chat";
+import UserPermissions from "./pages/UserPermissions";
 import PendingApproval from "./pages/PendingApproval";
 import ActivitiesArchive from "./pages/ActivitiesArchive";
 import Achats from "./pages/Achats";
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="imputations" element={<Imputations />} />
               <Route path="suivi-evaluation" element={<SuiviEvaluation />} />
               <Route path="admin" element={<Admin />} />
+              <Route path="permissions" element={<UserPermissions />} />
               <Route path="collaborateurs" element={<Collaborateurs />} />
               <Route path="activities-archive" element={<ActivitiesArchive />} />
               <Route path="achats" element={<Achats />} />
