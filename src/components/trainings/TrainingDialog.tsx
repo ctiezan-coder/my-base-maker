@@ -26,6 +26,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
   const { data: userDirection } = useUserDirection();
   const [loading, setLoading] = useState(false);
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
+  const [selectedTrainers, setSelectedTrainers] = useState<string[]>([]);
   const [formData, setFormData] = useState<any>({
     title: "",
     description: "",
@@ -35,7 +36,6 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
     location: "",
     max_participants: "",
     direction_id: "",
-    trainer_id: "",
   });
 
   const { data: directions = [] } = useQuery({
@@ -88,31 +88,45 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
   });
 
   useEffect(() => {
-    if (training) {
-      setFormData({
-        title: training.title || "",
-        description: training.description || "",
-        training_type: training.training_type || "Formation",
-        start_date: training.start_date ? training.start_date.split("T")[0] : "",
-        end_date: training.end_date ? training.end_date.split("T")[0] : "",
-        location: training.location || "",
-        max_participants: training.max_participants?.toString() || "",
-        direction_id: training.direction_id || "",
-        trainer_id: training.trainer_id || "",
-      });
-    } else {
-      setFormData({
-        title: "",
-        description: "",
-        training_type: "Formation",
-        start_date: "",
-        end_date: "",
-        location: "",
-        max_participants: "",
-        direction_id: userDirection?.direction_id || "",
-        trainer_id: "",
-      });
-      setSelectedCompanies([]);
+    const loadTrainingTrainers = async () => {
+      if (training) {
+        // Load trainers for this training
+        const { data: trainingTrainers } = await supabase
+          .from("training_trainers")
+          .select("trainer_id")
+          .eq("training_id", training.id);
+        
+        const trainerIds = trainingTrainers?.map(tt => tt.trainer_id) || [];
+        setSelectedTrainers(trainerIds);
+        
+        setFormData({
+          title: training.title || "",
+          description: training.description || "",
+          training_type: training.training_type || "Formation",
+          start_date: training.start_date ? training.start_date.split("T")[0] : "",
+          end_date: training.end_date ? training.end_date.split("T")[0] : "",
+          location: training.location || "",
+          max_participants: training.max_participants?.toString() || "",
+          direction_id: training.direction_id || "",
+        });
+      } else {
+        setFormData({
+          title: "",
+          description: "",
+          training_type: "Formation",
+          start_date: "",
+          end_date: "",
+          location: "",
+          max_participants: "",
+          direction_id: userDirection?.direction_id || "",
+        });
+        setSelectedCompanies([]);
+        setSelectedTrainers([]);
+      }
+    };
+    
+    if (open) {
+      loadTrainingTrainers();
     }
   }, [training, open, userDirection]);
 
@@ -148,6 +162,28 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
           .eq("id", training.id);
 
         if (error) throw error;
+        
+        // Update trainers
+        // First delete existing trainers
+        await supabase
+          .from("training_trainers")
+          .delete()
+          .eq("training_id", training.id);
+        
+        // Then add new trainers
+        if (selectedTrainers.length > 0) {
+          const trainerLinks = selectedTrainers.map(trainerId => ({
+            training_id: training.id,
+            trainer_id: trainerId,
+          }));
+          
+          const { error: trainersError } = await supabase
+            .from("training_trainers")
+            .insert(trainerLinks);
+          
+          if (trainersError) throw trainersError;
+        }
+        
         toast({ title: "Formation mise à jour avec succès" });
       } else {
         const { data: newTraining, error } = await supabase
@@ -157,6 +193,20 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
           .single();
 
         if (error) throw error;
+
+        // Add trainer links
+        if (selectedTrainers.length > 0 && newTraining) {
+          const trainerLinks = selectedTrainers.map(trainerId => ({
+            training_id: newTraining.id,
+            trainer_id: trainerId,
+          }));
+          
+          const { error: trainersError } = await supabase
+            .from("training_trainers")
+            .insert(trainerLinks);
+          
+          if (trainersError) throw trainersError;
+        }
 
         // Ajouter les inscriptions pour les entreprises sélectionnées
         if (selectedCompanies.length > 0 && newTraining) {
@@ -227,6 +277,14 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
       prev.includes(companyId)
         ? prev.filter(id => id !== companyId)
         : [...prev, companyId]
+    );
+  };
+
+  const toggleTrainer = (trainerId: string) => {
+    setSelectedTrainers(prev =>
+      prev.includes(trainerId)
+        ? prev.filter(id => id !== trainerId)
+        : [...prev, trainerId]
     );
   };
 
@@ -343,23 +401,40 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="trainer_id">Formateur</Label>
-            <Select
-              value={formData.trainer_id}
-              onValueChange={(value) => setFormData({ ...formData, trainer_id: value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un formateur" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Aucun formateur</SelectItem>
-                {trainers.map((trainer) => (
-                  <SelectItem key={trainer.id} value={trainer.id}>
-                    {trainer.full_name} {trainer.specialization && `(${trainer.specialization})`}
-                  </SelectItem>
+            <Label>Formateurs</Label>
+            <div className="text-sm text-muted-foreground mb-2">
+              Sélectionnez un ou plusieurs formateurs pour cette formation
+            </div>
+            <ScrollArea className="h-[150px] border rounded-md p-4">
+              <div className="space-y-3">
+                {trainers?.map((trainer) => (
+                  <div key={trainer.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`trainer-${trainer.id}`}
+                      checked={selectedTrainers.includes(trainer.id)}
+                      onCheckedChange={() => toggleTrainer(trainer.id)}
+                    />
+                    <label
+                      htmlFor={`trainer-${trainer.id}`}
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                    >
+                      {trainer.full_name}
+                      {trainer.specialization && (
+                        <span className="text-muted-foreground ml-1">({trainer.specialization})</span>
+                      )}
+                    </label>
+                  </div>
                 ))}
-              </SelectContent>
-            </Select>
+                {trainers?.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Aucun formateur disponible</p>
+                )}
+              </div>
+            </ScrollArea>
+            {selectedTrainers.length > 0 && (
+              <p className="text-sm text-muted-foreground mt-2">
+                {selectedTrainers.length} formateur(s) sélectionné(s)
+              </p>
+            )}
           </div>
 
           {!training && (

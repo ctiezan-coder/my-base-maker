@@ -27,10 +27,12 @@ export default function Trainings() {
         .from("trainings")
         .select(`
           *,
-          trainers (
-            id,
-            full_name,
-            specialization
+          training_trainers (
+            trainers (
+              id,
+              full_name,
+              specialization
+            )
           )
         `)
         .order("start_date", { ascending: false });

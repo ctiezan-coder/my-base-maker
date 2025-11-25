@@ -51,8 +51,14 @@ export function TrainingList({ trainings, isLoading, onEdit, canManage = true }:
                 <Badge variant="outline">{training.training_type}</Badge>
               </TableCell>
               <TableCell>
-                <div className="text-sm">
-                  {training.trainers?.full_name || (
+                <div className="text-sm space-y-1">
+                  {training.training_trainers && training.training_trainers.length > 0 ? (
+                    training.training_trainers.map((tt: any, idx: number) => (
+                      <div key={idx}>
+                        {tt.trainers?.full_name}
+                      </div>
+                    ))
+                  ) : (
                     <span className="text-muted-foreground italic">Non assigné</span>
                   )}
                 </div>
