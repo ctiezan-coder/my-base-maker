@@ -321,7 +321,9 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick, canManage 
           className: 'custom-leaflet-popup'
         });
 
-      markersLayer.current!.addLayer(marker);
+      if (markersLayer.current) {
+        markersLayer.current.addLayer(marker);
+      }
     });
   }, [opportunities, groupedOpportunities, onOpportunityClick]);
 

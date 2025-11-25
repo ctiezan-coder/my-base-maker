@@ -11,12 +11,25 @@ import { TrainerDialog } from "@/components/trainers/TrainerDialog";
 import { TrainerTable } from "@/components/trainers/TrainerTable";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import { useToast } from "@/hooks/use-toast";
+import type { Database } from "@/integrations/supabase/types";
+
+type Trainer = Database["public"]["Tables"]["trainers"]["Row"];
+
+type Training = Database["public"]["Tables"]["trainings"]["Row"] & {
+  training_trainers: {
+    trainers: {
+      id: string;
+      full_name: string;
+      specialization: string | null;
+    } | null;
+  }[];
+};
 
 export default function Trainings() {
   const [trainingDialogOpen, setTrainingDialogOpen] = useState(false);
   const [trainerDialogOpen, setTrainerDialogOpen] = useState(false);
-  const [selectedTraining, setSelectedTraining] = useState<any>(null);
-  const [selectedTrainer, setSelectedTrainer] = useState<any>(null);
+  const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
+  const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
   const { canAccess: canManageTrainings } = useCanAccessModule("trainings", "manager");
   const { toast } = useToast();
 
@@ -55,12 +68,12 @@ export default function Trainings() {
     },
   });
 
-  const handleEditTraining = (training: any) => {
+  const handleEditTraining = (training: Training) => {
     setSelectedTraining(training);
     setTrainingDialogOpen(true);
   };
 
-  const handleEditTrainer = (trainer: any) => {
+  const handleEditTrainer = (trainer: Trainer) => {
     setSelectedTrainer(trainer);
     setTrainerDialogOpen(true);
   };
@@ -77,7 +90,7 @@ export default function Trainings() {
     refetchTrainers();
   };
 
-  const handleDeleteTrainer = async (trainer: any) => {
+  const handleDeleteTrainer = async (trainer: Trainer) => {
     try {
       const { error } = await supabase
         .from("trainers")
@@ -92,11 +105,12 @@ export default function Trainings() {
       });
 
       refetchTrainers();
-    } catch (error: any) {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Une erreur est survenue";
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: error.message,
+        description: errorMessage,
       });
     }
   };

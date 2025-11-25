@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@supabase/auth-helpers-react";
+import { useUserDirection } from "@/hooks/useUserDirection";
 
 interface AddPmeDialogProps {
   open: boolean;
@@ -13,6 +16,9 @@ interface AddPmeDialogProps {
 }
 
 export function AddPmeDialog({ open, onOpenChange }: AddPmeDialogProps) {
+  const { user } = useAuth();
+  const { directionId } = useUserDirection();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     sector: "",
@@ -20,28 +26,61 @@ export function AddPmeDialog({ open, onOpenChange }: AddPmeDialogProps) {
     market: "",
     contact: "",
     nextMeeting: "",
-    description: ""
+    description: "",
+    dfeNumber: "",
+    rccmNumber: "",
+    headquarters: ""
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // TODO: Sauvegarder dans la base de données
-    console.log("Nouvelle PME:", formData);
-    
-    toast.success("PME ajoutée avec succès");
-    onOpenChange(false);
-    
-    // Reset form
-    setFormData({
-      name: "",
-      sector: "",
-      status: "Prospection",
-      market: "",
-      contact: "",
-      nextMeeting: "",
-      description: ""
-    });
+
+    if (!user) {
+      toast.error("Vous devez être connecté pour ajouter une PME");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase.from("companies").insert({
+        company_name: formData.name,
+        activity_sector: formData.sector,
+        accompaniment_status: formData.status,
+        target_export_markets: formData.market ? [formData.market] : null,
+        legal_representative_name: formData.contact,
+        aciex_interaction_history: formData.description,
+        dfe_number: formData.dfeNumber,
+        rccm_number: formData.rccmNumber,
+        headquarters_location: formData.headquarters,
+        direction_id: directionId,
+        created_by: user.id
+      });
+
+      if (error) throw error;
+
+      toast.success("PME ajoutée avec succès");
+      onOpenChange(false);
+
+      // Reset form
+      setFormData({
+        name: "",
+        sector: "",
+        status: "Prospection",
+        market: "",
+        contact: "",
+        nextMeeting: "",
+        description: "",
+        dfeNumber: "",
+        rccmNumber: "",
+        headquarters: ""
+      });
+    } catch (error) {
+      console.error("Error adding company:", error);
+      toast.error("Erreur lors de l'ajout de la PME");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -75,6 +114,39 @@ export function AddPmeDialog({ open, onOpenChange }: AddPmeDialogProps) {
                 value={formData.sector}
                 onChange={(e) => setFormData({ ...formData, sector: e.target.value })}
                 placeholder="Ex: Agroalimentaire"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="dfeNumber">Numéro DFE *</Label>
+              <Input
+                id="dfeNumber"
+                required
+                value={formData.dfeNumber}
+                onChange={(e) => setFormData({ ...formData, dfeNumber: e.target.value })}
+                placeholder="Ex: DFE123456"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rccmNumber">Numéro RCCM *</Label>
+              <Input
+                id="rccmNumber"
+                required
+                value={formData.rccmNumber}
+                onChange={(e) => setFormData({ ...formData, rccmNumber: e.target.value })}
+                placeholder="Ex: RCCM123456"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="headquarters">Siège social *</Label>
+              <Input
+                id="headquarters"
+                required
+                value={formData.headquarters}
+                onChange={(e) => setFormData({ ...formData, headquarters: e.target.value })}
+                placeholder="Ex: Abidjan, Plateau"
               />
             </div>
 
@@ -138,11 +210,11 @@ export function AddPmeDialog({ open, onOpenChange }: AddPmeDialogProps) {
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Annuler
             </Button>
-            <Button type="submit">
-              Ajouter la PME
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Ajout en cours..." : "Ajouter la PME"}
             </Button>
           </div>
         </form>

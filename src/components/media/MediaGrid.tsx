@@ -146,8 +146,6 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete, canManage =
     );
   }
 
-  console.log("MediaItems:", mediaItems);
-
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

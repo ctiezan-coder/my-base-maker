@@ -39,15 +39,11 @@ export function EventSearchDialog({ open, onOpenChange, onEventAdded }: EventSea
     setEvents([]);
 
     try {
-      console.log("Calling scrape-events function...");
-      
       const { data, error } = await supabase.functions.invoke('scrape-events', {
         body: {},
       });
 
       if (error) throw error;
-
-      console.log("Scraping result:", data);
 
       if (data.success) {
         setEvents(data.events || []);
@@ -58,9 +54,9 @@ export function EventSearchDialog({ open, onOpenChange, onEventAdded }: EventSea
         throw new Error(data.error || "Échec de la recherche");
       }
     } catch (error) {
-      console.error("Search error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
       toast.error("Erreur lors de la recherche", {
-        description: error.message,
+        description: errorMessage,
       });
     } finally {
       setSearching(false);
