@@ -2413,7 +2413,6 @@ export type Database = {
           max_participants: number | null
           start_date: string
           title: string
-          trainer_ids: string[] | null
           training_type: Database["public"]["Enums"]["training_type"]
           updated_at: string
         }
@@ -2429,7 +2428,6 @@ export type Database = {
           max_participants?: number | null
           start_date: string
           title: string
-          trainer_ids?: string[] | null
           training_type: Database["public"]["Enums"]["training_type"]
           updated_at?: string
         }
@@ -2445,7 +2443,6 @@ export type Database = {
           max_participants?: number | null
           start_date?: string
           title?: string
-          trainer_ids?: string[] | null
           training_type?: Database["public"]["Enums"]["training_type"]
           updated_at?: string
         }

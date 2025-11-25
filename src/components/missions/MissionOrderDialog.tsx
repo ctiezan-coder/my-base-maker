@@ -130,11 +130,11 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
   };
 
   const uploadFiles = async (missionId: string) => {
-    if (uploadedFiles.length === 0) return;
+    if (uploadedFiles.length === 0 || !user?.id) return;
 
     for (const file of uploadedFiles) {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${user!.id}/${missionId}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${missionId}/${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("mission-attachments")
@@ -151,7 +151,7 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
         file_path: fileName,
         file_size: file.size,
         file_type: file.type,
-        uploaded_by: user!.id,
+        uploaded_by: user.id,
       });
     }
   };
@@ -182,12 +182,16 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
 
   const mutation = useMutation({
     mutationFn: async (data: MissionFormData) => {
+      if (!user?.id) {
+        throw new Error("Utilisateur non connecté");
+      }
+
       const payload = {
         ...data,
         duration_days: parseFloat(data.duration_days),
         estimated_budget: data.estimated_budget ? parseFloat(data.estimated_budget) : null,
         advance_amount: data.advance_amount ? parseFloat(data.advance_amount) : null,
-        created_by: user!.id,
+        created_by: user.id,
         direction_id: data.direction_id || null,
         project_id: data.project_id || null,
       };

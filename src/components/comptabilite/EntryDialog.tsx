@@ -105,10 +105,14 @@ export function EntryDialog({ open, onOpenChange, entry }: EntryDialogProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: EntryFormData) => {
+      if (!user?.id) {
+        throw new Error("Utilisateur non connecté");
+      }
+
       const payload = {
         ...data,
         amount: parseFloat(data.amount),
-        created_by: user!.id,
+        created_by: user.id,
         direction_id: data.direction_id || null,
         project_id: data.project_id || null,
         reference: data.reference || null,
@@ -121,7 +125,7 @@ export function EntryDialog({ open, onOpenChange, entry }: EntryDialogProps) {
           .eq("id", entry.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("accounting_entries").insert([payload as any]);
+        const { error } = await supabase.from("accounting_entries").insert([payload]);
         if (error) throw error;
       }
     },

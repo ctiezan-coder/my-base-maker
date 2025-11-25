@@ -62,18 +62,18 @@ const TreeNode = ({
           <Folder className="w-4 h-4 text-primary" />
         )}
         <span className="text-sm font-medium">{node.name}</span>
-        {hasChildren && (
+        {hasChildren && node.children && (
           <span className="text-xs text-muted-foreground ml-2">
-            ({node.children!.length})
+            ({node.children.length})
           </span>
         )}
       </div>
-      {hasChildren && isExpanded && (
+      {hasChildren && isExpanded && node.children && (
         <div>
-          {node.children!.map((child) => (
-            <TreeNode 
-              key={child.id} 
-              node={child} 
+          {node.children.map((child) => (
+            <TreeNode
+              key={child.id}
+              node={child}
               level={level + 1}
               onFolderClick={onFolderClick}
               currentFolderId={currentFolderId}
@@ -98,11 +98,13 @@ export const FolderTreeView = ({ folders, onFolderClick, currentFolderId }: Fold
 
     // Construire la hiérarchie
     items.forEach(item => {
-      const node = map.get(item.id)!;
+      const node = map.get(item.id);
+      if (!node) return;
+
       if (item.parent_folder_id) {
         const parent = map.get(item.parent_folder_id);
-        if (parent) {
-          parent.children!.push(node);
+        if (parent && parent.children) {
+          parent.children.push(node);
         } else {
           roots.push(node);
         }

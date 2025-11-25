@@ -73,11 +73,15 @@ export function SupportTicketDialog({ open, onOpenChange }: SupportTicketDialogP
 
   const createTicketMutation = useMutation({
     mutationFn: async (data: TicketFormData) => {
+      if (!user?.id) {
+        throw new Error("Utilisateur non connecté");
+      }
+
       // Generate ticket number
       const { count } = await supabase
         .from('support_tickets')
         .select('*', { count: 'exact', head: true });
-      
+
       const ticketNumber = `TICKET-${String((count || 0) + 1).padStart(5, '0')}`;
 
       const { error } = await supabase
@@ -89,7 +93,7 @@ export function SupportTicketDialog({ open, onOpenChange }: SupportTicketDialogP
           category: data.category,
           priority: data.priority,
           direction_id: data.direction_id || null,
-          requester_id: user!.id,
+          requester_id: user.id,
           status: 'Ouvert',
         });
 

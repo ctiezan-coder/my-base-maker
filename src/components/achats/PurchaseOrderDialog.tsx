@@ -105,10 +105,14 @@ export function PurchaseOrderDialog({ open, onOpenChange, order }: PurchaseOrder
 
   const mutation = useMutation({
     mutationFn: async (data: OrderFormData) => {
+      if (!user?.id) {
+        throw new Error("Utilisateur non connecté");
+      }
+
       const payload = {
         ...data,
         total_amount: parseFloat(data.total_amount),
-        created_by: user!.id,
+        created_by: user.id,
         direction_id: data.direction_id || null,
         project_id: data.project_id || null,
         expected_delivery_date: data.expected_delivery_date || null,
@@ -121,7 +125,7 @@ export function PurchaseOrderDialog({ open, onOpenChange, order }: PurchaseOrder
           .eq("id", order.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("purchase_orders").insert([payload as any]);
+        const { error } = await supabase.from("purchase_orders").insert([payload]);
         if (error) throw error;
       }
     },

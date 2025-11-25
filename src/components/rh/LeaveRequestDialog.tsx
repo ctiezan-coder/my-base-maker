@@ -92,7 +92,7 @@ export function LeaveRequestDialog({ open, onOpenChange, leave }: LeaveRequestDi
           .eq("id", leave.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("leave_requests").insert([payload as any]);
+        const { error } = await supabase.from("leave_requests").insert([payload]);
         if (error) throw error;
       }
     },
@@ -102,8 +102,7 @@ export function LeaveRequestDialog({ open, onOpenChange, leave }: LeaveRequestDi
       form.reset();
       onOpenChange(false);
     },
-    onError: (error) => {
-      console.error("Error saving leave request:", error);
+    onError: () => {
       toast.error("Erreur lors de l'enregistrement de la demande");
     },
   });

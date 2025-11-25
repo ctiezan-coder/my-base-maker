@@ -12,11 +12,33 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserDirection } from "@/hooks/useUserDirection";
+import type { Database } from "@/integrations/supabase/types";
+
+type Training = Database["public"]["Tables"]["trainings"]["Row"] & {
+  training_trainers?: {
+    trainers: {
+      id: string;
+      full_name: string;
+      specialization: string | null;
+    } | null;
+  }[];
+};
+
+interface FormData {
+  title: string;
+  description: string;
+  training_type: "Formation" | "Atelier" | "Coaching" | "Webinaire" | "Autre";
+  start_date: string;
+  end_date: string;
+  location: string;
+  max_participants: string;
+  direction_id: string;
+}
 
 interface TrainingDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  training?: any;
+  training?: Training;
   onClose: () => void;
 }
 
@@ -27,10 +49,10 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
   const [loading, setLoading] = useState(false);
   const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
   const [selectedTrainers, setSelectedTrainers] = useState<string[]>([]);
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
     description: "",
-    training_type: "Formation" as "Formation" | "Atelier" | "Coaching" | "Webinaire" | "Autre",
+    training_type: "Formation",
     start_date: "",
     end_date: "",
     location: "",
@@ -62,6 +84,12 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
     },
   });
 
+  type CompanyBasic = {
+    id: string;
+    company_name: string;
+    rccm_number: string;
+  };
+
   const { data: companies } = useQuery({
     queryKey: ["companies"],
     queryFn: async () => {
@@ -70,19 +98,19 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         .select("id, company_name, rccm_number")
         .order("company_name");
       if (error) throw error;
-      
+
       // Éliminer les doublons basés sur le RCCM ET le nom
-      const uniqueCompanies = data?.reduce((acc: any[], company: any) => {
-        const isDuplicate = acc.find(c => 
-          c.rccm_number === company.rccm_number || 
+      const uniqueCompanies = data?.reduce((acc: CompanyBasic[], company: CompanyBasic) => {
+        const isDuplicate = acc.find(c =>
+          c.rccm_number === company.rccm_number ||
           c.company_name.toLowerCase().trim() === company.company_name.toLowerCase().trim()
         );
         if (!isDuplicate) {
           acc.push(company);
         }
         return acc;
-      }, []);
-      
+      }, [] as CompanyBasic[]);
+
       return uniqueCompanies;
     },
   });
@@ -233,14 +261,14 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
 
             // Créer des notifications pour les opérateurs
             const notifications = companiesData
-              .filter(company => company.created_by)
+              .filter(company => company.created_by !== null)
               .map(company => ({
-                user_id: company.created_by!,
+                user_id: company.created_by as string,
                 title: "Inscription à une formation",
                 message: `Votre entreprise ${company.company_name} a été inscrite à la formation "${formData.title}"`,
-                type: "info",
+                type: "info" as const,
                 reference_id: newTraining.id,
-                reference_table: "trainings",
+                reference_table: "trainings" as const,
               }));
 
             if (notifications.length > 0) {
@@ -254,14 +282,22 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         toast({ title: "Formation créée avec succès" });
       }
       onClose();
-    } catch (error: any) {
-      let errorMessage = error.message;
-      
-      // Détecter les erreurs de doublon
-      if (error.message?.includes('unique_training') || error.code === '23505') {
-        errorMessage = "Cette formation existe déjà (même titre, date et direction). Veuillez modifier les informations.";
+    } catch (error) {
+      const isPostgresError = error && typeof error === 'object' && 'message' in error && 'code' in error;
+      let errorMessage = "Une erreur est survenue";
+
+      if (isPostgresError) {
+        const pgError = error as { message: string; code?: string };
+        errorMessage = pgError.message;
+
+        // Détecter les erreurs de doublon
+        if (pgError.message?.includes('unique_training') || pgError.code === '23505') {
+          errorMessage = "Cette formation existe déjà (même titre, date et direction). Veuillez modifier les informations.";
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
       }
-      
+
       toast({
         variant: "destructive",
         title: "Erreur",
