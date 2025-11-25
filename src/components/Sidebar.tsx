@@ -47,11 +47,11 @@ const dgItems: MenuItem[] = [
 ];
 
 const dafItems: MenuItem[] = [
-  { icon: ShoppingCart, label: "Achats", path: "/achats", module: null },
-  { icon: Headphones, label: "Support", path: "/support", module: null },
-  { icon: UserCheck, label: "Ressources Humaines", path: "/rh", module: null },
-  { icon: Plane, label: "Missions", path: "/missions", module: null },
-  { icon: Calculator, label: "Comptabilité", path: "/comptabilite", module: null },
+  { icon: ShoppingCart, label: "Achats", path: "/achats", module: "achats" },
+  { icon: Headphones, label: "Support", path: "/support", module: "support" },
+  { icon: UserCheck, label: "Ressources Humaines", path: "/rh", module: "rh" },
+  { icon: Plane, label: "Missions", path: "/missions", module: "missions" },
+  { icon: Calculator, label: "Comptabilité", path: "/comptabilite", module: "comptabilite" },
 ];
 
 const operationalItems: MenuItem[] = [
@@ -145,20 +145,6 @@ export function Sidebar() {
               >
                 <Shield className="w-5 h-5" />
                 Administration
-              </NavLink>
-              <NavLink
-                to="/permissions"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  )
-                }
-              >
-                <Shield className="w-5 h-5" />
-                Gestion Permissions
               </NavLink>
             </div>
           </>
