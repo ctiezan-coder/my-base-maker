@@ -18,7 +18,14 @@ export default function Trainings() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("trainings")
-        .select("*")
+        .select(`
+          *,
+          trainers (
+            id,
+            full_name,
+            specialization
+          )
+        `)
         .order("start_date", { ascending: false });
 
       if (error) throw error;

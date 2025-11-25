@@ -35,6 +35,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
     location: "",
     max_participants: "",
     direction_id: "",
+    trainer_id: "",
   });
 
   const { data: directions = [] } = useQuery({
@@ -44,6 +45,18 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         .from("directions")
         .select("id, name")
         .order("name");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: trainers = [] } = useQuery({
+    queryKey: ["trainers"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("trainers")
+        .select("id, full_name, specialization")
+        .order("full_name");
       if (error) throw error;
       return data;
     },
@@ -85,6 +98,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         location: training.location || "",
         max_participants: training.max_participants?.toString() || "",
         direction_id: training.direction_id || "",
+        trainer_id: training.trainer_id || "",
       });
     } else {
       setFormData({
@@ -96,6 +110,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
         location: "",
         max_participants: "",
         direction_id: userDirection?.direction_id || "",
+        trainer_id: "",
       });
       setSelectedCompanies([]);
     }
@@ -321,6 +336,26 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
                 {directions.map((direction) => (
                   <SelectItem key={direction.id} value={direction.id}>
                     {direction.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="trainer_id">Formateur</Label>
+            <Select
+              value={formData.trainer_id}
+              onValueChange={(value) => setFormData({ ...formData, trainer_id: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un formateur" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Aucun formateur</SelectItem>
+                {trainers.map((trainer) => (
+                  <SelectItem key={trainer.id} value={trainer.id}>
+                    {trainer.full_name} {trainer.specialization && `(${trainer.specialization})`}
                   </SelectItem>
                 ))}
               </SelectContent>
