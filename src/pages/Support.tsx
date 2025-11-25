@@ -13,7 +13,6 @@ import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 export default function Support() {
   const { user } = useAuth();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { canAccess: isManager } = useCanAccessModule('support', 'manager');
 
   const { data: tickets } = useQuery({
     queryKey: ['support_tickets'],
@@ -61,12 +60,10 @@ export default function Support() {
           <h1 className="text-3xl font-bold">Module Support & Maintenance</h1>
           <p className="text-muted-foreground">Gestion des tickets d'assistance</p>
         </div>
-        {isManager && (
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nouveau Ticket
-          </Button>
-        )}
+        <Button onClick={() => setDialogOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nouveau Ticket
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
