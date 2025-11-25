@@ -2364,6 +2364,42 @@ export type Database = {
         }
         Relationships: []
       }
+      training_trainers: {
+        Row: {
+          created_at: string | null
+          id: string
+          trainer_id: string
+          training_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          trainer_id: string
+          training_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          trainer_id?: string
+          training_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_trainers_trainer_id_fkey"
+            columns: ["trainer_id"]
+            isOneToOne: false
+            referencedRelation: "trainers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_trainers_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainings: {
         Row: {
           created_at: string
@@ -2377,7 +2413,6 @@ export type Database = {
           max_participants: number | null
           start_date: string
           title: string
-          trainer_id: string | null
           trainer_ids: string[] | null
           training_type: Database["public"]["Enums"]["training_type"]
           updated_at: string
@@ -2394,7 +2429,6 @@ export type Database = {
           max_participants?: number | null
           start_date: string
           title: string
-          trainer_id?: string | null
           trainer_ids?: string[] | null
           training_type: Database["public"]["Enums"]["training_type"]
           updated_at?: string
@@ -2411,20 +2445,11 @@ export type Database = {
           max_participants?: number | null
           start_date?: string
           title?: string
-          trainer_id?: string | null
           trainer_ids?: string[] | null
           training_type?: Database["public"]["Enums"]["training_type"]
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "trainings_trainer_id_fkey"
-            columns: ["trainer_id"]
-            isOneToOne: false
-            referencedRelation: "trainers"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       user_role_assignments: {
         Row: {
