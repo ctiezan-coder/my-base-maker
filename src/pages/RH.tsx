@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Users, Calendar, UserCheck, Briefcase, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useHasRole } from "@/hooks/useUserRole";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import { EmployeeDialog } from "@/components/rh/EmployeeDialog";
 import { LeaveRequestDialog } from "@/components/rh/LeaveRequestDialog";
 
 export default function RH() {
   const [employeeDialogOpen, setEmployeeDialogOpen] = useState(false);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
-  const isManager = useHasRole('manager');
+  const { canAccess: isManager } = useCanAccessModule('rh', 'manager');
 
   const { data: employees } = useQuery({
     queryKey: ['employees'],

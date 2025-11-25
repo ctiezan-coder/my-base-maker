@@ -6,12 +6,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Plane, MapPin, Calendar, DollarSign, Plus } from "lucide-react";
-import { useHasRole } from "@/hooks/useUserRole";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import { MissionOrderDialog } from "@/components/missions/MissionOrderDialog";
 
 export default function Missions() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const isManager = useHasRole('manager');
+  const { canAccess: isManager } = useCanAccessModule('missions', 'manager');
 
   const { data: missions } = useQuery({
     queryKey: ['mission_orders'],

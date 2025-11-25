@@ -7,14 +7,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Package, Users, FileText } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useHasRole } from "@/hooks/useUserRole";
+import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import { PurchaseOrderDialog } from "@/components/achats/PurchaseOrderDialog";
 import { SupplierDialog } from "@/components/achats/SupplierDialog";
 
 export default function Achats() {
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
-  const isManager = useHasRole('manager');
+  const { canAccess: isManager } = useCanAccessModule('achats', 'manager');
 
   const { data: suppliers } = useQuery({
     queryKey: ['suppliers'],
