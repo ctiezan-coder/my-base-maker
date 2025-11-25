@@ -36,6 +36,7 @@ export function TrainingList({ trainings, isLoading, onEdit, canManage = true }:
           <TableRow>
             <TableHead>Titre</TableHead>
             <TableHead>Type</TableHead>
+            <TableHead>Formateur</TableHead>
             <TableHead>Date</TableHead>
             <TableHead>Lieu</TableHead>
             <TableHead>Participants</TableHead>
@@ -48,6 +49,13 @@ export function TrainingList({ trainings, isLoading, onEdit, canManage = true }:
               <TableCell className="font-medium">{training.title}</TableCell>
               <TableCell>
                 <Badge variant="outline">{training.training_type}</Badge>
+              </TableCell>
+              <TableCell>
+                <div className="text-sm">
+                  {training.trainers?.full_name || (
+                    <span className="text-muted-foreground italic">Non assigné</span>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-1 text-sm">
