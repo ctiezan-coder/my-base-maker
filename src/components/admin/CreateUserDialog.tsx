@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { UserPlus } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const createUserSchema = z.object({
   email: z.string().email("Email invalide"),
@@ -27,6 +28,13 @@ export function CreateUserDialog() {
   const [directionId, setDirectionId] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
+
+  // Ne pas afficher le bouton si non-admin
+  if (!isAdmin) {
+    return null;
+  }
 
   const { data: directions } = useQuery({
     queryKey: ['directions'],

@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/useUserRole";
 
 interface UserPermissionsDialogProps {
   user: any;
@@ -60,11 +61,18 @@ export function UserPermissionsDialog({
   open,
   onOpenChange,
 }: UserPermissionsDialogProps) {
+  const { data: userRole } = useUserRole();
+  const isAdmin = userRole === 'admin';
   const queryClient = useQueryClient();
   const [globalRole, setGlobalRole] = useState<string>("user");
   const [modulePermissions, setModulePermissions] = useState<
     Record<string, string>
   >({});
+
+  // Ne pas afficher si non-admin
+  if (!isAdmin) {
+    return null;
+  }
 
   // Initialize states
   useEffect(() => {
