@@ -5,21 +5,40 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Key, Send } from "lucide-react";
+import { Key, RefreshCw } from "lucide-react";
 
 export function PasswordResetManager() {
   const { toast } = useToast();
   const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const generatePassword = () => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%";
+    let password = "";
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewPassword(password);
+  };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    if (!email || !newPassword) {
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Veuillez entrer une adresse email",
+        description: "Veuillez entrer une adresse email et un mot de passe",
+      });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Le mot de passe doit contenir au moins 8 caractères",
       });
       return;
     }
@@ -27,24 +46,37 @@ export function PasswordResetManager() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('reset-password', {
-        body: { email }
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { email, newPassword },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
+        }
       });
 
       if (error) throw error;
 
       toast({
-        title: "Email envoyé",
-        description: `Un email de réinitialisation a été envoyé à ${email}`,
+        title: "Mot de passe réinitialisé",
+        description: `Le mot de passe de ${email} a été réinitialisé avec succès`,
+      });
+
+      // Copy password to clipboard
+      navigator.clipboard.writeText(newPassword);
+      toast({
+        title: "Copié",
+        description: "Le mot de passe a été copié dans le presse-papier",
       });
 
       setEmail("");
+      setNewPassword("");
     } catch (error) {
       console.error('Error resetting password:', error);
       toast({
         variant: "destructive",
         title: "Erreur",
-        description: "Impossible d'envoyer l'email de réinitialisation",
+        description: "Impossible de réinitialiser le mot de passe",
       });
     } finally {
       setLoading(false);
@@ -59,7 +91,7 @@ export function PasswordResetManager() {
           <CardTitle>Réinitialisation de mot de passe</CardTitle>
         </div>
         <CardDescription>
-          Envoyer un email de réinitialisation de mot de passe à un utilisateur
+          Réinitialiser le mot de passe d'un utilisateur (réservé aux administrateurs)
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -76,9 +108,35 @@ export function PasswordResetManager() {
             />
           </div>
           
+          <div className="space-y-2">
+            <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+            <div className="flex gap-2">
+              <Input
+                id="newPassword"
+                type="text"
+                placeholder="Minimum 8 caractères"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                minLength={8}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={generatePassword}
+                title="Générer un mot de passe"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Le mot de passe sera copié automatiquement dans le presse-papier
+            </p>
+          </div>
+          
           <Button type="submit" disabled={loading} className="w-full">
-            <Send className="mr-2 h-4 w-4" />
-            {loading ? "Envoi en cours..." : "Envoyer l'email de réinitialisation"}
+            <Key className="mr-2 h-4 w-4" />
+            {loading ? "Réinitialisation..." : "Réinitialiser le mot de passe"}
           </Button>
         </form>
       </CardContent>
