@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -13,8 +14,8 @@ import { LeaveRequestDialog } from "@/components/rh/LeaveRequestDialog";
 
 export default function RH() {
   const [employeeDialogOpen, setEmployeeDialogOpen] = useState(false);
-  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const { canAccess: isManager } = useCanAccessModule('rh', 'manager');
+  const queryClient = useQueryClient();
 
   const { data: employees } = useQuery({
     queryKey: ['employees'],
@@ -160,13 +161,7 @@ export default function RH() {
         <TabsContent value="leaves" className="space-y-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Demandes de Congé</CardTitle>
-              {isManager && (
-                <Button onClick={() => setLeaveDialogOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Nouvelle Demande
-                </Button>
-              )}
+              <CardTitle>Demandes de Congé - Validation RH</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -177,7 +172,9 @@ export default function RH() {
                     <TableHead>Début</TableHead>
                     <TableHead>Fin</TableHead>
                     <TableHead>Jours</TableHead>
+                    <TableHead>Motif</TableHead>
                     <TableHead>Statut</TableHead>
+                    {isManager && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -190,14 +187,54 @@ export default function RH() {
                       <TableCell>{new Date(leave.start_date).toLocaleDateString('fr-FR')}</TableCell>
                       <TableCell>{new Date(leave.end_date).toLocaleDateString('fr-FR')}</TableCell>
                       <TableCell>{leave.total_days}</TableCell>
+                      <TableCell className="max-w-xs truncate">{leave.reason || '-'}</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(leave.status)}>{leave.status}</Badge>
                       </TableCell>
+                      {isManager && (
+                        <TableCell>
+                          {leave.status === 'En attente' && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                onClick={async () => {
+                                  const { error } = await supabase
+                                    .from('leave_requests')
+                                    .update({ status: 'Approuvé', approval_date: new Date().toISOString() })
+                                    .eq('id', leave.id);
+                                  if (!error) {
+                                    queryClient.invalidateQueries({ queryKey: ['leave_requests'] });
+                                    toast.success('Demande approuvée');
+                                  }
+                                }}
+                              >
+                                Approuver
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={async () => {
+                                  const { error } = await supabase
+                                    .from('leave_requests')
+                                    .update({ status: 'Refusé' })
+                                    .eq('id', leave.id);
+                                  if (!error) {
+                                    queryClient.invalidateQueries({ queryKey: ['leave_requests'] });
+                                    toast.success('Demande refusée');
+                                  }
+                                }}
+                              >
+                                Refuser
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                   {leaveRequests?.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={isManager ? 8 : 7} className="text-center text-muted-foreground">
                         Aucune demande de congé
                       </TableCell>
                     </TableRow>
@@ -210,7 +247,6 @@ export default function RH() {
       </Tabs>
 
       <EmployeeDialog open={employeeDialogOpen} onOpenChange={setEmployeeDialogOpen} />
-      <LeaveRequestDialog open={leaveDialogOpen} onOpenChange={setLeaveDialogOpen} />
     </div>
   );
 }
