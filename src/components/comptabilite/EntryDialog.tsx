@@ -110,12 +110,16 @@ export function EntryDialog({ open, onOpenChange, entry }: EntryDialogProps) {
       }
 
       const payload = {
-        ...data,
+        entry_number: data.entry_number,
+        account_id: data.account_id,
+        entry_date: data.entry_date,
+        entry_type: data.entry_type,
         amount: parseFloat(data.amount),
+        description: data.description,
+        reference: data.reference || null,
         created_by: user.id,
         direction_id: data.direction_id || null,
         project_id: data.project_id || null,
-        reference: data.reference || null,
       };
 
       if (entry) {

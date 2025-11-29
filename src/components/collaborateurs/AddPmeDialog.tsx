@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@supabase/auth-helpers-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useUserDirection } from "@/hooks/useUserDirection";
 
 interface AddPmeDialogProps {
@@ -17,7 +17,7 @@ interface AddPmeDialogProps {
 
 export function AddPmeDialog({ open, onOpenChange }: AddPmeDialogProps) {
   const { user } = useAuth();
-  const { directionId } = useUserDirection();
+  const { data: userDirection } = useUserDirection();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -53,7 +53,7 @@ export function AddPmeDialog({ open, onOpenChange }: AddPmeDialogProps) {
         dfe_number: formData.dfeNumber,
         rccm_number: formData.rccmNumber,
         headquarters_location: formData.headquarters,
-        direction_id: directionId,
+        direction_id: userDirection?.direction_id || null,
         created_by: user.id
       });
 

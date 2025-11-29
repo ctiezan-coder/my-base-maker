@@ -110,8 +110,15 @@ export function PurchaseOrderDialog({ open, onOpenChange, order }: PurchaseOrder
       }
 
       const payload = {
-        ...data,
+        order_number: data.order_number,
+        supplier_id: data.supplier_id,
+        order_date: data.order_date,
+        procurement_type: data.procurement_type,
+        status: data.status,
         total_amount: parseFloat(data.total_amount),
+        currency: data.currency,
+        description: data.description || null,
+        notes: data.notes || null,
         created_by: user.id,
         direction_id: data.direction_id || null,
         project_id: data.project_id || null,
