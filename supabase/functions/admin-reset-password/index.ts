@@ -84,29 +84,54 @@ Deno.serve(async (req) => {
 
     console.log(`Admin ${user.email} is resetting password for: ${email}`);
 
-    // Get user by email
-    const { data: targetUser, error: getUserError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (getUserError) {
-      console.error('Error listing users:', getUserError);
-      return new Response(
-        JSON.stringify({ error: getUserError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // First check if user exists in profiles table
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('user_id')
+      .eq('email', email)
+      .single();
 
-    const userToUpdate = targetUser.users.find(u => u.email === email);
-    
-    if (!userToUpdate) {
+    if (!profile) {
       return new Response(
-        JSON.stringify({ error: 'Utilisateur non trouvé' }),
+        JSON.stringify({ error: 'Utilisateur non trouvé dans la base de données' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Update user password
+    // Check if user exists in auth.users
+    const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(profile.user_id);
+
+    if (!authUser.user) {
+      // User exists in profiles but not in auth.users, create it
+      console.log(`Creating auth user for existing profile: ${email}`);
+      const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
+        id: profile.user_id, // Use the existing user_id from profiles
+        email,
+        password: newPassword,
+        email_confirm: true,
+      });
+
+      if (createError) {
+        console.error('Error creating auth user:', createError);
+        return new Response(
+          JSON.stringify({ error: createError.message }),
+          { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+
+      console.log(`Auth user created and password set for: ${email}`);
+      return new Response(
+        JSON.stringify({ 
+          success: true,
+          message: `Compte authentification créé et mot de passe défini pour ${email}`,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // User exists in both, just update password
     const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
-      userToUpdate.id,
+      profile.user_id,
       { password: newPassword }
     );
 
