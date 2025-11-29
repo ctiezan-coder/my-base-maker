@@ -3,11 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { UserPermissionsTable } from "@/components/admin/UserPermissionsTable";
-import { Search, Shield } from "lucide-react";
+import { Search, Shield, FileDown } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import * as XLSX from "xlsx";
+import { toast } from "sonner";
 
 export default function UserPermissions() {
   const [search, setSearch] = useState("");
@@ -99,13 +102,52 @@ export default function UserPermissions() {
     return null;
   }
 
+  const exportToExcel = () => {
+    if (!users || users.length === 0) {
+      toast.error("Aucun utilisateur à exporter");
+      return;
+    }
+
+    const exportData = users.map((user) => ({
+      "Nom complet": user.full_name,
+      "Email": user.email,
+      "Direction": user.directions?.name || "N/A",
+      "Rôles": user.roles?.join(", ") || "Aucun",
+      "Nombre de permissions": user.assignments?.length || 0,
+      "Modules autorisés": user.assignments?.map((a: any) => a.module).join(", ") || "Aucun"
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Utilisateurs");
+
+    const colWidths = [
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 30 },
+      { wch: 20 },
+      { wch: 20 },
+      { wch: 40 }
+    ];
+    ws['!cols'] = colWidths;
+
+    XLSX.writeFile(wb, `utilisateurs_${new Date().toISOString().split('T')[0]}.xlsx`);
+    toast.success("Export Excel réussi");
+  };
+
   return (
     <div className="min-h-screen p-8">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Shield className="h-8 w-8" />
-            <h1 className="text-4xl font-bold">Gestion des Permissions</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <Shield className="h-8 w-8" />
+              <h1 className="text-4xl font-bold">Gestion des Permissions</h1>
+            </div>
+            <Button onClick={exportToExcel} className="gap-2">
+              <FileDown className="h-4 w-4" />
+              Exporter Excel
+            </Button>
           </div>
           <p className="text-muted-foreground">
             Gérez les rôles, les accès aux directions et les permissions des utilisateurs
