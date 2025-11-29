@@ -2,15 +2,18 @@ import { UserMenu } from "./UserMenu";
 import logo from "@/assets/aciex-logo.jpg";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { LogOut, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationsMenu } from "@/components/notifications/NotificationsMenu";
+import { EmployeeLeaveRequestDialog } from "@/components/rh/EmployeeLeaveRequestDialog";
+import { useState } from "react";
 
 export const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   
   const handleSignOut = async () => {
     try {
@@ -43,6 +46,10 @@ export const Header = () => {
           {user ? (
             <div className="flex items-center gap-4">
               <NotificationsMenu />
+              <Button onClick={() => setLeaveDialogOpen(true)} variant="outline" size="sm">
+                <Calendar className="mr-2 h-4 w-4" />
+                Demande de congé
+              </Button>
               <span className="text-sm text-muted-foreground">{user.email}</span>
               <Button onClick={handleSignOut} variant="outline" size="sm">
                 <LogOut className="mr-2 h-4 w-4" />
@@ -54,6 +61,7 @@ export const Header = () => {
           )}
         </div>
       </div>
+      <EmployeeLeaveRequestDialog open={leaveDialogOpen} onOpenChange={setLeaveDialogOpen} />
     </header>
   );
 };
