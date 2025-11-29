@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { PasswordResetManager } from '@/components/admin/PasswordResetManager';
 
 export default function Admin() {
   const navigate = useNavigate();
@@ -203,6 +204,7 @@ export default function Admin() {
             <TabsTrigger value="directions">Directions</TabsTrigger>
             <TabsTrigger value="logs">Logs d'activité</TabsTrigger>
             <TabsTrigger value="emails">Emails autorisés</TabsTrigger>
+            <TabsTrigger value="reset">Réinitialisation</TabsTrigger>
           </TabsList>
 
           {/* TAB 1: Users */}
@@ -531,6 +533,11 @@ export default function Admin() {
           {/* TAB 5: Allowed Emails */}
           <TabsContent value="emails" className="space-y-6">
             <AllowedEmailsManager />
+          </TabsContent>
+
+          {/* TAB 6: Password Reset */}
+          <TabsContent value="reset" className="space-y-6">
+            <PasswordResetManager />
           </TabsContent>
         </Tabs>
       </main>

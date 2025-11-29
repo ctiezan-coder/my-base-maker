@@ -358,7 +358,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
               <Label htmlFor="training_type">Type *</Label>
               <Select
                 value={formData.training_type}
-                onValueChange={(value) => setFormData({ ...formData, training_type: value })}
+                onValueChange={(value) => setFormData({ ...formData, training_type: value as FormData['training_type'] })}
               >
                 <SelectTrigger>
                   <SelectValue />

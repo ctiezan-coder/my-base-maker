@@ -80,8 +80,13 @@ export function LeaveRequestDialog({ open, onOpenChange, leave }: LeaveRequestDi
   const mutation = useMutation({
     mutationFn: async (data: LeaveFormData) => {
       const payload = {
-        ...data,
+        employee_id: data.employee_id,
+        leave_type: data.leave_type,
+        start_date: data.start_date,
+        end_date: data.end_date,
         total_days: parseFloat(data.total_days),
+        reason: data.reason || null,
+        notes: data.notes || null,
         status: "En attente" as const,
       };
 
