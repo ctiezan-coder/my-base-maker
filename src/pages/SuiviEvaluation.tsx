@@ -338,21 +338,19 @@ export default function SuiviEvaluation() {
               </div>
             </div>
 
-            {isAdmin && (
-              <Select value={filterDirection} onValueChange={setFilterDirection}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Direction" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Toutes les directions</SelectItem>
-                  {directions?.map((direction) => (
-                    <SelectItem key={direction.id} value={direction.id}>
-                      {direction.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select value={filterDirection} onValueChange={setFilterDirection}>
+              <SelectTrigger>
+                <SelectValue placeholder="Direction" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes les directions</SelectItem>
+                {directions?.map((direction) => (
+                  <SelectItem key={direction.id} value={direction.id}>
+                    {direction.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             <Select value={filterEtat} onValueChange={setFilterEtat}>
               <SelectTrigger>
@@ -389,14 +387,13 @@ export default function SuiviEvaluation() {
       </Card>
 
       {/* Statistics by Direction */}
-      {isAdmin && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Statistiques par Direction</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {statsByDirection?.map((stat, index) => {
+      <Card>
+        <CardHeader>
+          <CardTitle>Statistiques par Direction</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {statsByDirection?.map((stat, index) => {
                 const direction = directions?.find((d) => d.name === stat.name);
                 // Assign colors and icons based on direction
                 const colors = [
@@ -514,7 +511,6 @@ export default function SuiviEvaluation() {
             </div>
           </CardContent>
         </Card>
-      )}
 
       {/* Detailed Table */}
       <Card>
@@ -527,7 +523,7 @@ export default function SuiviEvaluation() {
               <thead>
                 <tr className="border-b">
                   <th className="text-left p-2">Date</th>
-                  {isAdmin && <th className="text-left p-2">Direction</th>}
+                  <th className="text-left p-2">Direction</th>
                   <th className="text-left p-2">Provenance</th>
                   <th className="text-left p-2">Objet</th>
                   <th className="text-left p-2">Imputation</th>
@@ -548,9 +544,7 @@ export default function SuiviEvaluation() {
                           locale: fr,
                         })}
                       </td>
-                      {isAdmin && (
-                        <td className="p-2 text-sm">{direction?.name || "N/A"}</td>
-                      )}
+                      <td className="p-2 text-sm">{direction?.name || "N/A"}</td>
                       <td className="p-2 text-sm">{imp.provenance}</td>
                       <td className="p-2 text-sm">{imp.objet}</td>
                       <td className="p-2 text-sm">{imp.imputation}</td>
