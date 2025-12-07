@@ -1,5 +1,5 @@
 import { UserMenu } from "./UserMenu";
-import logo from "@/assets/aciex-logo.jpg";
+import logo from "@/assets/ci-export-logo.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Calendar } from "lucide-react";
