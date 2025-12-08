@@ -29,6 +29,7 @@ import Support from "./pages/Support";
 import RH from "./pages/RH";
 import Missions from "./pages/Missions";
 import Comptabilite from "./pages/Comptabilite";
+import DatabaseExport from "./pages/DatabaseExport";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
+            <Route path="/database-export" element={<DatabaseExport />} />
             <Route path="/" element={<Dashboard />}>
               <Route index element={<Index />} />
               <Route path="chat" element={<Chat />} />
