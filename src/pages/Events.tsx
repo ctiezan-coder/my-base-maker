@@ -6,11 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Plus, Search, Calendar, Filter, Grid3x3, List } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventDialog } from "@/components/events/EventDialog";
 import { EventList } from "@/components/events/EventList";
 import { EventsStatsCards } from "@/components/events/EventsStatsCards";
-import { EventSearchDialog } from "@/components/events/EventSearchDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
@@ -19,7 +17,6 @@ export default function Events() {
   const { canAccess: canManageEvents } = useCanAccessModule("events", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [directionFilter, setDirectionFilter] = useState<string>("all");
@@ -125,24 +122,12 @@ export default function Events() {
             Gestion des événements et calendrier
           </p>
         </div>
-        <div className="flex gap-2">
-          {canManageEvents && (
-            <>
-              <Button 
-                onClick={() => setSearchDialogOpen(true)}
-                variant="outline"
-                className="gap-2"
-              >
-                <Search className="w-4 h-4" />
-                Recherche Auto
-              </Button>
-              <Button onClick={() => setDialogOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Nouvel événement
-              </Button>
-            </>
-          )}
-        </div>
+        {canManageEvents && (
+          <Button onClick={() => setDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvel événement
+          </Button>
+        )}
       </div>
 
       <EventsStatsCards events={events} />
@@ -250,12 +235,6 @@ export default function Events() {
         onOpenChange={setDialogOpen}
         event={selectedEvent}
         onClose={handleCloseDialog}
-      />
-
-      <EventSearchDialog
-        open={searchDialogOpen}
-        onOpenChange={setSearchDialogOpen}
-        onEventAdded={refetch}
       />
     </div>
   );
