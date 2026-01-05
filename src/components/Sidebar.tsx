@@ -34,6 +34,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useState } from "react";
+import logo from "@/assets/ci-export-logo.png";
 
 interface MenuItem {
   icon: any;
@@ -172,6 +173,11 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 border-r border-border bg-card/50 min-h-[calc(100vh-4rem)] p-4 overflow-y-auto">
+      {/* Logo */}
+      <div className="flex justify-center mb-6 pb-4 border-b border-border">
+        <img src={logo} alt="CI Export" className="h-14 w-auto" />
+      </div>
+      
       <nav className="space-y-4">
         <MenuSection 
           title="Direction Générale" 
