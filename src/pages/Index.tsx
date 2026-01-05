@@ -216,7 +216,7 @@ const Index = () => {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
       <div className="absolute top-1/2 left-1/2 w-[300px] h-[300px] bg-accent/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <div className="w-full px-4 py-6 relative z-10">
         {/* Hero Section améliorée */}
         <div className="text-center space-y-6 mb-12">
           {/* Logo avec effet */}
