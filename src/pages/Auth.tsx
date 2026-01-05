@@ -211,144 +211,214 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-primary/5 to-secondary/10 p-4">
-      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="w-full shadow-elegant">
-        <CardHeader className="space-y-2 text-center">
-          <div className="flex justify-center mb-4">
-            <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-24 w-auto" />
-          </div>
-          <CardTitle className="text-2xl">ACIEX</CardTitle>
-          <CardDescription>
-            Base de données institutionnelle centralisée
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs value={isLogin ? "login" : "signup"} onValueChange={(v) => setIsLogin(v === "login")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Connexion</TabsTrigger>
-              <TabsTrigger value="signup">Inscription</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="prenom.nom@cotedivoirexport.ci"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="login-password">Mot de passe</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Connexion..." : "Se connecter"}
-                </Button>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="signup">
-              <form onSubmit={handleSignup} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Nom complet</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Votre nom complet"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="prenom.nom@cotedivoirexport.ci"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-direction">Direction *</Label>
-                  <Select value={directionId} onValueChange={setDirectionId} required>
-                    <SelectTrigger>
-                      <SelectValue placeholder={
-                        directionsLoading 
-                          ? "Chargement..." 
-                          : directionsError 
-                            ? "Erreur de chargement" 
-                            : "Sélectionner votre direction"
-                      } />
-                    </SelectTrigger>
-                    <SelectContent className="z-[100] bg-popover">
-                      {directionsLoading ? (
-                        <SelectItem value="loading" disabled>Chargement...</SelectItem>
-                      ) : directionsError ? (
-                        <SelectItem value="error" disabled>Erreur de chargement</SelectItem>
-                      ) : directions && directions.length > 0 ? (
-                        directions.map((dir) => (
-                          <SelectItem key={dir.id} value={dir.id}>
-                            {dir.name}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value="empty" disabled>Aucune direction disponible</SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Mot de passe</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Minimum 8 caractères avec majuscule, minuscule et chiffre
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-confirm">Confirmer le mot de passe</Label>
-                  <Input
-                    id="signup-confirm"
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Inscription..." : "S'inscrire"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
+      {/* Fond avec gradient animé */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+      
+      {/* Formes décoratives */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
+      <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent/15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+      
+      {/* Pattern hexagonal subtil */}
+      <div className="absolute inset-0 opacity-5" style={{
+        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 17.32v34.64L30 60L0 51.96V17.32L30 0z' fill='none' stroke='%23009846' stroke-width='1'/%3E%3C/svg%3E")`,
+        backgroundSize: '60px 60px'
+      }} />
 
-      {isAdmin && (
-        <div className="hidden lg:block">
-          <QuickApprovalPanel />
-        </div>
-      )}
+      <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 relative z-10">
+        {/* Carte principale */}
+        <Card className="w-full backdrop-blur-sm bg-card/95 border-primary/20 shadow-2xl">
+          <CardHeader className="space-y-4 text-center pb-2">
+            {/* Logo avec effet glow */}
+            <div className="flex justify-center">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
+                <div className="relative bg-card p-4 rounded-2xl border border-primary/10 shadow-lg">
+                  <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-20 w-auto" />
+                </div>
+              </div>
+            </div>
+            
+            {/* Titre avec gradient */}
+            <div>
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
+                ACIEX
+              </CardTitle>
+              <CardDescription className="text-base mt-2">
+                Base de données institutionnelle centralisée
+              </CardDescription>
+            </div>
+
+            {/* Barre de séparation décorative */}
+            <div className="flex items-center justify-center gap-3">
+              <div className="h-1 w-12 rounded-full bg-primary" />
+              <div className="h-1 w-8 rounded-full bg-accent" />
+              <div className="h-1 w-4 rounded-full bg-secondary" />
+            </div>
+          </CardHeader>
+          
+          <CardContent className="pt-4">
+            <Tabs value={isLogin ? "login" : "signup"} onValueChange={(v) => setIsLogin(v === "login")}>
+              <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50">
+                <TabsTrigger 
+                  value="login" 
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+                >
+                  Connexion
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="signup"
+                  className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
+                >
+                  Inscription
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login" className="space-y-4 animate-fade-in">
+                <form onSubmit={handleLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="login-email" className="text-sm font-medium">Email professionnel</Label>
+                    <Input
+                      id="login-email"
+                      type="email"
+                      placeholder="prenom.nom@cotedivoirexport.ci"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="h-12 bg-muted/30 border-primary/20 focus:border-primary focus:ring-primary/30 transition-all duration-300"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="login-password" className="text-sm font-medium">Mot de passe</Label>
+                    <Input
+                      id="login-password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-12 bg-muted/30 border-primary/20 focus:border-primary focus:ring-primary/30 transition-all duration-300"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary/25" 
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                        Connexion...
+                      </span>
+                    ) : "Se connecter"}
+                  </Button>
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="signup" className="animate-fade-in">
+                <form onSubmit={handleSignup} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name" className="text-sm font-medium">Nom complet</Label>
+                    <Input
+                      id="signup-name"
+                      type="text"
+                      placeholder="Votre nom complet"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="h-11 bg-muted/30 border-primary/20 focus:border-primary focus:ring-primary/30 transition-all duration-300"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email" className="text-sm font-medium">Email professionnel</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="prenom.nom@cotedivoirexport.ci"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="h-11 bg-muted/30 border-primary/20 focus:border-primary focus:ring-primary/30 transition-all duration-300"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-direction" className="text-sm font-medium">Direction *</Label>
+                    <Select value={directionId} onValueChange={setDirectionId} required>
+                      <SelectTrigger className="h-11 bg-muted/30 border-primary/20 focus:border-primary focus:ring-primary/30">
+                        <SelectValue placeholder={
+                          directionsLoading 
+                            ? "Chargement..." 
+                            : directionsError 
+                              ? "Erreur de chargement" 
+                              : "Sélectionner votre direction"
+                        } />
+                      </SelectTrigger>
+                      <SelectContent className="z-[100] bg-popover">
+                        {directionsLoading ? (
+                          <SelectItem value="loading" disabled>Chargement...</SelectItem>
+                        ) : directionsError ? (
+                          <SelectItem value="error" disabled>Erreur de chargement</SelectItem>
+                        ) : directions && directions.length > 0 ? (
+                          directions.map((dir) => (
+                            <SelectItem key={dir.id} value={dir.id}>
+                              {dir.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="empty" disabled>Aucune direction disponible</SelectItem>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password" className="text-sm font-medium">Mot de passe</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-11 bg-muted/30 border-primary/20 focus:border-primary focus:ring-primary/30 transition-all duration-300"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Minimum 8 caractères avec majuscule, minuscule et chiffre
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-confirm" className="text-sm font-medium">Confirmer le mot de passe</Label>
+                    <Input
+                      id="signup-confirm"
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      className="h-11 bg-muted/30 border-primary/20 focus:border-primary focus:ring-primary/30 transition-all duration-300"
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base font-semibold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary/25" 
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span className="flex items-center gap-2">
+                        <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                        Inscription...
+                      </span>
+                    ) : "S'inscrire"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+
+        {/* Panel admin avec nouveau style */}
+        {isAdmin && (
+          <div className="hidden lg:block animate-slide-in-from-bottom-4">
+            <QuickApprovalPanel />
+          </div>
+        )}
       </div>
     </div>
   );
