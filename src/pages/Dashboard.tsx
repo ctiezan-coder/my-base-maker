@@ -55,7 +55,7 @@ export default function Dashboard() {
       <Header />
       <div className="flex">
         <Sidebar />
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 lg:p-8 xl:p-10 overflow-auto">
           <Outlet />
         </main>
       </div>
