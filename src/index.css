@@ -10,32 +10,32 @@ All colors MUST be HSL.
   :root {
     /* Couleurs basées sur le logo CI Export: Orange, Vert, Cyan */
     --background: 150 10% 98%;
-    --foreground: 150 20% 10%;
+    --foreground: 150 30% 5%;
 
     --card: 0 0% 100%;
-    --card-foreground: 150 20% 10%;
+    --card-foreground: 150 30% 5%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 150 20% 10%;
+    --popover-foreground: 150 30% 5%;
 
     /* Vert du logo - couleur principale (foncé) */
-    --primary: 152 100% 22%;
+    --primary: 152 100% 18%;
     --primary-foreground: 0 0% 100%;
     
     /* Couleurs CI Logo */
-    --ci-orange: 32 94% 54%;
-    --ci-green: 152 100% 22%;
-    --ci-cyan: 187 100% 42%;
+    --ci-orange: 32 94% 48%;
+    --ci-green: 152 100% 18%;
+    --ci-cyan: 187 100% 35%;
 
     /* Orange du logo - couleur secondaire */
-    --secondary: 32 94% 54%;
+    --secondary: 32 94% 48%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 150 10% 94%;
-    --muted-foreground: 150 10% 40%;
+    --muted: 150 10% 92%;
+    --muted-foreground: 150 15% 30%;
 
     /* Cyan du logo - couleur d'accent */
-    --accent: 187 100% 42%;
+    --accent: 187 100% 32%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -130,8 +130,21 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-size: 16px;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-weight: 500;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight text-foreground;
+  }
+
+  p, span, div {
+    @apply text-foreground;
   }
 }
 

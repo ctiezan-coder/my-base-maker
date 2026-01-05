@@ -124,7 +124,7 @@ const MenuSection = ({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className={cn(
-        "flex items-center justify-between w-full px-3 py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-all duration-200 border",
+        "flex items-center justify-between w-full px-4 py-3.5 rounded-lg font-bold text-base uppercase tracking-wide transition-all duration-200 border",
         colors.bg,
         colors.border,
         colors.text,
@@ -132,7 +132,7 @@ const MenuSection = ({
       )}>
         <span>{title}</span>
         <ChevronDown className={cn(
-          "w-4 h-4 transition-transform duration-200",
+          "w-5 h-5 transition-transform duration-200",
           isOpen && "rotate-180"
         )} />
       </CollapsibleTrigger>
@@ -147,14 +147,14 @@ const MenuSection = ({
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    "flex items-center gap-3 px-4 py-2.5 rounded-lg text-base font-semibold transition-all duration-200",
                     isActive
                       ? "bg-primary text-primary-foreground shadow-md"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                      : "text-foreground/80 hover:text-foreground hover:bg-accent/30"
                   )
                 }
               >
-                <item.icon className="w-4 h-4" />
+                <item.icon className="w-5 h-5" />
                 {item.label}
               </NavLink>
             );
