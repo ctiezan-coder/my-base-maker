@@ -57,6 +57,10 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Couleurs spécifiques du logo CI Export
+        "ci-green": "hsl(152, 100%, 29%)",
+        "ci-orange": "hsl(32, 94%, 54%)",
+        "ci-cyan": "hsl(187, 100%, 42%)",
       },
       borderRadius: {
         lg: "var(--radius)",
