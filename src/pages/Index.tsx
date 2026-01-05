@@ -4,9 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, FolderKanban, FileText, GraduationCap, Calendar, Handshake, Image, BarChart3, TrendingUp, Users, Target, Activity, Globe, ArrowRight, Sparkles } from "lucide-react";
+import { Building2, FolderKanban, FileText, GraduationCap, Calendar, Handshake, Image, BarChart3, TrendingUp, Users, Target, Activity, Globe, ArrowRight, Sparkles, LineChart } from "lucide-react";
 import logo from "@/assets/ci-export-logo.png";
-
+import { MonthlyActivityChart, SectorDistributionChart, OpportunitiesChart, ConnectionsEvolutionChart } from "@/components/dashboard/DashboardCharts";
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -310,6 +310,21 @@ const Index = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Section Analytics */}
+        <div className="space-y-4 mb-10">
+          <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <LineChart className="w-6 h-6 text-accent" />
+            Analytiques
+          </h2>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <MonthlyActivityChart />
+            <SectorDistributionChart />
+            <OpportunitiesChart />
+            <ConnectionsEvolutionChart />
+          </div>
+        </div>
 
         {/* Modules Grid avec nouveau design */}
         <div className="space-y-4">
