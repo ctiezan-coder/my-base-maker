@@ -1,6 +1,5 @@
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import {
   LayoutDashboard,
   Building2,
@@ -24,10 +23,17 @@ import {
   UserCheck,
   Plane,
   Calculator,
+  ChevronDown,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import { AppModule } from "@/hooks/useModulePermission";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useState } from "react";
 
 interface MenuItem {
   icon: any;
@@ -65,45 +71,98 @@ const operationalItems: MenuItem[] = [
   { icon: UserCircle, label: "Espace Collaborateurs", path: "/collaborateurs", module: "collaborators" },
 ];
 
+const adminItems: MenuItem[] = [
+  { icon: Shield, label: "Administration", path: "/admin", module: null },
+  { icon: Shield, label: "Gestion Permissions", path: "/permissions", module: null },
+];
+
+interface MenuSectionProps {
+  title: string;
+  items: MenuItem[];
+  isAdmin: boolean;
+  defaultOpen?: boolean;
+  color: "orange" | "green" | "cyan" | "red";
+}
+
+const colorMap = {
+  orange: {
+    bg: "bg-ci-orange/10",
+    border: "border-ci-orange/30",
+    text: "text-ci-orange",
+    hover: "hover:bg-ci-orange/20",
+  },
+  green: {
+    bg: "bg-ci-green/10",
+    border: "border-ci-green/30",
+    text: "text-ci-green",
+    hover: "hover:bg-ci-green/20",
+  },
+  cyan: {
+    bg: "bg-ci-cyan/10",
+    border: "border-ci-cyan/30",
+    text: "text-ci-cyan",
+    hover: "hover:bg-ci-cyan/20",
+  },
+  red: {
+    bg: "bg-destructive/10",
+    border: "border-destructive/30",
+    text: "text-destructive",
+    hover: "hover:bg-destructive/20",
+  },
+};
+
 const MenuSection = ({ 
   title, 
   items, 
-  isAdmin 
-}: { 
-  title: string; 
-  items: MenuItem[]; 
-  isAdmin: boolean;
-}) => {
+  isAdmin,
+  defaultOpen = true,
+  color,
+}: MenuSectionProps) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  const colors = colorMap[color];
+
   return (
-    <div className="space-y-2">
-      <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-        {title}
-      </h3>
-      {items.map((item) => {
-        const { canAccess } = useCanAccessModule(item.module || 'companies', 'user');
-        
-        if (!item.module || canAccess || isAdmin) {
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                )
-              }
-            >
-              <item.icon className="w-5 h-5" />
-              {item.label}
-            </NavLink>
-          );
-        }
-        return null;
-      })}
-    </div>
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger className={cn(
+        "flex items-center justify-between w-full px-3 py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-all duration-200 border",
+        colors.bg,
+        colors.border,
+        colors.text,
+        colors.hover
+      )}>
+        <span>{title}</span>
+        <ChevronDown className={cn(
+          "w-4 h-4 transition-transform duration-200",
+          isOpen && "rotate-180"
+        )} />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-2 space-y-1 pl-2">
+        {items.map((item) => {
+          const { canAccess } = useCanAccessModule(item.module || 'companies', 'user');
+          
+          if (!item.module || canAccess || isAdmin) {
+            return (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200",
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-md"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                  )
+                }
+              >
+                <item.icon className="w-4 h-4" />
+                {item.label}
+              </NavLink>
+            );
+          }
+          return null;
+        })}
+      </CollapsibleContent>
+    </Collapsible>
   );
 };
 
@@ -113,54 +172,39 @@ export function Sidebar() {
 
   return (
     <aside className="w-64 border-r border-border bg-card/50 min-h-[calc(100vh-4rem)] p-4 overflow-y-auto">
-      <nav className="space-y-6">
-        <MenuSection title="Direction Générale" items={dgItems} isAdmin={isAdmin} />
+      <nav className="space-y-4">
+        <MenuSection 
+          title="Direction Générale" 
+          items={dgItems} 
+          isAdmin={isAdmin} 
+          color="orange"
+          defaultOpen={true}
+        />
         
-        <Separator />
+        <MenuSection 
+          title="DAF" 
+          items={dafItems} 
+          isAdmin={isAdmin} 
+          color="green"
+          defaultOpen={true}
+        />
         
-        <MenuSection title="DAF" items={dafItems} isAdmin={isAdmin} />
-        
-        <Separator />
-        
-        <MenuSection title="Directions Opérationnelles" items={operationalItems} isAdmin={isAdmin} />
+        <MenuSection 
+          title="Directions Opérationnelles" 
+          items={operationalItems} 
+          isAdmin={isAdmin} 
+          color="cyan"
+          defaultOpen={true}
+        />
         
         {isAdmin && (
-          <>
-            <Separator />
-            <div className="space-y-2">
-              <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                Administration
-              </h3>
-              <NavLink
-                to="/admin"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  )
-                }
-              >
-                <Shield className="w-5 h-5" />
-                Administration
-              </NavLink>
-              <NavLink
-                to="/permissions"
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                  )
-                }
-              >
-                <Shield className="w-5 h-5" />
-                Gestion Permissions
-              </NavLink>
-            </div>
-          </>
+          <MenuSection 
+            title="Administration" 
+            items={adminItems} 
+            isAdmin={isAdmin} 
+            color="red"
+            defaultOpen={true}
+          />
         )}
       </nav>
     </aside>
