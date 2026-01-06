@@ -23,6 +23,7 @@ import {
   UserCheck,
   Plane,
   Calculator,
+  Wallet,
   ChevronDown,
 } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -58,6 +59,7 @@ const dafItems: MenuItem[] = [
   { icon: Headphones, label: "Support", path: "/support", module: "support" },
   { icon: UserCheck, label: "Ressources Humaines", path: "/rh", module: "rh" },
   { icon: Plane, label: "Missions", path: "/missions", module: "missions" },
+  { icon: Wallet, label: "Budgets", path: "/budgets", module: "comptabilite" },
   { icon: Calculator, label: "Comptabilité", path: "/comptabilite", module: "comptabilite" },
 ];
 
