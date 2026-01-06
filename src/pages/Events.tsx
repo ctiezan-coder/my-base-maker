@@ -116,10 +116,10 @@ export default function Events() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Calendar className="w-8 h-8 text-primary" />
-            Événements
+            Événements Export
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gestion des événements et calendrier
+            Foires, salons, ateliers et opportunités d'exportation
           </p>
         </div>
         {canManageEvents && (
@@ -170,10 +170,12 @@ export default function Events() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Tous les types</SelectItem>
-                  <SelectItem value="formation">Formation</SelectItem>
-                  <SelectItem value="conférence">Conférence</SelectItem>
-                  <SelectItem value="atelier">Atelier</SelectItem>
-                  <SelectItem value="réunion">Réunion</SelectItem>
+                  <SelectItem value="foire">Foire internationale</SelectItem>
+                  <SelectItem value="salon">Salon professionnel</SelectItem>
+                  <SelectItem value="atelier">Atelier export</SelectItem>
+                  <SelectItem value="conference">Conférence commerciale</SelectItem>
+                  <SelectItem value="mission">Mission commerciale</SelectItem>
+                  <SelectItem value="formation">Formation export</SelectItem>
                   <SelectItem value="autre">Autre</SelectItem>
                 </SelectContent>
               </Select>

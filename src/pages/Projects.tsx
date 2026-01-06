@@ -30,10 +30,11 @@ export default function Projects() {
   const { data: projects, isLoading, refetch } = useQuery({
     queryKey: ["projects", userDirection?.direction_id],
     queryFn: async () => {
-      // RLS policies will filter based on user's permissions
+      // Filtrer les projets par la direction de l'utilisateur
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select("*, directions(name)")
+        .eq("direction_id", userDirection?.direction_id)
         .order("start_date", { ascending: false });
 
       if (error) throw error;
@@ -103,10 +104,10 @@ export default function Projects() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <FolderKanban className="w-8 h-8 text-primary" />
-            Projets d'Accompagnement
+            Projets de ma Direction
           </h1>
           <p className="text-muted-foreground mt-1">
-            Gestion et suivi des projets en cours
+            Projets d'accompagnement liés aux événements export
           </p>
         </div>
         {canManageProjects && (
@@ -146,19 +147,6 @@ export default function Projects() {
               </SelectContent>
             </Select>
 
-            <Select value={filterDirection} onValueChange={setFilterDirection}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Toutes les directions" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Toutes les directions</SelectItem>
-                {directions?.map((direction) => (
-                  <SelectItem key={direction.id} value={direction.id}>
-                    {direction.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
 
             <Select value={filterYear} onValueChange={setFilterYear}>
               <SelectTrigger className="w-full md:w-[140px]">

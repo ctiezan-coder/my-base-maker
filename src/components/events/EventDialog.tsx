@@ -221,10 +221,12 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
                   <SelectValue placeholder="Sélectionner un type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="formation">Formation</SelectItem>
-                  <SelectItem value="conférence">Conférence</SelectItem>
-                  <SelectItem value="atelier">Atelier</SelectItem>
-                  <SelectItem value="réunion">Réunion</SelectItem>
+                  <SelectItem value="foire">Foire internationale</SelectItem>
+                  <SelectItem value="salon">Salon professionnel</SelectItem>
+                  <SelectItem value="atelier">Atelier export</SelectItem>
+                  <SelectItem value="conference">Conférence commerciale</SelectItem>
+                  <SelectItem value="mission">Mission commerciale</SelectItem>
+                  <SelectItem value="formation">Formation export</SelectItem>
                   <SelectItem value="autre">Autre</SelectItem>
                 </SelectContent>
               </Select>
