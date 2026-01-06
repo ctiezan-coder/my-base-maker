@@ -28,19 +28,21 @@ export default function Projects() {
   const { canAccess: canManageProjects } = useCanAccessModule("projects", "manager");
 
   const { data: projects, isLoading, refetch } = useQuery({
-    queryKey: ["projects", userDirection?.direction_id],
+    queryKey: ["projects-all"],
     queryFn: async () => {
-      // Filtrer les projets par la direction de l'utilisateur
+      // Récupérer tous les projets de l'agence (comme le tableau de bord)
       const { data, error } = await supabase
         .from("projects")
         .select("*, directions(name)")
-        .eq("direction_id", userDirection?.direction_id)
         .order("start_date", { ascending: false });
 
       if (error) throw error;
-      return data;
+      
+      // Exclure les événements et formations (comme sur le tableau de bord)
+      return data?.filter(p => 
+        !p.name.startsWith("Événement:") && !p.name.startsWith("Formation:")
+      ) || [];
     },
-    enabled: !!userDirection?.direction_id,
   });
 
   const { data: directions } = useQuery({
@@ -104,7 +106,7 @@ export default function Projects() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <FolderKanban className="w-8 h-8 text-primary" />
-            Projets de ma Direction
+            Projets de l'Agence
           </h1>
           <p className="text-muted-foreground mt-1">
             Projets d'accompagnement liés aux événements export
@@ -144,6 +146,20 @@ export default function Projects() {
                 <SelectItem value="en cours">En cours</SelectItem>
                 <SelectItem value="terminé">Terminé</SelectItem>
                 <SelectItem value="suspendu">Suspendu</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterDirection} onValueChange={setFilterDirection}>
+              <SelectTrigger className="w-full md:w-[200px]">
+                <SelectValue placeholder="Toutes directions" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes directions</SelectItem>
+                {directions?.map((dir) => (
+                  <SelectItem key={dir.id} value={dir.id}>
+                    {dir.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
