@@ -4,9 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Plus, Search, Image as ImageIcon } from "lucide-react";
+import { Plus, Search, Image as ImageIcon, BarChart3 } from "lucide-react";
 import { MediaDialog } from "@/components/media/MediaDialog";
 import { MediaGrid } from "@/components/media/MediaGrid";
+import { MediaSummaryDialog } from "@/components/media/MediaSummaryDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
@@ -15,6 +16,7 @@ export default function Media() {
   const { canAccess: canManageMedia } = useCanAccessModule("media", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [summaryDialogOpen, setSummaryDialogOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<any>(null);
 
   const { data: mediaItems, isLoading, refetch } = useQuery({
@@ -78,12 +80,18 @@ export default function Media() {
             Gestion des images, vidéos et contenus multimédias
           </p>
         </div>
-        {canManageMedia && (
-          <Button onClick={() => setDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Nouveau média
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setSummaryDialogOpen(true)}>
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Résumé
           </Button>
-        )}
+          {canManageMedia && (
+            <Button onClick={() => setDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau média
+            </Button>
+          )}
+        </div>
       </div>
 
       <Card>
@@ -116,6 +124,11 @@ export default function Media() {
         onOpenChange={setDialogOpen}
         media={selectedMedia}
         onClose={handleCloseDialog}
+      />
+
+      <MediaSummaryDialog
+        open={summaryDialogOpen}
+        onOpenChange={setSummaryDialogOpen}
       />
     </div>
   );
