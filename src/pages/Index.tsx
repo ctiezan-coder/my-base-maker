@@ -32,28 +32,37 @@ const Index = () => {
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      const [companies, projects, trainings, events, partnerships, documents, media, activeProjects, opportunities, connections] = await Promise.all([
+      const [companies, projects, trainings, events, partnerships, documents, media, activeProjectsData, opportunities, connections] = await Promise.all([
         supabase.from("companies").select("id", { count: "exact", head: true }),
-        supabase.from("projects").select("id", { count: "exact", head: true }),
+        supabase.from("projects").select("id, name"),
         supabase.from("trainings").select("id", { count: "exact", head: true }),
         supabase.from("events").select("id", { count: "exact", head: true }),
         supabase.from("partnerships").select("id", { count: "exact", head: true }),
         supabase.from("documents").select("id", { count: "exact", head: true }),
         supabase.from("media_content").select("id", { count: "exact", head: true }),
-        supabase.from("projects").select("id", { count: "exact", head: true }).eq("status", "en cours"),
+        supabase.from("projects").select("id, name").eq("status", "en cours"),
         supabase.from("export_opportunities").select("id", { count: "exact", head: true }),
         supabase.from("business_connections").select("id", { count: "exact", head: true }),
       ]);
 
+      // Filtrer les vrais projets (exclure ceux préfixés "Événement:" ou "Formation:")
+      const realProjects = projects.data?.filter(p => 
+        !p.name.startsWith("Événement:") && !p.name.startsWith("Formation:")
+      ) || [];
+      
+      const realActiveProjects = activeProjectsData.data?.filter(p => 
+        !p.name.startsWith("Événement:") && !p.name.startsWith("Formation:")
+      ) || [];
+
       return {
         companies: companies.count || 0,
-        projects: projects.count || 0,
+        projects: realProjects.length,
         trainings: trainings.count || 0,
         events: events.count || 0,
         partnerships: partnerships.count || 0,
         documents: documents.count || 0,
         media: media.count || 0,
-        activeProjects: activeProjects.count || 0,
+        activeProjects: realActiveProjects.length,
         opportunities: opportunities.count || 0,
         connections: connections.count || 0,
       };
