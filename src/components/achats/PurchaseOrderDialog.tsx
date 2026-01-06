@@ -35,6 +35,8 @@ const orderSchema = z.object({
   supplier_id: z.string().min(1, "Le fournisseur est requis"),
   direction_id: z.string().optional(),
   project_id: z.string().optional(),
+  mission_id: z.string().optional(),
+  budget_id: z.string().optional(),
   order_date: z.string().min(1, "La date de commande est requise"),
   expected_delivery_date: z.string().optional(),
   procurement_type: z.enum(["Appel d'offres", "Consultation", "Gré à gré"]),
@@ -81,17 +83,44 @@ export function PurchaseOrderDialog({ open, onOpenChange, order }: PurchaseOrder
     },
   });
 
+  const { data: missions } = useQuery({
+    queryKey: ["missions_for_achats"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("mission_orders")
+        .select("id, mission_number, destination, employee_id")
+        .order("mission_number", { ascending: false });
+      return data || [];
+    },
+  });
+
+  const { data: budgets } = useQuery({
+    queryKey: ["budgets_for_achats"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("budgets")
+        .select("id, budget_name, allocated_amount, consumed_amount, remaining_amount, mission:mission_orders(mission_number)")
+        .eq("status", "Actif")
+        .order("budget_name");
+      return data || [];
+    },
+  });
+
   const form = useForm<OrderFormData>({
     resolver: zodResolver(orderSchema),
     defaultValues: order ? {
       ...order,
       total_amount: order.total_amount?.toString(),
       order_date: order.order_date || new Date().toISOString().split('T')[0],
+      mission_id: order.mission_id || "",
+      budget_id: order.budget_id || "",
     } : {
       order_number: "",
       supplier_id: "",
       direction_id: "",
       project_id: "",
+      mission_id: "",
+      budget_id: "",
       order_date: new Date().toISOString().split('T')[0],
       expected_delivery_date: "",
       procurement_type: "Appel d'offres",
@@ -122,6 +151,8 @@ export function PurchaseOrderDialog({ open, onOpenChange, order }: PurchaseOrder
         created_by: user.id,
         direction_id: data.direction_id || null,
         project_id: data.project_id || null,
+        mission_id: data.mission_id || null,
+        budget_id: data.budget_id || null,
         expected_delivery_date: data.expected_delivery_date || null,
       };
 
@@ -138,6 +169,8 @@ export function PurchaseOrderDialog({ open, onOpenChange, order }: PurchaseOrder
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["purchase_orders"] });
+      queryClient.invalidateQueries({ queryKey: ["budgets"] });
+      queryClient.invalidateQueries({ queryKey: ["budget_entries"] });
       toast.success(order ? "Commande modifiée" : "Commande créée");
       form.reset();
       onOpenChange(false);
@@ -246,6 +279,60 @@ export function PurchaseOrderDialog({ open, onOpenChange, order }: PurchaseOrder
                         {projects?.map((project) => (
                           <SelectItem key={project.id} value={project.id}>
                             {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="mission_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mission liée</FormLabel>
+                    <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value || "none"}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner une mission" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Aucune mission</SelectItem>
+                        {missions?.map((mission) => (
+                          <SelectItem key={mission.id} value={mission.id}>
+                            {mission.mission_number} - {mission.destination}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="budget_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Budget à imputer</FormLabel>
+                    <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value || "none"}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionner un budget" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">Aucun budget</SelectItem>
+                        {budgets?.map((budget) => (
+                          <SelectItem key={budget.id} value={budget.id}>
+                            {budget.budget_name} (Dispo: {Number(budget.remaining_amount).toLocaleString()} FCFA)
                           </SelectItem>
                         ))}
                       </SelectContent>

@@ -2140,6 +2140,7 @@ export type Database = {
       purchase_orders: {
         Row: {
           actual_delivery_date: string | null
+          budget_id: string | null
           created_at: string
           created_by: string | null
           currency: string | null
@@ -2147,6 +2148,7 @@ export type Database = {
           direction_id: string | null
           expected_delivery_date: string | null
           id: string
+          mission_id: string | null
           notes: string | null
           order_date: string
           order_number: string
@@ -2159,6 +2161,7 @@ export type Database = {
         }
         Insert: {
           actual_delivery_date?: string | null
+          budget_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -2166,6 +2169,7 @@ export type Database = {
           direction_id?: string | null
           expected_delivery_date?: string | null
           id?: string
+          mission_id?: string | null
           notes?: string | null
           order_date: string
           order_number: string
@@ -2178,6 +2182,7 @@ export type Database = {
         }
         Update: {
           actual_delivery_date?: string | null
+          budget_id?: string | null
           created_at?: string
           created_by?: string | null
           currency?: string | null
@@ -2185,6 +2190,7 @@ export type Database = {
           direction_id?: string | null
           expected_delivery_date?: string | null
           id?: string
+          mission_id?: string | null
           notes?: string | null
           order_date?: string
           order_number?: string
@@ -2197,10 +2203,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "purchase_orders_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "purchase_orders_direction_id_fkey"
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
             referencedColumns: ["id"]
           },
           {
