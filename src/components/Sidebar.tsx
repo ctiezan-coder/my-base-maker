@@ -128,7 +128,7 @@ const MenuSection = ({
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className={cn(
-        "flex items-center justify-between w-full px-4 py-3.5 rounded-lg font-bold text-base uppercase tracking-wide transition-all duration-200 border",
+        "flex items-center justify-between w-full px-4 py-3 rounded-lg font-bold text-sm uppercase tracking-wide transition-all duration-200 border",
         colors.bg,
         colors.border,
         colors.text,
