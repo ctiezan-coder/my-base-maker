@@ -32,7 +32,7 @@ export default function Achats() {
     queryFn: async () => {
       const { data } = await supabase
         .from('purchase_orders')
-        .select('*, supplier:suppliers(name)')
+        .select('*, supplier:suppliers(name), budget:budgets(budget_name), mission:mission_orders!purchase_orders_mission_id_fkey(mission_number, destination)')
         .order('created_at', { ascending: false });
       return data || [];
     }
@@ -114,9 +114,10 @@ export default function Achats() {
                   <TableRow>
                     <TableHead>N° Commande</TableHead>
                     <TableHead>Fournisseur</TableHead>
+                    <TableHead>Mission</TableHead>
+                    <TableHead>Budget</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Montant</TableHead>
-                    <TableHead>Type</TableHead>
                     <TableHead>Statut</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -125,9 +126,26 @@ export default function Achats() {
                     <TableRow key={order.id}>
                       <TableCell className="font-medium">{order.order_number}</TableCell>
                       <TableCell>{order.supplier?.name || 'N/A'}</TableCell>
+                      <TableCell>
+                        {order.mission ? (
+                          <Badge variant="outline" className="text-xs">
+                            {order.mission.mission_number}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {order.budget ? (
+                          <Badge variant="secondary" className="text-xs">
+                            {order.budget.budget_name}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground">-</span>
+                        )}
+                      </TableCell>
                       <TableCell>{new Date(order.order_date).toLocaleDateString('fr-FR')}</TableCell>
                       <TableCell>{order.total_amount.toLocaleString()} {order.currency}</TableCell>
-                      <TableCell>{order.procurement_type}</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
                       </TableCell>
@@ -135,7 +153,7 @@ export default function Achats() {
                   ))}
                   {orders?.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
                         Aucune commande
                       </TableCell>
                     </TableRow>
