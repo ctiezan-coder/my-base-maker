@@ -67,6 +67,7 @@ const operationalItems: MenuItem[] = [
   { icon: Globe, label: "Marchés Export", path: "/market-development", module: "market_development" },
   { icon: Handshake, label: "Partenariats", path: "/partnerships", module: "partnerships" },
   { icon: GraduationCap, label: "Formations", path: "/trainings", module: "trainings" },
+  { icon: Calendar, label: "Agenda", path: "/agenda", module: "events" },
   { icon: Calendar, label: "Événements", path: "/events", module: "events" },
   { icon: Image, label: "Médias", path: "/media", module: "media" },
   { icon: ClipboardList, label: "Imputations", path: "/imputations", module: "imputations" },
