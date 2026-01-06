@@ -303,13 +303,12 @@ const Index = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { label: "Documents", value: stats?.documents || 0, color: "primary" },
                 { label: "Médias", value: stats?.media || 0, color: "accent" },
                 { label: "Événements", value: stats?.events || 0, color: "secondary" },
                 { label: "Projets Total", value: stats?.projects || 0, color: "primary" },
-                { label: "Connexions B2B", value: stats?.connections || 0, color: "accent" },
               ].map((item, index) => (
                 <div key={index} className={`text-center p-4 rounded-xl bg-${item.color}/5 border border-${item.color}/10 hover:border-${item.color}/30 transition-colors duration-300`}>
                   <div className="text-3xl font-bold text-foreground mb-1">{item.value}</div>
