@@ -21,7 +21,7 @@ export default function Projects() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("en cours");
   const [filterDirection, setFilterDirection] = useState<string>("all");
   const [filterYear, setFilterYear] = useState<string>("all");
   const { data: userDirection } = useUserDirection();
@@ -168,7 +168,7 @@ export default function Projects() {
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold">
-            Projets en cours ({filteredProjects.length})
+            {filterStatus === "en cours" ? "Projets Actifs" : "Projets"} ({filteredProjects.length})
           </h3>
         </CardHeader>
         <CardContent>
