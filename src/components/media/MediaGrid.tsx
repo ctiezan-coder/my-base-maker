@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Image as ImageIcon, Video, Calendar, Building2 } from "lucide-react";
+import { Pencil, Trash2, Image as ImageIcon, Video, Calendar, Building2, Eye } from "lucide-react";
 import { format, isPast, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useUserDirection } from "@/hooks/useUserDirection";
+import { MediaDetailsDialog } from "./MediaDetailsDialog";
 
 interface MediaGridProps {
   mediaItems: any[];
@@ -39,6 +40,8 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete, canManage =
   const { data: userDirection } = useUserDirection();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [mediaToDelete, setMediaToDelete] = useState<any>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedMediaDetails, setSelectedMediaDetails] = useState<any>(null);
   const [directionsMap, setDirectionsMap] = useState<Record<string, string>>({});
   const [communicationDirectionId, setCommunicationDirectionId] = useState<string | null>(null);
 
@@ -87,6 +90,12 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete, canManage =
       setDeleteDialogOpen(false);
       setMediaToDelete(null);
     }
+  };
+
+
+  const handleViewDetails = (media: any) => {
+    setSelectedMediaDetails(media);
+    setDetailsDialogOpen(true);
   };
 
   const handleStatusChange = async (mediaId: string, newStatus: "Demande" | "En cours" | "Validé" | "Livré" | "Annulé") => {
@@ -180,6 +189,14 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete, canManage =
                     </div>
                   </div>
                   <div className="flex gap-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => handleViewDetails(media)}
+                      title="Voir le résumé"
+                    >
+                      <Eye className="w-4 h-4 text-primary" />
+                    </Button>
                     {canManage && (
                       <>
                         <Button variant="ghost" size="sm" onClick={() => onEdit(media)}>
@@ -293,6 +310,13 @@ export function MediaGrid({ mediaItems, isLoading, onEdit, onDelete, canManage =
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <MediaDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        media={selectedMediaDetails}
+        directionName={selectedMediaDetails ? directionsMap[selectedMediaDetails.direction_id] : undefined}
+      />
     </>
   );
 }
