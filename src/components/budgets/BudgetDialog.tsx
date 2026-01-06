@@ -213,14 +213,14 @@ export function BudgetDialog({ open, onOpenChange, budget }: BudgetDialogProps) 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Mission liée</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value || "none"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner une mission" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Aucune mission</SelectItem>
+                        <SelectItem value="none">Aucune mission</SelectItem>
                         {missions?.map((mission) => (
                           <SelectItem key={mission.id} value={mission.id}>
                             {mission.mission_number} - {mission.destination}
@@ -239,14 +239,14 @@ export function BudgetDialog({ open, onOpenChange, budget }: BudgetDialogProps) 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Employé responsable</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value || "none"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner un employé" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Aucun employé</SelectItem>
+                        <SelectItem value="none">Aucun employé</SelectItem>
                         {employees?.map((emp) => (
                           <SelectItem key={emp.id} value={emp.id}>
                             {emp.first_name} {emp.last_name}
@@ -267,14 +267,14 @@ export function BudgetDialog({ open, onOpenChange, budget }: BudgetDialogProps) 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Direction</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={(val) => field.onChange(val === "none" ? "" : val)} value={field.value || "none"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner une direction" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Aucune direction</SelectItem>
+                        <SelectItem value="none">Aucune direction</SelectItem>
                         {directions?.map((dir) => (
                           <SelectItem key={dir.id} value={dir.id}>
                             {dir.name}
