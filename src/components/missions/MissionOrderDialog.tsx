@@ -31,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { FileText, Upload, X } from "lucide-react";
 import { useState } from "react";
+import { createNotification } from "@/hooks/useNotification";
 
 const missionSchema = z.object({
   mission_number: z.string().min(1, "Le numéro d'ordre est requis"),
@@ -197,6 +198,7 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
       };
 
       let missionId = mission?.id;
+      const previousEmployeeId = mission?.employee_id;
 
       if (mission) {
         const { error } = await supabase
@@ -216,6 +218,27 @@ export function MissionOrderDialog({ open, onOpenChange, mission }: MissionOrder
 
       // Upload files
       await uploadFiles(missionId);
+
+      // Notifier l'employé si nouvelle assignation ou changement d'employé
+      if (data.employee_id && data.employee_id !== previousEmployeeId) {
+        // Récupérer le user_id de l'employé
+        const { data: employee } = await supabase
+          .from("employees")
+          .select("user_id")
+          .eq("id", data.employee_id)
+          .single();
+
+        if (employee?.user_id) {
+          await createNotification({
+            userId: employee.user_id,
+            title: "Nouvelle mission assignée",
+            message: `Vous avez été assigné à une mission: "${data.purpose}" - Destination: ${data.destination}`,
+            type: "assignment",
+            referenceId: missionId,
+            referenceTable: "mission_orders",
+          });
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["mission_orders"] });
