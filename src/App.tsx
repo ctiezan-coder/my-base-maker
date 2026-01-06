@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Companies from "./pages/Companies";
 import Trainings from "./pages/Trainings";
 import Events from "./pages/Events";
+import Agenda from "./pages/Agenda";
 import Partnerships from "./pages/Partnerships";
 import Projects from "./pages/Projects";
 import Documents from "./pages/Documents";
@@ -52,6 +53,7 @@ const App = () => (
               <Route path="companies" element={<Companies />} />
               <Route path="trainings" element={<Trainings />} />
               <Route path="events" element={<Events />} />
+              <Route path="agenda" element={<Agenda />} />
               <Route path="partnerships" element={<Partnerships />} />
               <Route path="projects" element={<Projects />} />
               <Route path="documents" element={<Documents />} />
