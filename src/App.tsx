@@ -29,6 +29,7 @@ import Support from "./pages/Support";
 import RH from "./pages/RH";
 import Missions from "./pages/Missions";
 import Comptabilite from "./pages/Comptabilite";
+import Budgets from "./pages/Budgets";
 import DatabaseExport from "./pages/DatabaseExport";
 import NotFound from "./pages/NotFound";
 
@@ -67,6 +68,7 @@ const App = () => (
               <Route path="support" element={<Support />} />
               <Route path="rh" element={<RH />} />
               <Route path="missions" element={<Missions />} />
+              <Route path="budgets" element={<Budgets />} />
               <Route path="comptabilite" element={<Comptabilite />} />
               <Route path="chat" element={<Chat />} />
             </Route>

@@ -169,6 +169,124 @@ export type Database = {
         }
         Relationships: []
       }
+      budget_entries: {
+        Row: {
+          accounting_entry_id: string | null
+          amount: number
+          budget_id: string
+          created_at: string
+          description: string | null
+          entry_date: string
+          id: string
+        }
+        Insert: {
+          accounting_entry_id?: string | null
+          amount: number
+          budget_id: string
+          created_at?: string
+          description?: string | null
+          entry_date?: string
+          id?: string
+        }
+        Update: {
+          accounting_entry_id?: string | null
+          amount?: number
+          budget_id?: string
+          created_at?: string
+          description?: string | null
+          entry_date?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_entries_accounting_entry_id_fkey"
+            columns: ["accounting_entry_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_entries_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      budgets: {
+        Row: {
+          allocated_amount: number
+          budget_name: string
+          consumed_amount: number
+          created_at: string
+          created_by: string | null
+          direction_id: string | null
+          employee_id: string | null
+          fiscal_year: number
+          id: string
+          mission_id: string | null
+          notes: string | null
+          remaining_amount: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number
+          budget_name: string
+          consumed_amount?: number
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          employee_id?: string | null
+          fiscal_year?: number
+          id?: string
+          mission_id?: string | null
+          notes?: string | null
+          remaining_amount?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number
+          budget_name?: string
+          consumed_amount?: number
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          employee_id?: string | null
+          fiscal_year?: number
+          id?: string
+          mission_id?: string | null
+          notes?: string | null
+          remaining_amount?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budgets_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budgets_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_connections: {
         Row: {
           company_id: string | null
