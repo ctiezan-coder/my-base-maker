@@ -4,7 +4,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useUnreadMessagesByUser } from "@/hooks/useUnreadMessagesByUser";
 
 interface UserListProps {
   selectedUserId: string | null;
@@ -13,6 +15,7 @@ interface UserListProps {
 
 export function UserList({ selectedUserId, onSelectUser }: UserListProps) {
   const { user } = useAuth();
+  const { unreadByUser } = useUnreadMessagesByUser();
 
   const { data: users, isLoading } = useQuery({
     queryKey: ["chat-users"],
@@ -68,6 +71,8 @@ export function UserList({ selectedUserId, onSelectUser }: UserListProps) {
               .toUpperCase()
               .slice(0, 2);
 
+            const unreadCount = unreadByUser[u.user_id] || 0;
+
             return (
               <button
                 key={u.user_id}
@@ -79,11 +84,23 @@ export function UserList({ selectedUserId, onSelectUser }: UserListProps) {
                     : "hover:bg-muted"
                 )}
               >
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback>{initials}</AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
+                  {unreadCount > 0 && (
+                    <Badge 
+                      className="absolute -top-1 -right-1 h-5 min-w-5 px-1 flex items-center justify-center bg-secondary text-secondary-foreground text-xs font-bold"
+                    >
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </Badge>
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">
+                  <p className={cn(
+                    "font-medium truncate",
+                    unreadCount > 0 && selectedUserId !== u.user_id && "font-bold"
+                  )}>
                     {u.full_name}
                   </p>
                   <p className={cn(
