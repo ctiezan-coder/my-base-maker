@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useUserDirection } from "@/hooks/useUserDirection";
+import { createNotification } from "@/hooks/useNotification";
 
 interface ProjectDialogProps {
   open: boolean;
@@ -102,11 +103,35 @@ export function ProjectDialog({ open, onOpenChange, project, onClose }: ProjectD
         if (error) throw error;
         toast({ title: "Projet mis à jour avec succès" });
       } else {
-        const { error } = await supabase
+        const { data: newProject, error } = await supabase
           .from("projects")
-          .insert([dataToSave]);
+          .insert([dataToSave])
+          .select()
+          .single();
 
         if (error) throw error;
+
+        // Notifier tous les utilisateurs de la direction
+        if (newProject && directionId) {
+          const { data: directionUsers } = await supabase
+            .from("profiles")
+            .select("user_id")
+            .eq("direction_id", directionId);
+
+          if (directionUsers) {
+            for (const u of directionUsers) {
+              await createNotification({
+                userId: u.user_id,
+                title: "Nouveau projet créé",
+                message: `Un nouveau projet a été créé: "${formData.name}"`,
+                type: "info",
+                referenceId: newProject.id,
+                referenceTable: "projects",
+              });
+            }
+          }
+        }
+
         toast({ title: "Projet créé avec succès" });
       }
       onClose();

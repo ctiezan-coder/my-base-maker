@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { FileText, Upload, X, Download } from "lucide-react";
 import type { Imputation, ImputationFormData } from "@/types/imputation";
+import { createNotification } from "@/hooks/useNotification";
 
 interface ImputationDialogProps {
   open: boolean;
@@ -125,6 +126,7 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
   const saveMutation = useMutation({
     mutationFn: async (data: ImputationFormData) => {
       let imputationId = imputation?.id;
+      const previousAssignedTo = imputation?.assigned_to;
       
       if (imputation) {
         const { error } = await supabase
@@ -145,6 +147,18 @@ export function ImputationDialog({ open, onOpenChange, imputation }: ImputationD
       // Upload files if any
       if (uploadedFiles.length > 0 && imputationId) {
         await uploadFiles(imputationId);
+      }
+
+      // Notifier l'employé assigné si changement ou nouvelle assignation
+      if (data.assigned_to && data.assigned_to !== previousAssignedTo) {
+        await createNotification({
+          userId: data.assigned_to,
+          title: "Nouvelle imputation assignée",
+          message: `Une imputation vous a été assignée: "${data.objet}"`,
+          type: "assignment",
+          referenceId: imputationId,
+          referenceTable: "imputations",
+        });
       }
 
       return imputationId;
