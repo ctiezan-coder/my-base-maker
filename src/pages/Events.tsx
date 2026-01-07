@@ -226,6 +226,7 @@ export default function Events() {
             isLoading={isLoading}
             onEdit={handleEdit}
             onDelete={handleDelete}
+            onRefresh={refetch}
             viewMode={viewMode}
             canManage={canManageEvents}
           />

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Calendar, MapPin, Users } from "lucide-react";
+import { Pencil, Trash2, Calendar, MapPin, Users, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -15,19 +15,28 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
+import { EventDetailsDialog } from "./EventDetailsDialog";
 
 interface EventListProps {
   events: any[];
   isLoading: boolean;
   onEdit: (event: any) => void;
   onDelete: (event: any) => void;
+  onRefresh: () => void;
   viewMode?: "grid" | "list";
   canManage?: boolean;
 }
 
-export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "grid", canManage = true }: EventListProps) {
+export function EventList({ events, isLoading, onEdit, onDelete, onRefresh, viewMode = "grid", canManage = true }: EventListProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<any>(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
+  const handleViewDetails = (event: any) => {
+    setSelectedEvent(event);
+    setDetailsDialogOpen(true);
+  };
 
   const handleDeleteClick = (event: any) => {
     setEventToDelete(event);
@@ -125,16 +134,21 @@ export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "gri
                       </div>
                     </div>
                     
-                    {canManage && (
-                      <div className="flex gap-1 ml-4">
-                        <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
-                    )}
+                    <div className="flex gap-1 ml-4">
+                      <Button variant="ghost" size="sm" onClick={() => handleViewDetails(event)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      {canManage && (
+                        <>
+                          <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
+                            <Trash2 className="w-4 h-4 text-destructive" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -166,16 +180,21 @@ export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "gri
                       {event.event_type}
                     </Badge>
                   </div>
-                  {canManage && (
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="sm" onClick={() => handleViewDetails(event)}>
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    {canManage && (
+                      <>
+                        <Button variant="ghost" size="sm" onClick={() => onEdit(event)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteClick(event)}>
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -230,6 +249,14 @@ export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "gri
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <EventDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        event={selectedEvent}
+        onRefresh={onRefresh}
+        canManage={canManage}
+      />
     </>
   );
 }
