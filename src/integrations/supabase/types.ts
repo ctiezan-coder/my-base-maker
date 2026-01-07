@@ -1993,6 +1993,47 @@ export type Database = {
           },
         ]
       }
+      project_budget_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          created_at: string
+          id: string
+          project_id: string
+          threshold_percentage: number
+          triggered_at: string
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          id?: string
+          project_id: string
+          threshold_percentage: number
+          triggered_at?: string
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          created_at?: string
+          id?: string
+          project_id?: string
+          threshold_percentage?: number
+          triggered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_budget_alerts_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_comments: {
         Row: {
           content: string
@@ -2051,6 +2092,9 @@ export type Database = {
           project_id: string
           status: string
           updated_at: string
+          validated_at: string | null
+          validated_by: string | null
+          validation_status: string | null
         }
         Insert: {
           assigned_to?: string | null
@@ -2064,6 +2108,9 @@ export type Database = {
           project_id: string
           status?: string
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?: string | null
         }
         Update: {
           assigned_to?: string | null
@@ -2077,6 +2124,9 @@ export type Database = {
           project_id?: string
           status?: string
           updated_at?: string
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_status?: string | null
         }
         Relationships: [
           {
@@ -2112,9 +2162,11 @@ export type Database = {
           file_type: string | null
           id: string
           name: string
+          parent_document_id: string | null
           project_id: string
           updated_at: string
           uploaded_by: string | null
+          version: number | null
         }
         Insert: {
           category?: string | null
@@ -2125,9 +2177,11 @@ export type Database = {
           file_type?: string | null
           id?: string
           name: string
+          parent_document_id?: string | null
           project_id: string
           updated_at?: string
           uploaded_by?: string | null
+          version?: number | null
         }
         Update: {
           category?: string | null
@@ -2138,11 +2192,20 @@ export type Database = {
           file_type?: string | null
           id?: string
           name?: string
+          parent_document_id?: string | null
           project_id?: string
           updated_at?: string
           uploaded_by?: string | null
+          version?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "project_documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "project_documents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "project_documents_project_id_fkey"
             columns: ["project_id"]
@@ -2338,9 +2401,11 @@ export type Database = {
           due_date: string
           id: string
           name: string
+          progress_percentage: number | null
           project_id: string
           status: string
           updated_at: string
+          validation_status: string | null
         }
         Insert: {
           completed_date?: string | null
@@ -2350,9 +2415,11 @@ export type Database = {
           due_date: string
           id?: string
           name: string
+          progress_percentage?: number | null
           project_id: string
           status?: string
           updated_at?: string
+          validation_status?: string | null
         }
         Update: {
           completed_date?: string | null
@@ -2362,9 +2429,11 @@ export type Database = {
           due_date?: string
           id?: string
           name?: string
+          progress_percentage?: number | null
           project_id?: string
           status?: string
           updated_at?: string
+          validation_status?: string | null
         }
         Relationships: [
           {
@@ -2378,6 +2447,7 @@ export type Database = {
       }
       project_risks: {
         Row: {
+          category: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -2388,10 +2458,12 @@ export type Database = {
           owner_id: string | null
           probability: string
           project_id: string
+          risk_level: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2402,10 +2474,12 @@ export type Database = {
           owner_id?: string | null
           probability?: string
           project_id: string
+          risk_level?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2416,6 +2490,7 @@ export type Database = {
           owner_id?: string | null
           probability?: string
           project_id?: string
+          risk_level?: string | null
           status?: string
           updated_at?: string
         }
@@ -2482,6 +2557,8 @@ export type Database = {
       }
       projects: {
         Row: {
+          actual_end_date: string | null
+          actual_start_date: string | null
           budget: number | null
           created_at: string
           created_by: string | null
@@ -2490,14 +2567,20 @@ export type Database = {
           direction_id: string
           end_date: string | null
           id: string
+          manager_id: string | null
           name: string
           priority_level: Database["public"]["Enums"]["priority_level"] | null
+          progress_percentage: number | null
+          project_code: string | null
+          project_type: string | null
           rccm_number: string | null
           start_date: string | null
           status: string | null
           updated_at: string
         }
         Insert: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
           budget?: number | null
           created_at?: string
           created_by?: string | null
@@ -2506,14 +2589,20 @@ export type Database = {
           direction_id: string
           end_date?: string | null
           id?: string
+          manager_id?: string | null
           name: string
           priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          progress_percentage?: number | null
+          project_code?: string | null
+          project_type?: string | null
           rccm_number?: string | null
           start_date?: string | null
           status?: string | null
           updated_at?: string
         }
         Update: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
           budget?: number | null
           created_at?: string
           created_by?: string | null
@@ -2522,8 +2611,12 @@ export type Database = {
           direction_id?: string
           end_date?: string | null
           id?: string
+          manager_id?: string | null
           name?: string
           priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          progress_percentage?: number | null
+          project_code?: string | null
+          project_type?: string | null
           rccm_number?: string | null
           start_date?: string | null
           status?: string | null
@@ -2535,6 +2628,13 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "projects_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
