@@ -355,6 +355,152 @@ export type Database = {
           },
         ]
       }
+      buyer_requests: {
+        Row: {
+          buyer_id: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          deadline: string | null
+          id: string
+          notes: string | null
+          products_requested: string[] | null
+          request_date: string
+          status: string | null
+          value_estimated: number | null
+          volume_requested: string | null
+        }
+        Insert: {
+          buyer_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          products_requested?: string[] | null
+          request_date?: string
+          status?: string | null
+          value_estimated?: number | null
+          volume_requested?: string | null
+        }
+        Update: {
+          buyer_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          deadline?: string | null
+          id?: string
+          notes?: string | null
+          products_requested?: string[] | null
+          request_date?: string
+          status?: string | null
+          value_estimated?: number | null
+          volume_requested?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "buyer_requests_buyer_id_fkey"
+            columns: ["buyer_id"]
+            isOneToOne: false
+            referencedRelation: "international_buyers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      catalog_products: {
+        Row: {
+          available_quantity: number | null
+          catalog_id: string | null
+          category: string | null
+          certifications: string[] | null
+          company_id: string | null
+          created_at: string
+          currency: string | null
+          description: string | null
+          hs_code: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean | null
+          lead_time_days: number | null
+          min_order_quantity: number | null
+          origin_region: string | null
+          packaging_details: string | null
+          price_cif: number | null
+          price_fob: number | null
+          product_code: string | null
+          product_name: string
+          production_capacity: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          available_quantity?: number | null
+          catalog_id?: string | null
+          category?: string | null
+          certifications?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          hs_code?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          lead_time_days?: number | null
+          min_order_quantity?: number | null
+          origin_region?: string | null
+          packaging_details?: string | null
+          price_cif?: number | null
+          price_fob?: number | null
+          product_code?: string | null
+          product_name: string
+          production_capacity?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          available_quantity?: number | null
+          catalog_id?: string | null
+          category?: string | null
+          certifications?: string[] | null
+          company_id?: string | null
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          hs_code?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean | null
+          lead_time_days?: number | null
+          min_order_quantity?: number | null
+          origin_region?: string | null
+          packaging_details?: string | null
+          price_cif?: number | null
+          price_fob?: number | null
+          product_code?: string | null
+          product_name?: string
+          production_capacity?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "catalog_products_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "product_catalogs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "catalog_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           created_at: string
@@ -971,6 +1117,83 @@ export type Database = {
         }
         Relationships: []
       }
+      export_performance_kpis: {
+        Row: {
+          b2b_connections_made: number | null
+          buyers_contacted: number | null
+          conversion_rate: number | null
+          created_at: string
+          currency: string | null
+          direction_id: string | null
+          id: string
+          mission_participants: number | null
+          missions_organized: number | null
+          new_markets_accessed: number | null
+          notes: string | null
+          opportunities_concluded: number | null
+          opportunities_identified: number | null
+          opportunities_shared: number | null
+          period: string
+          successful_connections: number | null
+          top_countries: string[] | null
+          top_sectors: string[] | null
+          total_contract_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          b2b_connections_made?: number | null
+          buyers_contacted?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          currency?: string | null
+          direction_id?: string | null
+          id?: string
+          mission_participants?: number | null
+          missions_organized?: number | null
+          new_markets_accessed?: number | null
+          notes?: string | null
+          opportunities_concluded?: number | null
+          opportunities_identified?: number | null
+          opportunities_shared?: number | null
+          period: string
+          successful_connections?: number | null
+          top_countries?: string[] | null
+          top_sectors?: string[] | null
+          total_contract_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          b2b_connections_made?: number | null
+          buyers_contacted?: number | null
+          conversion_rate?: number | null
+          created_at?: string
+          currency?: string | null
+          direction_id?: string | null
+          id?: string
+          mission_participants?: number | null
+          missions_organized?: number | null
+          new_markets_accessed?: number | null
+          notes?: string | null
+          opportunities_concluded?: number | null
+          opportunities_identified?: number | null
+          opportunities_shared?: number | null
+          period?: string
+          successful_connections?: number | null
+          top_countries?: string[] | null
+          top_sectors?: string[] | null
+          total_contract_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "export_performance_kpis_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       folders: {
         Row: {
           created_at: string
@@ -1112,6 +1335,95 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "imputations_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      international_buyers: {
+        Row: {
+          certifications_required: string[] | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          direction_id: string | null
+          id: string
+          last_contact_date: string | null
+          notes: string | null
+          organization_name: string
+          payment_terms: string | null
+          position: string | null
+          preferred_incoterms: string | null
+          products_interested: string[] | null
+          purchase_frequency: string | null
+          purchase_volume: string | null
+          quality_requirements: string | null
+          region: string | null
+          sector: string
+          status: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          certifications_required?: string[] | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country: string
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          id?: string
+          last_contact_date?: string | null
+          notes?: string | null
+          organization_name: string
+          payment_terms?: string | null
+          position?: string | null
+          preferred_incoterms?: string | null
+          products_interested?: string[] | null
+          purchase_frequency?: string | null
+          purchase_volume?: string | null
+          quality_requirements?: string | null
+          region?: string | null
+          sector: string
+          status?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          certifications_required?: string[] | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          id?: string
+          last_contact_date?: string | null
+          notes?: string | null
+          organization_name?: string
+          payment_terms?: string | null
+          position?: string | null
+          preferred_incoterms?: string | null
+          products_interested?: string[] | null
+          purchase_frequency?: string | null
+          purchase_volume?: string | null
+          quality_requirements?: string | null
+          region?: string | null
+          sector?: string
+          status?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "international_buyers_direction_id_fkey"
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
@@ -1321,6 +1633,96 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_country_analysis: {
+        Row: {
+          ci_export_potential: string | null
+          country: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          ease_of_business_rank: number | null
+          gdp_billion: number | null
+          gdp_growth_percent: number | null
+          id: string
+          import_value_billion: number | null
+          inflation_percent: number | null
+          key_contacts: string | null
+          last_updated: string | null
+          main_imports: string[] | null
+          main_trading_partners: string[] | null
+          market_challenges: string | null
+          market_opportunities: string | null
+          non_tariff_barriers: string | null
+          notes: string | null
+          official_languages: string[] | null
+          population: number | null
+          recommended_sectors: string[] | null
+          region: string | null
+          tariff_average_percent: number | null
+          trade_agreements: string[] | null
+          updated_at: string
+          useful_resources: string[] | null
+        }
+        Insert: {
+          ci_export_potential?: string | null
+          country: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          ease_of_business_rank?: number | null
+          gdp_billion?: number | null
+          gdp_growth_percent?: number | null
+          id?: string
+          import_value_billion?: number | null
+          inflation_percent?: number | null
+          key_contacts?: string | null
+          last_updated?: string | null
+          main_imports?: string[] | null
+          main_trading_partners?: string[] | null
+          market_challenges?: string | null
+          market_opportunities?: string | null
+          non_tariff_barriers?: string | null
+          notes?: string | null
+          official_languages?: string[] | null
+          population?: number | null
+          recommended_sectors?: string[] | null
+          region?: string | null
+          tariff_average_percent?: number | null
+          trade_agreements?: string[] | null
+          updated_at?: string
+          useful_resources?: string[] | null
+        }
+        Update: {
+          ci_export_potential?: string | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          ease_of_business_rank?: number | null
+          gdp_billion?: number | null
+          gdp_growth_percent?: number | null
+          id?: string
+          import_value_billion?: number | null
+          inflation_percent?: number | null
+          key_contacts?: string | null
+          last_updated?: string | null
+          main_imports?: string[] | null
+          main_trading_partners?: string[] | null
+          market_challenges?: string | null
+          market_opportunities?: string | null
+          non_tariff_barriers?: string | null
+          notes?: string | null
+          official_languages?: string[] | null
+          population?: number | null
+          recommended_sectors?: string[] | null
+          region?: string | null
+          tariff_average_percent?: number | null
+          trade_agreements?: string[] | null
+          updated_at?: string
+          useful_resources?: string[] | null
+        }
+        Relationships: []
       }
       market_statistics: {
         Row: {
@@ -2441,6 +2843,62 @@ export type Database = {
         }
         Relationships: []
       }
+      product_catalogs: {
+        Row: {
+          catalog_name: string
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string | null
+          download_count: number | null
+          id: string
+          is_published: boolean | null
+          publish_date: string | null
+          sector: string
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          catalog_name: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          download_count?: number | null
+          id?: string
+          is_published?: boolean | null
+          publish_date?: string | null
+          sector: string
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          catalog_name?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          download_count?: number | null
+          id?: string
+          is_published?: boolean | null
+          publish_date?: string | null
+          sector?: string
+          updated_at?: string
+          version?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_catalogs_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_status: string
@@ -3277,6 +3735,84 @@ export type Database = {
           },
         ]
       }
+      regulatory_requirements: {
+        Row: {
+          authority_contact: string | null
+          authority_website: string | null
+          cost_estimate: number | null
+          country: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          description: string | null
+          documents_required: string[] | null
+          id: string
+          issuing_authority: string | null
+          last_updated: string | null
+          mandatory: boolean | null
+          notes: string | null
+          processing_time: string | null
+          product_category: string | null
+          region: string | null
+          requirement_type: string
+          sector: string | null
+          title: string
+          updated_at: string
+          useful_links: string[] | null
+          validity_period: string | null
+        }
+        Insert: {
+          authority_contact?: string | null
+          authority_website?: string | null
+          cost_estimate?: number | null
+          country: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          documents_required?: string[] | null
+          id?: string
+          issuing_authority?: string | null
+          last_updated?: string | null
+          mandatory?: boolean | null
+          notes?: string | null
+          processing_time?: string | null
+          product_category?: string | null
+          region?: string | null
+          requirement_type: string
+          sector?: string | null
+          title: string
+          updated_at?: string
+          useful_links?: string[] | null
+          validity_period?: string | null
+        }
+        Update: {
+          authority_contact?: string | null
+          authority_website?: string | null
+          cost_estimate?: number | null
+          country?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          description?: string | null
+          documents_required?: string[] | null
+          id?: string
+          issuing_authority?: string | null
+          last_updated?: string | null
+          mandatory?: boolean | null
+          notes?: string | null
+          processing_time?: string | null
+          product_category?: string | null
+          region?: string | null
+          requirement_type?: string
+          sector?: string | null
+          title?: string
+          updated_at?: string
+          useful_links?: string[] | null
+          validity_period?: string | null
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -3446,6 +3982,159 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_mission_participants: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          id: string
+          is_paid: boolean | null
+          mission_id: string
+          notes: string | null
+          participant_email: string | null
+          participant_name: string
+          participant_phone: string | null
+          participation_fee: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_paid?: boolean | null
+          mission_id: string
+          notes?: string | null
+          participant_email?: string | null
+          participant_name: string
+          participant_phone?: string | null
+          participation_fee?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          is_paid?: boolean | null
+          mission_id?: string
+          notes?: string | null
+          participant_email?: string | null
+          participant_name?: string
+          participant_phone?: string | null
+          participation_fee?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_mission_participants_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_mission_participants_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "trade_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_missions: {
+        Row: {
+          budget_actual: number | null
+          budget_estimated: number | null
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          destination_city: string | null
+          destination_country: string
+          direction_id: string | null
+          end_date: string
+          event_id: string | null
+          id: string
+          lessons_learned: string | null
+          mission_name: string
+          mission_type: string
+          objectives: string | null
+          organizer: string | null
+          report_summary: string | null
+          results_contacts: number | null
+          results_contracts: number | null
+          results_leads: number | null
+          results_value: number | null
+          start_date: string
+          status: string | null
+          target_sectors: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          budget_actual?: number | null
+          budget_estimated?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          destination_city?: string | null
+          destination_country: string
+          direction_id?: string | null
+          end_date: string
+          event_id?: string | null
+          id?: string
+          lessons_learned?: string | null
+          mission_name: string
+          mission_type: string
+          objectives?: string | null
+          organizer?: string | null
+          report_summary?: string | null
+          results_contacts?: number | null
+          results_contracts?: number | null
+          results_leads?: number | null
+          results_value?: number | null
+          start_date: string
+          status?: string | null
+          target_sectors?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          budget_actual?: number | null
+          budget_estimated?: number | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          destination_city?: string | null
+          destination_country?: string
+          direction_id?: string | null
+          end_date?: string
+          event_id?: string | null
+          id?: string
+          lessons_learned?: string | null
+          mission_name?: string
+          mission_type?: string
+          objectives?: string | null
+          organizer?: string | null
+          report_summary?: string | null
+          results_contacts?: number | null
+          results_contracts?: number | null
+          results_leads?: number | null
+          results_value?: number | null
+          start_date?: string
+          status?: string | null
+          target_sectors?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_missions_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_missions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
         ]
