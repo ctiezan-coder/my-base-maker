@@ -34,7 +34,6 @@ import Budgets from "./pages/Budgets";
 import DatabaseExport from "./pages/DatabaseExport";
 import NotFound from "./pages/NotFound";
 import Trainers from "./pages/Trainers";
-import Mediatheque from "./pages/Mediatheque";
 
 const queryClient = new QueryClient();
 
@@ -75,7 +74,6 @@ const App = () => (
               <Route path="budgets" element={<Budgets />} />
               <Route path="comptabilite" element={<Comptabilite />} />
               <Route path="trainers" element={<Trainers />} />
-              <Route path="mediatheque" element={<Mediatheque />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
