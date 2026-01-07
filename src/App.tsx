@@ -33,6 +33,7 @@ import Comptabilite from "./pages/Comptabilite";
 import Budgets from "./pages/Budgets";
 import DatabaseExport from "./pages/DatabaseExport";
 import NotFound from "./pages/NotFound";
+import Trainers from "./pages/Trainers";
 
 const queryClient = new QueryClient();
 
@@ -72,7 +73,7 @@ const App = () => (
               <Route path="missions" element={<Missions />} />
               <Route path="budgets" element={<Budgets />} />
               <Route path="comptabilite" element={<Comptabilite />} />
-              <Route path="chat" element={<Chat />} />
+              <Route path="trainers" element={<Trainers />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
