@@ -179,15 +179,25 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick, canManage 
         iconAnchor: [20, 20],
       });
 
-      // Create popup content
+      // Create popup content using safe DOM methods to prevent XSS
       const popupContent = document.createElement('div');
       popupContent.className = 'p-4 min-w-[400px] bg-white rounded-lg';
-      popupContent.innerHTML = `
-        <div class="mb-3 pb-3 border-b-2 border-green-500">
-          <h3 class="text-lg font-bold text-gray-800 mb-1">📍 ${country}${city !== 'general' ? ` - ${city}` : ''}</h3>
-          <p class="text-sm text-gray-600 font-medium">${opps.length} opportunité${opps.length > 1 ? 's' : ''} disponible${opps.length > 1 ? 's' : ''}</p>
-        </div>
-      `;
+      
+      // Header section - using textContent for safety
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'mb-3 pb-3 border-b-2 border-green-500';
+      
+      const titleH3 = document.createElement('h3');
+      titleH3.className = 'text-lg font-bold text-gray-800 mb-1';
+      titleH3.textContent = `📍 ${country}${city !== 'general' ? ` - ${city}` : ''}`;
+      
+      const countP = document.createElement('p');
+      countP.className = 'text-sm text-gray-600 font-medium';
+      countP.textContent = `${opps.length} opportunité${opps.length > 1 ? 's' : ''} disponible${opps.length > 1 ? 's' : ''}`;
+      
+      headerDiv.appendChild(titleH3);
+      headerDiv.appendChild(countP);
+      popupContent.appendChild(headerDiv);
 
       const oppList = document.createElement('div');
       oppList.className = 'space-y-2 max-h-96 overflow-y-auto pr-2';
@@ -197,7 +207,7 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick, canManage 
         const oppDiv = document.createElement('div');
         oppDiv.className = 'p-3 hover:bg-green-50 rounded-lg cursor-pointer border-2 border-gray-200 bg-white transition-all duration-200 hover:shadow-lg hover:border-green-400';
         
-        const statusColors = {
+        const statusColors: Record<string, string> = {
           'URGENT': 'bg-gradient-to-r from-orange-500 to-orange-600 text-white',
           'NOUVEAU': 'bg-gradient-to-r from-white to-gray-100 text-gray-800 border border-gray-300',
           'RECOMMANDÉ': 'bg-gradient-to-r from-green-500 to-green-600 text-white',
@@ -205,109 +215,165 @@ export const OpportunitiesMap = ({ opportunities, onOpportunityClick, canManage 
           'FERMÉ': 'bg-gray-400 text-white'
         };
         
-        const statusColor = statusColors[opp.status as keyof typeof statusColors] || 'bg-gray-400 text-white';
+        const statusColor = statusColors[opp.status as string] || 'bg-gray-400 text-white';
         const deadlineDate = new Date(opp.deadline).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
         
-        oppDiv.innerHTML = `
-          <div class="flex items-start justify-between gap-2 mb-2">
-            <div class="font-bold text-gray-800 text-base flex-1">${opp.title}</div>
-            <span class="px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${statusColor} shadow-sm">
-              ${opp.status?.replace('_', ' ')}
-            </span>
-          </div>
-          <div class="space-y-1.5">
-            <div class="flex items-center gap-2 text-sm">
-              <span class="text-gray-500 font-medium">📊 Secteur:</span>
-              <span class="font-semibold text-green-700">${opp.sector}</span>
-            </div>
-            <div class="flex items-center gap-2 text-sm">
-              <span class="text-gray-500 font-medium">💰 Valeur estimée:</span>
-              <span class="font-bold text-orange-600">${opp.estimated_value.toLocaleString()} ${opp.currency || 'CFA'}</span>
-            </div>
-            <div class="flex items-center gap-2 text-sm">
-              <span class="text-gray-500 font-medium">📅 Date limite:</span>
-              <span class="font-semibold text-gray-700">${deadlineDate}</span>
-            </div>
-            <div class="flex items-center gap-2 text-sm">
-              <span class="text-gray-500 font-medium">📦 Volume:</span>
-              <span class="font-semibold text-gray-700">${opp.volume}</span>
-            </div>
-          </div>
-          <div class="mt-2 pt-2 border-t-2 border-gray-200">
-            <p class="text-xs text-gray-600 line-clamp-2">${opp.description}</p>
-          </div>
-          <div style="display: flex; gap: 8px; margin-top: 12px;">
-            <button 
-              class="opp-details-btn"
-              data-opp-id="${opp.id}"
-              style="
-                padding: 10px 16px;
-                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 600;
-                flex: 1;
-                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-                transition: all 0.2s;
-              "
-              onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';"
-              onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(16, 185, 129, 0.3)';"
-            >
-              📋 Voir détails
-            </button>
-            ${canManage ? `
-            <button 
-              class="opp-send-btn"
-              data-opp-id="${opp.id}"
-              style="
-                padding: 10px 16px;
-                background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-                color: white;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 600;
-                flex: 1;
-                box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
-                transition: all 0.2s;
-              "
-              onmouseover="this.style.transform='scale(1.05)'; this.style.boxShadow='0 4px 12px rgba(249, 115, 22, 0.4)';"
-              onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 2px 8px rgba(249, 115, 22, 0.3)';"
-            >
-              📤 Envoyer
-            </button>
-            ` : ''}
-          </div>
+        // Build opportunity card using safe DOM methods
+        const headerRow = document.createElement('div');
+        headerRow.className = 'flex items-start justify-between gap-2 mb-2';
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'font-bold text-gray-800 text-base flex-1';
+        titleDiv.textContent = opp.title;
+        
+        const statusSpan = document.createElement('span');
+        statusSpan.className = `px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${statusColor} shadow-sm`;
+        statusSpan.textContent = opp.status?.replace('_', ' ') || '';
+        
+        headerRow.appendChild(titleDiv);
+        headerRow.appendChild(statusSpan);
+        oppDiv.appendChild(headerRow);
+        
+        // Details section
+        const detailsDiv = document.createElement('div');
+        detailsDiv.className = 'space-y-1.5';
+        
+        // Sector row
+        const sectorRow = document.createElement('div');
+        sectorRow.className = 'flex items-center gap-2 text-sm';
+        const sectorLabel = document.createElement('span');
+        sectorLabel.className = 'text-gray-500 font-medium';
+        sectorLabel.textContent = '📊 Secteur:';
+        const sectorValue = document.createElement('span');
+        sectorValue.className = 'font-semibold text-green-700';
+        sectorValue.textContent = opp.sector;
+        sectorRow.appendChild(sectorLabel);
+        sectorRow.appendChild(sectorValue);
+        detailsDiv.appendChild(sectorRow);
+        
+        // Value row
+        const valueRow = document.createElement('div');
+        valueRow.className = 'flex items-center gap-2 text-sm';
+        const valueLabel = document.createElement('span');
+        valueLabel.className = 'text-gray-500 font-medium';
+        valueLabel.textContent = '💰 Valeur estimée:';
+        const valueValue = document.createElement('span');
+        valueValue.className = 'font-bold text-orange-600';
+        valueValue.textContent = `${opp.estimated_value.toLocaleString()} ${opp.currency || 'CFA'}`;
+        valueRow.appendChild(valueLabel);
+        valueRow.appendChild(valueValue);
+        detailsDiv.appendChild(valueRow);
+        
+        // Deadline row
+        const deadlineRow = document.createElement('div');
+        deadlineRow.className = 'flex items-center gap-2 text-sm';
+        const deadlineLabel = document.createElement('span');
+        deadlineLabel.className = 'text-gray-500 font-medium';
+        deadlineLabel.textContent = '📅 Date limite:';
+        const deadlineValue = document.createElement('span');
+        deadlineValue.className = 'font-semibold text-gray-700';
+        deadlineValue.textContent = deadlineDate;
+        deadlineRow.appendChild(deadlineLabel);
+        deadlineRow.appendChild(deadlineValue);
+        detailsDiv.appendChild(deadlineRow);
+        
+        // Volume row
+        const volumeRow = document.createElement('div');
+        volumeRow.className = 'flex items-center gap-2 text-sm';
+        const volumeLabel = document.createElement('span');
+        volumeLabel.className = 'text-gray-500 font-medium';
+        volumeLabel.textContent = '📦 Volume:';
+        const volumeValue = document.createElement('span');
+        volumeValue.className = 'font-semibold text-gray-700';
+        volumeValue.textContent = opp.volume;
+        volumeRow.appendChild(volumeLabel);
+        volumeRow.appendChild(volumeValue);
+        detailsDiv.appendChild(volumeRow);
+        
+        oppDiv.appendChild(detailsDiv);
+        
+        // Description section
+        const descSection = document.createElement('div');
+        descSection.className = 'mt-2 pt-2 border-t-2 border-gray-200';
+        const descP = document.createElement('p');
+        descP.className = 'text-xs text-gray-600 line-clamp-2';
+        descP.textContent = opp.description;
+        descSection.appendChild(descP);
+        oppDiv.appendChild(descSection);
+        
+        // Buttons section
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.style.cssText = 'display: flex; gap: 8px; margin-top: 12px;';
+        
+        // Details button
+        const detailsBtn = document.createElement('button');
+        detailsBtn.className = 'opp-details-btn';
+        detailsBtn.style.cssText = `
+          padding: 10px 16px;
+          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          font-size: 13px;
+          font-weight: 600;
+          flex: 1;
+          box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+          transition: all 0.2s;
         `;
+        detailsBtn.textContent = '📋 Voir détails';
+        detailsBtn.addEventListener('mouseenter', () => {
+          detailsBtn.style.transform = 'scale(1.05)';
+          detailsBtn.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.4)';
+        });
+        detailsBtn.addEventListener('mouseleave', () => {
+          detailsBtn.style.transform = 'scale(1)';
+          detailsBtn.style.boxShadow = '0 2px 8px rgba(16, 185, 129, 0.3)';
+        });
+        detailsBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (onOpportunityClick) {
+            onOpportunityClick(opp);
+          }
+        });
+        buttonsDiv.appendChild(detailsBtn);
         
+        // Send button (only for managers)
+        if (canManage) {
+          const sendBtn = document.createElement('button');
+          sendBtn.className = 'opp-send-btn';
+          sendBtn.style.cssText = `
+            padding: 10px 16px;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            flex: 1;
+            box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+            transition: all 0.2s;
+          `;
+          sendBtn.textContent = '📤 Envoyer';
+          sendBtn.addEventListener('mouseenter', () => {
+            sendBtn.style.transform = 'scale(1.05)';
+            sendBtn.style.boxShadow = '0 4px 12px rgba(249, 115, 22, 0.4)';
+          });
+          sendBtn.addEventListener('mouseleave', () => {
+            sendBtn.style.transform = 'scale(1)';
+            sendBtn.style.boxShadow = '0 2px 8px rgba(249, 115, 22, 0.3)';
+          });
+          sendBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setSelectedOpportunity(opp);
+            setSendDialogOpen(true);
+          });
+          buttonsDiv.appendChild(sendBtn);
+        }
+        
+        oppDiv.appendChild(buttonsDiv);
         oppList.appendChild(oppDiv);
-        
-        // Add event listeners to buttons after appending
-        setTimeout(() => {
-          const detailsBtn = oppDiv.querySelector('.opp-details-btn');
-          const sendBtn = oppDiv.querySelector('.opp-send-btn');
-          
-          if (detailsBtn) {
-            detailsBtn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (onOpportunityClick) {
-                onOpportunityClick(opp);
-              }
-            });
-          }
-          
-          if (sendBtn) {
-            sendBtn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              setSelectedOpportunity(opp);
-              setSendDialogOpen(true);
-            });
-          }
-        }, 0);
       });
 
       popupContent.appendChild(oppList);
