@@ -23,8 +23,8 @@ interface ProjectDetailsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   project: any;
-  onEdit: () => void;
-  canManage: boolean;
+  onEdit?: () => void;
+  canManage?: boolean;
 }
 
 const statusColors: Record<string, string> = {
