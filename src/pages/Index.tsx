@@ -173,11 +173,11 @@ const Index = () => {
       subtitle: `${stats?.successfulConnections || 0} conclues`,
     },
     {
-      title: "Valeur Contrats",
-      value: `${formatCurrency(stats?.totalContractValue || 0)} $`,
-      icon: DollarSign,
+      title: "Partenariats",
+      value: stats?.partnerships || 0,
+      icon: Users,
       gradient: "from-primary via-accent to-secondary",
-      subtitle: "Cumul contrats signés",
+      subtitle: "Relations actives",
     },
   ];
 
@@ -202,13 +202,6 @@ const Index = () => {
       icon: Globe,
       color: "text-secondary",
       bgColor: "bg-secondary/10",
-    },
-    {
-      title: "Valeur Opportunités",
-      value: `${formatCurrency(stats?.totalOpportunityValue || 0)} $`,
-      icon: Briefcase,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
     },
   ];
 
