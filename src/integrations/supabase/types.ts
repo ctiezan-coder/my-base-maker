@@ -1134,6 +1134,72 @@ export type Database = {
         }
         Relationships: []
       }
+      discovered_events: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          end_date: string | null
+          event_type: string | null
+          id: string
+          notes: string | null
+          relevance_score: number | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          sectors: string[] | null
+          source: string | null
+          start_date: string | null
+          status: string | null
+          title: string
+          updated_at: string
+          venue: string | null
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          event_type?: string | null
+          id?: string
+          notes?: string | null
+          relevance_score?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sectors?: string[] | null
+          source?: string | null
+          start_date?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          venue?: string | null
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          event_type?: string | null
+          id?: string
+          notes?: string | null
+          relevance_score?: number | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          sectors?: string[] | null
+          source?: string | null
+          start_date?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          venue?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           category: string | null
@@ -1420,39 +1486,370 @@ export type Database = {
           },
         ]
       }
-      event_participants: {
+      event_budget_items: {
         Row: {
-          company_id: string
+          actual_amount: number | null
+          category: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          estimated_amount: number | null
+          event_id: string
+          id: string
+          invoice_number: string | null
+          invoice_url: string | null
+          item_name: string
+          notes: string | null
+          status: string | null
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          actual_amount?: number | null
+          category: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          estimated_amount?: number | null
+          event_id: string
+          id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
+          item_name: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          actual_amount?: number | null
+          category?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          estimated_amount?: number | null
+          event_id?: string
+          id?: string
+          invoice_number?: string | null
+          invoice_url?: string | null
+          item_name?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_budget_items_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_catering: {
+        Row: {
+          caterer_contact: string | null
+          caterer_name: string | null
+          cost: number | null
+          created_at: string
+          currency: string | null
+          dietary_options: string[] | null
+          event_id: string
+          expected_count: number | null
+          id: string
+          menu_description: string | null
+          notes: string | null
+          service_date: string
+          service_time: string | null
+          service_type: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          caterer_contact?: string | null
+          caterer_name?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          dietary_options?: string[] | null
+          event_id: string
+          expected_count?: number | null
+          id?: string
+          menu_description?: string | null
+          notes?: string | null
+          service_date: string
+          service_time?: string | null
+          service_type: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          caterer_contact?: string | null
+          caterer_name?: string | null
+          cost?: number | null
+          created_at?: string
+          currency?: string | null
+          dietary_options?: string[] | null
+          event_id?: string
+          expected_count?: number | null
+          id?: string
+          menu_description?: string | null
+          notes?: string | null
+          service_date?: string
+          service_time?: string | null
+          service_type?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_catering_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_documents: {
+        Row: {
+          created_at: string
+          description: string | null
+          document_type: string
+          event_id: string
+          file_size: number | null
+          file_url: string | null
+          id: string
+          is_public: boolean | null
+          title: string
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          document_type: string
+          event_id: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          title: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          document_type?: string
+          event_id?: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          is_public?: boolean | null
+          title?: string
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_documents_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_logistics: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          completed: boolean | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          event_id: string
+          id: string
+          item_name: string
+          notes: string | null
+          quantity: number | null
+          status: string | null
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          category: string
+          completed?: boolean | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          event_id: string
+          id?: string
+          item_name: string
+          notes?: string | null
+          quantity?: number | null
+          status?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          completed?: boolean | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          event_id?: string
+          id?: string
+          item_name?: string
+          notes?: string | null
+          quantity?: number | null
+          status?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_logistics_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_notifications: {
+        Row: {
           created_at: string
           created_by: string | null
           event_id: string
           id: string
-          notes: string | null
-          registration_date: string
-          status: string
-          updated_at: string
+          message: string
+          notification_type: string
+          recipients_count: number | null
+          scheduled_for: string | null
+          sent_at: string | null
+          status: string | null
+          subject: string
         }
         Insert: {
-          company_id: string
           created_at?: string
           created_by?: string | null
           event_id: string
           id?: string
-          notes?: string | null
-          registration_date?: string
-          status?: string
-          updated_at?: string
+          message: string
+          notification_type: string
+          recipients_count?: number | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject: string
         }
         Update: {
-          company_id?: string
           created_at?: string
           created_by?: string | null
           event_id?: string
           id?: string
+          message?: string
+          notification_type?: string
+          recipients_count?: number | null
+          scheduled_for?: string | null
+          sent_at?: string | null
+          status?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_participants: {
+        Row: {
+          accessibility_needs: string | null
+          badge_number: string | null
+          badge_printed: boolean | null
+          category: string | null
+          certificate_sent: boolean | null
+          certificate_url: string | null
+          check_in_time: string | null
+          check_out_time: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          dietary_requirements: string | null
+          event_id: string
+          hotel_reservation: boolean | null
+          id: string
+          notes: string | null
+          payment_amount: number | null
+          payment_status: string | null
+          qr_code: string | null
+          registration_date: string
+          status: string
+          transport_needed: boolean | null
+          updated_at: string
+          waitlist_position: number | null
+        }
+        Insert: {
+          accessibility_needs?: string | null
+          badge_number?: string | null
+          badge_printed?: boolean | null
+          category?: string | null
+          certificate_sent?: boolean | null
+          certificate_url?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          dietary_requirements?: string | null
+          event_id: string
+          hotel_reservation?: boolean | null
+          id?: string
           notes?: string | null
+          payment_amount?: number | null
+          payment_status?: string | null
+          qr_code?: string | null
           registration_date?: string
           status?: string
+          transport_needed?: boolean | null
           updated_at?: string
+          waitlist_position?: number | null
+        }
+        Update: {
+          accessibility_needs?: string | null
+          badge_number?: string | null
+          badge_printed?: boolean | null
+          category?: string | null
+          certificate_sent?: boolean | null
+          certificate_url?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          dietary_requirements?: string | null
+          event_id?: string
+          hotel_reservation?: boolean | null
+          id?: string
+          notes?: string | null
+          payment_amount?: number | null
+          payment_status?: string | null
+          qr_code?: string | null
+          registration_date?: string
+          status?: string
+          transport_needed?: boolean | null
+          updated_at?: string
+          waitlist_position?: number | null
         }
         Relationships: [
           {
@@ -1471,48 +1868,608 @@ export type Database = {
           },
         ]
       }
-      events: {
+      event_reports: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           created_at: string
           created_by: string | null
-          description: string | null
-          direction_id: string
-          end_date: string
-          event_type: string
+          event_id: string
+          file_url: string | null
+          financial_summary: Json | null
           id: string
-          location: string | null
-          max_participants: number | null
-          start_date: string
+          improvements: string | null
+          key_statistics: Json | null
+          lessons_learned: string | null
+          media_urls: string[] | null
+          objectives_achieved: string | null
+          recommendations: string | null
+          report_type: string | null
+          status: string | null
+          strengths: string | null
+          summary: string | null
+          testimonials: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_id: string
+          file_url?: string | null
+          financial_summary?: Json | null
+          id?: string
+          improvements?: string | null
+          key_statistics?: Json | null
+          lessons_learned?: string | null
+          media_urls?: string[] | null
+          objectives_achieved?: string | null
+          recommendations?: string | null
+          report_type?: string | null
+          status?: string | null
+          strengths?: string | null
+          summary?: string | null
+          testimonials?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_id?: string
+          file_url?: string | null
+          financial_summary?: Json | null
+          id?: string
+          improvements?: string | null
+          key_statistics?: Json | null
+          lessons_learned?: string | null
+          media_urls?: string[] | null
+          objectives_achieved?: string | null
+          recommendations?: string | null
+          report_type?: string | null
+          status?: string | null
+          strengths?: string | null
+          summary?: string | null
+          testimonials?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_reports_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_session_attendance: {
+        Row: {
+          attended: boolean | null
+          check_in_time: string | null
+          check_out_time: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          participant_id: string
+          session_id: string
+        }
+        Insert: {
+          attended?: boolean | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          participant_id: string
+          session_id: string
+        }
+        Update: {
+          attended?: boolean | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          participant_id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_session_attendance_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "event_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_session_attendance_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "event_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_sessions: {
+        Row: {
+          created_at: string
+          day_number: number | null
+          description: string | null
+          end_time: string
+          event_id: string
+          id: string
+          is_break: boolean | null
+          is_parallel: boolean | null
+          materials_url: string | null
+          max_attendees: number | null
+          room: string | null
+          session_date: string
+          session_type: string | null
+          start_time: string
           title: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          created_by?: string | null
+          day_number?: number | null
           description?: string | null
-          direction_id: string
-          end_date: string
-          event_type: string
+          end_time: string
+          event_id: string
           id?: string
-          location?: string | null
-          max_participants?: number | null
-          start_date: string
+          is_break?: boolean | null
+          is_parallel?: boolean | null
+          materials_url?: string | null
+          max_attendees?: number | null
+          room?: string | null
+          session_date: string
+          session_type?: string | null
+          start_time: string
           title: string
           updated_at?: string
         }
         Update: {
           created_at?: string
+          day_number?: number | null
+          description?: string | null
+          end_time?: string
+          event_id?: string
+          id?: string
+          is_break?: boolean | null
+          is_parallel?: boolean | null
+          materials_url?: string | null
+          max_attendees?: number | null
+          room?: string | null
+          session_date?: string
+          session_type?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_sessions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_speakers: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string | null
+          event_id: string
+          id: string
+          is_keynote: boolean | null
+          linkedin_url: string | null
+          name: string
+          organization: string | null
+          phone: string | null
+          photo_url: string | null
+          session_id: string | null
+          title: string | null
+          topics: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          event_id: string
+          id?: string
+          is_keynote?: boolean | null
+          linkedin_url?: string | null
+          name: string
+          organization?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          session_id?: string | null
+          title?: string | null
+          topics?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          event_id?: string
+          id?: string
+          is_keynote?: boolean | null
+          linkedin_url?: string | null
+          name?: string
+          organization?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          session_id?: string | null
+          title?: string | null
+          topics?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_speakers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_speakers_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "event_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_sponsors: {
+        Row: {
+          benefits_offered: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          contribution_type: string | null
+          contribution_value: number | null
+          created_at: string
+          currency: string | null
+          event_id: string
+          id: string
+          is_media_partner: boolean | null
+          logo_url: string | null
+          name: string
+          notes: string | null
+          sponsor_level: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          benefits_offered?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contribution_type?: string | null
+          contribution_value?: number | null
+          created_at?: string
+          currency?: string | null
+          event_id: string
+          id?: string
+          is_media_partner?: boolean | null
+          logo_url?: string | null
+          name: string
+          notes?: string | null
+          sponsor_level?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          benefits_offered?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          contribution_type?: string | null
+          contribution_value?: number | null
+          created_at?: string
+          currency?: string | null
+          event_id?: string
+          id?: string
+          is_media_partner?: boolean | null
+          logo_url?: string | null
+          name?: string
+          notes?: string | null
+          sponsor_level?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_sponsors_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_surveys: {
+        Row: {
+          comments: string | null
+          content_rating: number | null
+          created_at: string
+          event_id: string
+          id: string
+          logistics_rating: number | null
+          organization_rating: number | null
+          overall_rating: number | null
+          participant_id: string | null
+          speakers_rating: number | null
+          submitted_at: string
+          suggestions: string | null
+          venue_rating: number | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          comments?: string | null
+          content_rating?: number | null
+          created_at?: string
+          event_id: string
+          id?: string
+          logistics_rating?: number | null
+          organization_rating?: number | null
+          overall_rating?: number | null
+          participant_id?: string | null
+          speakers_rating?: number | null
+          submitted_at?: string
+          suggestions?: string | null
+          venue_rating?: number | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          comments?: string | null
+          content_rating?: number | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          logistics_rating?: number | null
+          organization_rating?: number | null
+          overall_rating?: number | null
+          participant_id?: string | null
+          speakers_rating?: number | null
+          submitted_at?: string
+          suggestions?: string | null
+          venue_rating?: number | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_surveys_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_surveys_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "event_participants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_team_members: {
+        Row: {
+          created_at: string
+          email: string | null
+          event_id: string
+          id: string
+          is_external: boolean | null
+          name: string
+          notes: string | null
+          organization: string | null
+          phone: string | null
+          role: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          event_id: string
+          id?: string
+          is_external?: boolean | null
+          name: string
+          notes?: string | null
+          organization?: string | null
+          phone?: string | null
+          role: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          event_id?: string
+          id?: string
+          is_external?: boolean | null
+          name?: string
+          notes?: string | null
+          organization?: string | null
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_team_members_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          access_instructions: string | null
+          b2b_meetings: number | null
+          budget_actual: number | null
+          budget_estimated: number | null
+          capacity: number | null
+          city: string | null
+          contracts_value: number | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string
+          end_date: string
+          end_time: string | null
+          event_type: string
+          full_address: string | null
+          hashtag: string | null
+          id: string
+          is_registration_open: boolean | null
+          leads_generated: number | null
+          location: string | null
+          location_type: string | null
+          max_participants: number | null
+          media_coverage_value: number | null
+          objectives: string | null
+          press_release_url: string | null
+          program_pdf_url: string | null
+          project_manager_id: string | null
+          recurrence_end_date: string | null
+          recurrence_type: string | null
+          registration_deadline: string | null
+          registration_link: string | null
+          require_approval: boolean | null
+          roi_percentage: number | null
+          satisfaction_score: number | null
+          sectors: string[] | null
+          social_media_links: Json | null
+          start_date: string
+          start_time: string | null
+          status: string | null
+          target_audience: string | null
+          timezone: string | null
+          title: string
+          total_participants_actual: number | null
+          updated_at: string
+          venue: string | null
+          venue_map_url: string | null
+          video_link: string | null
+          waitlist_enabled: boolean | null
+        }
+        Insert: {
+          access_instructions?: string | null
+          b2b_meetings?: number | null
+          budget_actual?: number | null
+          budget_estimated?: number | null
+          capacity?: number | null
+          city?: string | null
+          contracts_value?: number | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id: string
+          end_date: string
+          end_time?: string | null
+          event_type: string
+          full_address?: string | null
+          hashtag?: string | null
+          id?: string
+          is_registration_open?: boolean | null
+          leads_generated?: number | null
+          location?: string | null
+          location_type?: string | null
+          max_participants?: number | null
+          media_coverage_value?: number | null
+          objectives?: string | null
+          press_release_url?: string | null
+          program_pdf_url?: string | null
+          project_manager_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
+          registration_deadline?: string | null
+          registration_link?: string | null
+          require_approval?: boolean | null
+          roi_percentage?: number | null
+          satisfaction_score?: number | null
+          sectors?: string[] | null
+          social_media_links?: Json | null
+          start_date: string
+          start_time?: string | null
+          status?: string | null
+          target_audience?: string | null
+          timezone?: string | null
+          title: string
+          total_participants_actual?: number | null
+          updated_at?: string
+          venue?: string | null
+          venue_map_url?: string | null
+          video_link?: string | null
+          waitlist_enabled?: boolean | null
+        }
+        Update: {
+          access_instructions?: string | null
+          b2b_meetings?: number | null
+          budget_actual?: number | null
+          budget_estimated?: number | null
+          capacity?: number | null
+          city?: string | null
+          contracts_value?: number | null
+          country?: string | null
+          created_at?: string
           created_by?: string | null
           description?: string | null
           direction_id?: string
           end_date?: string
+          end_time?: string | null
           event_type?: string
+          full_address?: string | null
+          hashtag?: string | null
           id?: string
+          is_registration_open?: boolean | null
+          leads_generated?: number | null
           location?: string | null
+          location_type?: string | null
           max_participants?: number | null
+          media_coverage_value?: number | null
+          objectives?: string | null
+          press_release_url?: string | null
+          program_pdf_url?: string | null
+          project_manager_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_type?: string | null
+          registration_deadline?: string | null
+          registration_link?: string | null
+          require_approval?: boolean | null
+          roi_percentage?: number | null
+          satisfaction_score?: number | null
+          sectors?: string[] | null
+          social_media_links?: Json | null
           start_date?: string
+          start_time?: string | null
+          status?: string | null
+          target_audience?: string | null
+          timezone?: string | null
           title?: string
+          total_participants_actual?: number | null
           updated_at?: string
+          venue?: string | null
+          venue_map_url?: string | null
+          video_link?: string | null
+          waitlist_enabled?: boolean | null
         }
         Relationships: [
           {
