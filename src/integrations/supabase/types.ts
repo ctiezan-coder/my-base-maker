@@ -3287,6 +3287,76 @@ export type Database = {
         }
         Relationships: []
       }
+      media_albums: {
+        Row: {
+          access_level: string | null
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string | null
+          event_id: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          parent_id: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          access_level?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          event_id?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          access_level?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          event_id?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_albums_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_albums_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_albums_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "media_albums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       media_content: {
         Row: {
           budget_estime: number | null
@@ -3431,6 +3501,450 @@ export type Database = {
             columns: ["partnership_id"]
             isOneToOne: false
             referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_downloads: {
+        Row: {
+          downloaded_at: string
+          id: string
+          ip_address: string | null
+          media_file_id: string
+          resolution: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          downloaded_at?: string
+          id?: string
+          ip_address?: string | null
+          media_file_id: string
+          resolution?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          downloaded_at?: string
+          id?: string
+          ip_address?: string | null
+          media_file_id?: string
+          resolution?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_downloads_media_file_id_fkey"
+            columns: ["media_file_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          media_file_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_file_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_file_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_favorites_media_file_id_fkey"
+            columns: ["media_file_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_file_tags: {
+        Row: {
+          created_at: string
+          id: string
+          media_file_id: string
+          tag_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          media_file_id: string
+          tag_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          media_file_id?: string
+          tag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_file_tags_media_file_id_fkey"
+            columns: ["media_file_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_file_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "media_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_files: {
+        Row: {
+          album_id: string | null
+          author: string | null
+          capture_date: string | null
+          copyright_holder: string | null
+          created_at: string
+          created_by: string | null
+          credit_required: boolean | null
+          description: string | null
+          direction_id: string | null
+          download_count: number | null
+          duration_seconds: number | null
+          event_id: string | null
+          exif_data: Json | null
+          file_name: string
+          file_size: number | null
+          file_type: string
+          file_url: string
+          height: number | null
+          id: string
+          is_featured: boolean | null
+          is_public: boolean | null
+          license_type: string | null
+          location_city: string | null
+          location_country: string | null
+          location_venue: string | null
+          media_category: string | null
+          mime_type: string | null
+          photographer: string | null
+          preview_url: string | null
+          resolution: string | null
+          share_expires_at: string | null
+          share_password: string | null
+          share_token: string | null
+          status: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          view_count: number | null
+          watermark_applied: boolean | null
+          width: number | null
+        }
+        Insert: {
+          album_id?: string | null
+          author?: string | null
+          capture_date?: string | null
+          copyright_holder?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_required?: boolean | null
+          description?: string | null
+          direction_id?: string | null
+          download_count?: number | null
+          duration_seconds?: number | null
+          event_id?: string | null
+          exif_data?: Json | null
+          file_name: string
+          file_size?: number | null
+          file_type: string
+          file_url: string
+          height?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          license_type?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_venue?: string | null
+          media_category?: string | null
+          mime_type?: string | null
+          photographer?: string | null
+          preview_url?: string | null
+          resolution?: string | null
+          share_expires_at?: string | null
+          share_password?: string | null
+          share_token?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          view_count?: number | null
+          watermark_applied?: boolean | null
+          width?: number | null
+        }
+        Update: {
+          album_id?: string | null
+          author?: string | null
+          capture_date?: string | null
+          copyright_holder?: string | null
+          created_at?: string
+          created_by?: string | null
+          credit_required?: boolean | null
+          description?: string | null
+          direction_id?: string | null
+          download_count?: number | null
+          duration_seconds?: number | null
+          event_id?: string | null
+          exif_data?: Json | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string
+          file_url?: string
+          height?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_public?: boolean | null
+          license_type?: string | null
+          location_city?: string | null
+          location_country?: string | null
+          location_venue?: string | null
+          media_category?: string | null
+          mime_type?: string | null
+          photographer?: string | null
+          preview_url?: string | null
+          resolution?: string | null
+          share_expires_at?: string | null
+          share_password?: string | null
+          share_token?: string | null
+          status?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          view_count?: number | null
+          watermark_applied?: boolean | null
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_files_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "media_albums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_files_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_files_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_galleries: {
+        Row: {
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string | null
+          gallery_type: string | null
+          id: string
+          is_published: boolean | null
+          name: string
+          published_at: string | null
+          settings: Json | null
+          slug: string | null
+          theme: string | null
+          updated_at: string
+        }
+        Insert: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          gallery_type?: string | null
+          id?: string
+          is_published?: boolean | null
+          name: string
+          published_at?: string | null
+          settings?: Json | null
+          slug?: string | null
+          theme?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          gallery_type?: string | null
+          id?: string
+          is_published?: boolean | null
+          name?: string
+          published_at?: string | null
+          settings?: Json | null
+          slug?: string | null
+          theme?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_galleries_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_gallery_items: {
+        Row: {
+          caption: string | null
+          created_at: string
+          gallery_id: string
+          id: string
+          media_file_id: string
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          gallery_id: string
+          id?: string
+          media_file_id: string
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          gallery_id?: string
+          id?: string
+          media_file_id?: string
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_gallery_items_gallery_id_fkey"
+            columns: ["gallery_id"]
+            isOneToOne: false
+            referencedRelation: "media_galleries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_gallery_items_media_file_id_fkey"
+            columns: ["media_file_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_share_links: {
+        Row: {
+          access_count: number | null
+          album_id: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          max_access_count: number | null
+          media_file_id: string | null
+          password_hash: string | null
+          token: string
+        }
+        Insert: {
+          access_count?: number | null
+          album_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_access_count?: number | null
+          media_file_id?: string | null
+          password_hash?: string | null
+          token: string
+        }
+        Update: {
+          access_count?: number | null
+          album_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          max_access_count?: number | null
+          media_file_id?: string | null
+          password_hash?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_share_links_album_id_fkey"
+            columns: ["album_id"]
+            isOneToOne: false
+            referencedRelation: "media_albums"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "media_share_links_media_file_id_fkey"
+            columns: ["media_file_id"]
+            isOneToOne: false
+            referencedRelation: "media_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      media_tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "media_tags_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "media_tags"
             referencedColumns: ["id"]
           },
         ]
@@ -6175,6 +6689,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_media_download_count: {
+        Args: { media_id: string }
+        Returns: undefined
+      }
+      increment_media_view_count: {
+        Args: { media_id: string }
+        Returns: undefined
       }
       is_account_approved: { Args: { _user_id: string }; Returns: boolean }
       is_email_allowed: { Args: { check_email: string }; Returns: boolean }
