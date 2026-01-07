@@ -23,6 +23,11 @@ import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog
 import { WebMarketSearch } from "@/components/market/WebMarketSearch";
 import { MarketDataRefresh } from "@/components/market/MarketDataRefresh";
 import { OpportunitiesMap } from "@/components/market/OpportunitiesMap";
+import { InternationalBuyersTab } from "@/components/market/InternationalBuyersTab";
+import { TradeMissionsTab } from "@/components/market/TradeMissionsTab";
+import { ProductCatalogsTab } from "@/components/market/ProductCatalogsTab";
+import { RegulatoryRequirementsTab } from "@/components/market/RegulatoryRequirementsTab";
+import { ExportPerformanceTab } from "@/components/market/ExportPerformanceTab";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
 
 export default function MarketDevelopment() {
@@ -216,11 +221,16 @@ export default function MarketDevelopment() {
       </div>
 
       <Tabs defaultValue="opportunities" className="space-y-6">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto">
           <TabsTrigger value="opportunities">Opportunités</TabsTrigger>
-          <TabsTrigger value="markets">Marchés Potentiels</TabsTrigger>
+          <TabsTrigger value="buyers">Acheteurs</TabsTrigger>
           <TabsTrigger value="connections">Mises en Relation</TabsTrigger>
-          <TabsTrigger value="web-search">Recherche Web</TabsTrigger>
+          <TabsTrigger value="missions">Missions</TabsTrigger>
+          <TabsTrigger value="catalogs">Catalogues</TabsTrigger>
+          <TabsTrigger value="regulatory">Réglementations</TabsTrigger>
+          <TabsTrigger value="performance">Performance</TabsTrigger>
+          <TabsTrigger value="markets">Marchés</TabsTrigger>
+          <TabsTrigger value="web-search">Recherche</TabsTrigger>
         </TabsList>
 
         <TabsContent value="opportunities" className="space-y-6">
@@ -233,6 +243,26 @@ export default function MarketDevelopment() {
               setDialogOpen(true);
             }}
           />
+        </TabsContent>
+
+        <TabsContent value="buyers" className="space-y-6">
+          <InternationalBuyersTab canManage={canManageMarket} />
+        </TabsContent>
+
+        <TabsContent value="missions" className="space-y-6">
+          <TradeMissionsTab canManage={canManageMarket} />
+        </TabsContent>
+
+        <TabsContent value="catalogs" className="space-y-6">
+          <ProductCatalogsTab canManage={canManageMarket} />
+        </TabsContent>
+
+        <TabsContent value="regulatory" className="space-y-6">
+          <RegulatoryRequirementsTab canManage={canManageMarket} />
+        </TabsContent>
+
+        <TabsContent value="performance" className="space-y-6">
+          <ExportPerformanceTab canManage={canManageMarket} />
         </TabsContent>
 
         <TabsContent value="markets" className="space-y-6">
