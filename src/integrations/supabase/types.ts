@@ -801,31 +801,66 @@ export type Database = {
       }
       companies: {
         Row: {
+          accompaniment_budget: number | null
+          accompaniment_priority: string | null
+          accompaniment_start_date: string | null
           accompaniment_status: string | null
+          accompaniment_type: string | null
           aciex_interaction_history: string | null
           activity_sector: string | null
+          annual_capacity: number | null
           annual_turnover: number | null
+          assigned_aciex_officer: string | null
+          assigned_aciex_officer_id: string | null
+          available_stock: string | null
+          can_increase_capacity: boolean | null
+          capacity_rating: number | null
+          capacity_utilization_rate: number | null
+          catalog_url: string | null
           certifications: string[] | null
           city: string | null
           commercial_events_participation:
             | Database["public"]["Enums"]["participation_type"]
             | null
+          commune: string | null
+          company_category: string | null
           company_name: string
           company_size: Database["public"]["Enums"]["company_size"] | null
           created_at: string
           created_by: string | null
           creation_date: string | null
           current_export_markets: string[] | null
+          current_production: number | null
           dfe_number: string
           direction_id: string | null
+          distribution_channels: string[] | null
           email: string | null
+          engagement_rating: number | null
+          export_barriers: string | null
           export_manager_email: string | null
           export_manager_name: string | null
           export_manager_phone: string | null
+          export_maturity_level: string | null
+          export_performance_score: number | null
+          export_rate: number | null
+          export_turnover: number | null
           exported_products: string | null
+          facebook_url: string | null
+          female_employees: number | null
+          filiere: string | null
+          financial_needs: string | null
+          first_contact_date: string | null
+          global_risk_level: string | null
+          gps_latitude: number | null
+          gps_longitude: number | null
+          growth_potential: string | null
           has_export_service: boolean | null
           headquarters_location: string
+          hs_codes: string[] | null
           id: string
+          identified_risks: string | null
+          initial_diagnostic: string | null
+          instagram_url: string | null
           legal_form: Database["public"]["Enums"]["company_legal_form"] | null
           legal_representative_email: string | null
           legal_representative_gender:
@@ -833,42 +868,113 @@ export type Database = {
             | null
           legal_representative_name: string | null
           legal_representative_phone: string | null
+          legal_status: string | null
+          linkedin_url: string | null
+          logistics_needs: string | null
+          main_contact_email: string | null
+          main_contact_function: string | null
+          main_contact_name: string | null
+          main_contact_phone: string | null
+          male_employees: number | null
+          management_rating: number | null
+          managers_count: number | null
+          market_share: number | null
+          marketing_needs: string | null
+          needs_priority: string | null
+          permanent_employees: number | null
           phone: string | null
+          photo_url: string | null
           postal_address: string | null
+          postal_code: string | null
+          practiced_incoterms: string[] | null
+          product_ranges: string[] | null
+          production_equipment: string | null
+          production_lead_time_days: number | null
           products_services: string | null
+          quality_rating: number | null
           rccm_number: string
+          region: string | null
+          registration_date_aciex: string | null
+          seasonal_employees: number | null
+          sigle: string | null
+          smart_objectives: Json | null
+          specific_needs_details: string | null
+          strategic_segment: string | null
+          sub_sector: string | null
           support_needed: Database["public"]["Enums"]["support_type"] | null
           target_export_markets: string[] | null
+          technical_needs: string | null
+          technicians_count: number | null
+          total_employees: number | null
           trade_name: string | null
+          turnover_category: string | null
+          turnover_evolution_3y: Json | null
+          twitter_url: string | null
           updated_at: string
           website: string | null
+          workers_count: number | null
         }
         Insert: {
+          accompaniment_budget?: number | null
+          accompaniment_priority?: string | null
+          accompaniment_start_date?: string | null
           accompaniment_status?: string | null
+          accompaniment_type?: string | null
           aciex_interaction_history?: string | null
           activity_sector?: string | null
+          annual_capacity?: number | null
           annual_turnover?: number | null
+          assigned_aciex_officer?: string | null
+          assigned_aciex_officer_id?: string | null
+          available_stock?: string | null
+          can_increase_capacity?: boolean | null
+          capacity_rating?: number | null
+          capacity_utilization_rate?: number | null
+          catalog_url?: string | null
           certifications?: string[] | null
           city?: string | null
           commercial_events_participation?:
             | Database["public"]["Enums"]["participation_type"]
             | null
+          commune?: string | null
+          company_category?: string | null
           company_name: string
           company_size?: Database["public"]["Enums"]["company_size"] | null
           created_at?: string
           created_by?: string | null
           creation_date?: string | null
           current_export_markets?: string[] | null
+          current_production?: number | null
           dfe_number: string
           direction_id?: string | null
+          distribution_channels?: string[] | null
           email?: string | null
+          engagement_rating?: number | null
+          export_barriers?: string | null
           export_manager_email?: string | null
           export_manager_name?: string | null
           export_manager_phone?: string | null
+          export_maturity_level?: string | null
+          export_performance_score?: number | null
+          export_rate?: number | null
+          export_turnover?: number | null
           exported_products?: string | null
+          facebook_url?: string | null
+          female_employees?: number | null
+          filiere?: string | null
+          financial_needs?: string | null
+          first_contact_date?: string | null
+          global_risk_level?: string | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          growth_potential?: string | null
           has_export_service?: boolean | null
           headquarters_location: string
+          hs_codes?: string[] | null
           id?: string
+          identified_risks?: string | null
+          initial_diagnostic?: string | null
+          instagram_url?: string | null
           legal_form?: Database["public"]["Enums"]["company_legal_form"] | null
           legal_representative_email?: string | null
           legal_representative_gender?:
@@ -876,42 +982,113 @@ export type Database = {
             | null
           legal_representative_name?: string | null
           legal_representative_phone?: string | null
+          legal_status?: string | null
+          linkedin_url?: string | null
+          logistics_needs?: string | null
+          main_contact_email?: string | null
+          main_contact_function?: string | null
+          main_contact_name?: string | null
+          main_contact_phone?: string | null
+          male_employees?: number | null
+          management_rating?: number | null
+          managers_count?: number | null
+          market_share?: number | null
+          marketing_needs?: string | null
+          needs_priority?: string | null
+          permanent_employees?: number | null
           phone?: string | null
+          photo_url?: string | null
           postal_address?: string | null
+          postal_code?: string | null
+          practiced_incoterms?: string[] | null
+          product_ranges?: string[] | null
+          production_equipment?: string | null
+          production_lead_time_days?: number | null
           products_services?: string | null
+          quality_rating?: number | null
           rccm_number: string
+          region?: string | null
+          registration_date_aciex?: string | null
+          seasonal_employees?: number | null
+          sigle?: string | null
+          smart_objectives?: Json | null
+          specific_needs_details?: string | null
+          strategic_segment?: string | null
+          sub_sector?: string | null
           support_needed?: Database["public"]["Enums"]["support_type"] | null
           target_export_markets?: string[] | null
+          technical_needs?: string | null
+          technicians_count?: number | null
+          total_employees?: number | null
           trade_name?: string | null
+          turnover_category?: string | null
+          turnover_evolution_3y?: Json | null
+          twitter_url?: string | null
           updated_at?: string
           website?: string | null
+          workers_count?: number | null
         }
         Update: {
+          accompaniment_budget?: number | null
+          accompaniment_priority?: string | null
+          accompaniment_start_date?: string | null
           accompaniment_status?: string | null
+          accompaniment_type?: string | null
           aciex_interaction_history?: string | null
           activity_sector?: string | null
+          annual_capacity?: number | null
           annual_turnover?: number | null
+          assigned_aciex_officer?: string | null
+          assigned_aciex_officer_id?: string | null
+          available_stock?: string | null
+          can_increase_capacity?: boolean | null
+          capacity_rating?: number | null
+          capacity_utilization_rate?: number | null
+          catalog_url?: string | null
           certifications?: string[] | null
           city?: string | null
           commercial_events_participation?:
             | Database["public"]["Enums"]["participation_type"]
             | null
+          commune?: string | null
+          company_category?: string | null
           company_name?: string
           company_size?: Database["public"]["Enums"]["company_size"] | null
           created_at?: string
           created_by?: string | null
           creation_date?: string | null
           current_export_markets?: string[] | null
+          current_production?: number | null
           dfe_number?: string
           direction_id?: string | null
+          distribution_channels?: string[] | null
           email?: string | null
+          engagement_rating?: number | null
+          export_barriers?: string | null
           export_manager_email?: string | null
           export_manager_name?: string | null
           export_manager_phone?: string | null
+          export_maturity_level?: string | null
+          export_performance_score?: number | null
+          export_rate?: number | null
+          export_turnover?: number | null
           exported_products?: string | null
+          facebook_url?: string | null
+          female_employees?: number | null
+          filiere?: string | null
+          financial_needs?: string | null
+          first_contact_date?: string | null
+          global_risk_level?: string | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          growth_potential?: string | null
           has_export_service?: boolean | null
           headquarters_location?: string
+          hs_codes?: string[] | null
           id?: string
+          identified_risks?: string | null
+          initial_diagnostic?: string | null
+          instagram_url?: string | null
           legal_form?: Database["public"]["Enums"]["company_legal_form"] | null
           legal_representative_email?: string | null
           legal_representative_gender?:
@@ -919,17 +1096,754 @@ export type Database = {
             | null
           legal_representative_name?: string | null
           legal_representative_phone?: string | null
+          legal_status?: string | null
+          linkedin_url?: string | null
+          logistics_needs?: string | null
+          main_contact_email?: string | null
+          main_contact_function?: string | null
+          main_contact_name?: string | null
+          main_contact_phone?: string | null
+          male_employees?: number | null
+          management_rating?: number | null
+          managers_count?: number | null
+          market_share?: number | null
+          marketing_needs?: string | null
+          needs_priority?: string | null
+          permanent_employees?: number | null
           phone?: string | null
+          photo_url?: string | null
           postal_address?: string | null
+          postal_code?: string | null
+          practiced_incoterms?: string[] | null
+          product_ranges?: string[] | null
+          production_equipment?: string | null
+          production_lead_time_days?: number | null
           products_services?: string | null
+          quality_rating?: number | null
           rccm_number?: string
+          region?: string | null
+          registration_date_aciex?: string | null
+          seasonal_employees?: number | null
+          sigle?: string | null
+          smart_objectives?: Json | null
+          specific_needs_details?: string | null
+          strategic_segment?: string | null
+          sub_sector?: string | null
           support_needed?: Database["public"]["Enums"]["support_type"] | null
           target_export_markets?: string[] | null
+          technical_needs?: string | null
+          technicians_count?: number | null
+          total_employees?: number | null
           trade_name?: string | null
+          turnover_category?: string | null
+          turnover_evolution_3y?: Json | null
+          twitter_url?: string | null
           updated_at?: string
           website?: string | null
+          workers_count?: number | null
         }
         Relationships: []
+      }
+      company_accompaniment_actions: {
+        Row: {
+          action_title: string
+          action_type: string | null
+          actual_cost: number | null
+          company_id: string
+          completed_date: string | null
+          created_at: string
+          description: string | null
+          estimated_cost: number | null
+          id: string
+          notes: string | null
+          outcome: string | null
+          plan_id: string | null
+          planned_date: string | null
+          priority: string | null
+          responsible_id: string | null
+          responsible_name: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_title: string
+          action_type?: string | null
+          actual_cost?: number | null
+          company_id: string
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          plan_id?: string | null
+          planned_date?: string | null
+          priority?: string | null
+          responsible_id?: string | null
+          responsible_name?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_title?: string
+          action_type?: string | null
+          actual_cost?: number | null
+          company_id?: string
+          completed_date?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_cost?: number | null
+          id?: string
+          notes?: string | null
+          outcome?: string | null
+          plan_id?: string | null
+          planned_date?: string | null
+          priority?: string | null
+          responsible_id?: string | null
+          responsible_name?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_accompaniment_actions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_accompaniment_actions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "company_accompaniment_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_accompaniment_history: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          documents_shared: string[] | null
+          duration_minutes: number | null
+          id: string
+          interaction_date: string
+          interaction_type: string
+          location: string | null
+          next_steps: string | null
+          officer_id: string | null
+          officer_name: string | null
+          outcome: string | null
+          subject: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          documents_shared?: string[] | null
+          duration_minutes?: number | null
+          id?: string
+          interaction_date?: string
+          interaction_type: string
+          location?: string | null
+          next_steps?: string | null
+          officer_id?: string | null
+          officer_name?: string | null
+          outcome?: string | null
+          subject: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          documents_shared?: string[] | null
+          duration_minutes?: number | null
+          id?: string
+          interaction_date?: string
+          interaction_type?: string
+          location?: string | null
+          next_steps?: string | null
+          officer_id?: string | null
+          officer_name?: string | null
+          outcome?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_accompaniment_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_accompaniment_plans: {
+        Row: {
+          aciex_services: string[] | null
+          allocated_budget: number | null
+          company_id: string
+          consumed_budget: number | null
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          fiscal_year: number | null
+          id: string
+          initial_diagnostic: string | null
+          milestones: Json | null
+          notes: string | null
+          plan_title: string
+          responsible_officer_id: string | null
+          responsible_officer_name: string | null
+          smart_objectives: Json | null
+          start_date: string | null
+          status: string | null
+          success_indicators: Json | null
+          updated_at: string
+        }
+        Insert: {
+          aciex_services?: string[] | null
+          allocated_budget?: number | null
+          company_id: string
+          consumed_budget?: number | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          fiscal_year?: number | null
+          id?: string
+          initial_diagnostic?: string | null
+          milestones?: Json | null
+          notes?: string | null
+          plan_title: string
+          responsible_officer_id?: string | null
+          responsible_officer_name?: string | null
+          smart_objectives?: Json | null
+          start_date?: string | null
+          status?: string | null
+          success_indicators?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          aciex_services?: string[] | null
+          allocated_budget?: number | null
+          company_id?: string
+          consumed_budget?: number | null
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          fiscal_year?: number | null
+          id?: string
+          initial_diagnostic?: string | null
+          milestones?: Json | null
+          notes?: string | null
+          plan_title?: string
+          responsible_officer_id?: string | null
+          responsible_officer_name?: string | null
+          smart_objectives?: Json | null
+          start_date?: string | null
+          status?: string | null
+          success_indicators?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_accompaniment_plans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_certifications: {
+        Row: {
+          certificate_number: string | null
+          certificate_url: string | null
+          certification_name: string
+          certification_type: string
+          company_id: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          issue_date: string | null
+          issuing_body: string | null
+          notes: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          certificate_number?: string | null
+          certificate_url?: string | null
+          certification_name: string
+          certification_type: string
+          company_id: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_body?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          certificate_number?: string | null
+          certificate_url?: string | null
+          certification_name?: string
+          certification_type?: string
+          company_id?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string | null
+          issuing_body?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_certifications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_communications: {
+        Row: {
+          channel: string | null
+          clicked_at: string | null
+          communication_type: string
+          company_id: string
+          content: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          opened_at: string | null
+          response_date: string | null
+          response_received: boolean | null
+          sent_by: string | null
+          sent_date: string | null
+          status: string | null
+          subject: string
+        }
+        Insert: {
+          channel?: string | null
+          clicked_at?: string | null
+          communication_type: string
+          company_id: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          response_date?: string | null
+          response_received?: boolean | null
+          sent_by?: string | null
+          sent_date?: string | null
+          status?: string | null
+          subject: string
+        }
+        Update: {
+          channel?: string | null
+          clicked_at?: string | null
+          communication_type?: string
+          company_id?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          opened_at?: string | null
+          response_date?: string | null
+          response_received?: boolean | null
+          sent_by?: string | null
+          sent_date?: string | null
+          status?: string | null
+          subject?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_communications_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_contacts: {
+        Row: {
+          company_id: string
+          created_at: string
+          department: string
+          email: string | null
+          function: string | null
+          id: string
+          is_primary: boolean | null
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          department: string
+          email?: string | null
+          function?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          department?: string
+          email?: string | null
+          function?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_documents: {
+        Row: {
+          company_id: string
+          created_at: string
+          document_name: string
+          document_type: string
+          expiry_date: string | null
+          file_size: number | null
+          file_url: string | null
+          id: string
+          issue_date: string | null
+          notes: string | null
+          status: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document_name: string
+          document_type: string
+          expiry_date?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          issue_date?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document_name?: string
+          document_type?: string
+          expiry_date?: string | null
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          issue_date?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_evaluations: {
+        Row: {
+          company_id: string
+          created_at: string
+          engagement_rating: number | null
+          evaluation_date: string
+          evaluation_type: string | null
+          evaluator_id: string | null
+          evaluator_name: string | null
+          export_performance_score: number | null
+          financial_health_rating: number | null
+          id: string
+          management_rating: number | null
+          next_evaluation_date: string | null
+          notes: string | null
+          opportunities: string | null
+          overall_score: number | null
+          production_capacity_rating: number | null
+          quality_rating: number | null
+          recommendations: string | null
+          strengths: string | null
+          threats: string | null
+          weaknesses: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          engagement_rating?: number | null
+          evaluation_date: string
+          evaluation_type?: string | null
+          evaluator_id?: string | null
+          evaluator_name?: string | null
+          export_performance_score?: number | null
+          financial_health_rating?: number | null
+          id?: string
+          management_rating?: number | null
+          next_evaluation_date?: string | null
+          notes?: string | null
+          opportunities?: string | null
+          overall_score?: number | null
+          production_capacity_rating?: number | null
+          quality_rating?: number | null
+          recommendations?: string | null
+          strengths?: string | null
+          threats?: string | null
+          weaknesses?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          engagement_rating?: number | null
+          evaluation_date?: string
+          evaluation_type?: string | null
+          evaluator_id?: string | null
+          evaluator_name?: string | null
+          export_performance_score?: number | null
+          financial_health_rating?: number | null
+          id?: string
+          management_rating?: number | null
+          next_evaluation_date?: string | null
+          notes?: string | null
+          opportunities?: string | null
+          overall_score?: number | null
+          production_capacity_rating?: number | null
+          quality_rating?: number | null
+          recommendations?: string | null
+          strengths?: string | null
+          threats?: string | null
+          weaknesses?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_evaluations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_export_kpis: {
+        Row: {
+          average_payment_delay_days: number | null
+          client_retention_rate: number | null
+          company_id: string
+          complaint_rate: number | null
+          contracts_value: number | null
+          created_at: string
+          created_by: string | null
+          export_turnover: number | null
+          export_volume: number | null
+          fiscal_year: number
+          id: string
+          new_clients: number | null
+          new_markets: number | null
+          notes: string | null
+          number_of_clients: number | null
+          number_of_contracts: number | null
+          number_of_markets: number | null
+          period: string | null
+          updated_at: string
+        }
+        Insert: {
+          average_payment_delay_days?: number | null
+          client_retention_rate?: number | null
+          company_id: string
+          complaint_rate?: number | null
+          contracts_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          export_turnover?: number | null
+          export_volume?: number | null
+          fiscal_year: number
+          id?: string
+          new_clients?: number | null
+          new_markets?: number | null
+          notes?: string | null
+          number_of_clients?: number | null
+          number_of_contracts?: number | null
+          number_of_markets?: number | null
+          period?: string | null
+          updated_at?: string
+        }
+        Update: {
+          average_payment_delay_days?: number | null
+          client_retention_rate?: number | null
+          company_id?: string
+          complaint_rate?: number | null
+          contracts_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          export_turnover?: number | null
+          export_volume?: number | null
+          fiscal_year?: number
+          id?: string
+          new_clients?: number | null
+          new_markets?: number | null
+          notes?: string | null
+          number_of_clients?: number | null
+          number_of_contracts?: number | null
+          number_of_markets?: number | null
+          period?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_export_kpis_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_export_markets: {
+        Row: {
+          annual_value: number | null
+          annual_volume: number | null
+          barriers_encountered: string | null
+          company_id: string
+          country: string
+          created_at: string
+          currency: string | null
+          entry_date: string | null
+          id: string
+          main_clients: string[] | null
+          market_share_percent: number | null
+          market_type: string | null
+          notes: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          annual_value?: number | null
+          annual_volume?: number | null
+          barriers_encountered?: string | null
+          company_id: string
+          country: string
+          created_at?: string
+          currency?: string | null
+          entry_date?: string | null
+          id?: string
+          main_clients?: string[] | null
+          market_share_percent?: number | null
+          market_type?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          annual_value?: number | null
+          annual_volume?: number | null
+          barriers_encountered?: string | null
+          company_id?: string
+          country?: string
+          created_at?: string
+          currency?: string | null
+          entry_date?: string | null
+          id?: string
+          main_clients?: string[] | null
+          market_share_percent?: number | null
+          market_type?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_export_markets_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_leadership_history: {
+        Row: {
+          company_id: string
+          created_at: string
+          end_date: string | null
+          id: string
+          leader_name: string
+          notes: string | null
+          position: string
+          reason_for_change: string | null
+          start_date: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          leader_name: string
+          notes?: string | null
+          position: string
+          reason_for_change?: string | null
+          start_date?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          leader_name?: string
+          notes?: string | null
+          position?: string
+          reason_for_change?: string | null
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_leadership_history_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       company_market_interests: {
         Row: {
@@ -972,6 +1886,388 @@ export type Database = {
             columns: ["market_id"]
             isOneToOne: false
             referencedRelation: "potential_markets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_products: {
+        Row: {
+          available_quantity: number | null
+          category: string | null
+          company_id: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          hs_code: string | null
+          id: string
+          is_exported: boolean | null
+          is_featured: boolean | null
+          is_new_development: boolean | null
+          min_order_quantity: number | null
+          photo_url: string | null
+          price_cif: number | null
+          price_fob: number | null
+          product_code: string | null
+          product_name: string
+          product_range: string | null
+          production_capacity: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          available_quantity?: number | null
+          category?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          hs_code?: string | null
+          id?: string
+          is_exported?: boolean | null
+          is_featured?: boolean | null
+          is_new_development?: boolean | null
+          min_order_quantity?: number | null
+          photo_url?: string | null
+          price_cif?: number | null
+          price_fob?: number | null
+          product_code?: string | null
+          product_name: string
+          product_range?: string | null
+          production_capacity?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          available_quantity?: number | null
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          hs_code?: string | null
+          id?: string
+          is_exported?: boolean | null
+          is_featured?: boolean | null
+          is_new_development?: boolean | null
+          min_order_quantity?: number | null
+          photo_url?: string | null
+          price_cif?: number | null
+          price_fob?: number | null
+          product_code?: string | null
+          product_name?: string
+          product_range?: string | null
+          production_capacity?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_products_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_program_participations: {
+        Row: {
+          benefits_obtained: string | null
+          company_id: string
+          contacts_made: number | null
+          contract_value: number | null
+          contracts_signed: number | null
+          created_at: string
+          feedback: string | null
+          id: string
+          notes: string | null
+          participation_date: string | null
+          program_id: string | null
+          program_name: string
+          program_type: string
+          rating: number | null
+          role: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          benefits_obtained?: string | null
+          company_id: string
+          contacts_made?: number | null
+          contract_value?: number | null
+          contracts_signed?: number | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          participation_date?: string | null
+          program_id?: string | null
+          program_name: string
+          program_type: string
+          rating?: number | null
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          benefits_obtained?: string | null
+          company_id?: string
+          contacts_made?: number | null
+          contract_value?: number | null
+          contracts_signed?: number | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          notes?: string | null
+          participation_date?: string | null
+          program_id?: string | null
+          program_name?: string
+          program_type?: string
+          rating?: number | null
+          role?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_program_participations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_risks: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          identified_date: string | null
+          impact: string | null
+          mitigation_actions: string | null
+          notes: string | null
+          probability: string | null
+          resolved_date: string | null
+          responsible_id: string | null
+          risk_description: string
+          risk_level: string | null
+          risk_type: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          identified_date?: string | null
+          impact?: string | null
+          mitigation_actions?: string | null
+          notes?: string | null
+          probability?: string | null
+          resolved_date?: string | null
+          responsible_id?: string | null
+          risk_description: string
+          risk_level?: string | null
+          risk_type: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          identified_date?: string | null
+          impact?: string | null
+          mitigation_actions?: string | null
+          notes?: string | null
+          probability?: string | null
+          resolved_date?: string | null
+          responsible_id?: string | null
+          risk_description?: string
+          risk_level?: string | null
+          risk_type?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_risks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_saved_filters: {
+        Row: {
+          created_at: string
+          filter_config: Json
+          filter_name: string
+          id: string
+          is_default: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          filter_config: Json
+          filter_name: string
+          id?: string
+          is_default?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          filter_config?: Json
+          filter_name?: string
+          id?: string
+          is_default?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      company_sites: {
+        Row: {
+          address: string | null
+          city: string | null
+          company_id: string
+          created_at: string
+          description: string | null
+          gps_latitude: number | null
+          gps_longitude: number | null
+          id: string
+          is_active: boolean | null
+          region: string | null
+          site_name: string
+          site_type: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          company_id: string
+          created_at?: string
+          description?: string | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_active?: boolean | null
+          region?: string | null
+          site_name: string
+          site_type?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          is_active?: boolean | null
+          region?: string | null
+          site_name?: string
+          site_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_sites_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_success_stories: {
+        Row: {
+          authorization_date: string | null
+          authorized_by: string | null
+          company_id: string
+          content: string
+          contract_total_value: number | null
+          contracts_concluded: number | null
+          created_at: string
+          created_by: string | null
+          export_increase_percent: number | null
+          id: string
+          is_published: boolean | null
+          jobs_created: number | null
+          key_results: Json | null
+          media_urls: string[] | null
+          new_markets_entered: string[] | null
+          publication_authorized: boolean | null
+          story_title: string
+          story_type: string | null
+          testimonial_author: string | null
+          testimonial_date: string | null
+          testimonial_text: string | null
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          authorization_date?: string | null
+          authorized_by?: string | null
+          company_id: string
+          content: string
+          contract_total_value?: number | null
+          contracts_concluded?: number | null
+          created_at?: string
+          created_by?: string | null
+          export_increase_percent?: number | null
+          id?: string
+          is_published?: boolean | null
+          jobs_created?: number | null
+          key_results?: Json | null
+          media_urls?: string[] | null
+          new_markets_entered?: string[] | null
+          publication_authorized?: boolean | null
+          story_title: string
+          story_type?: string | null
+          testimonial_author?: string | null
+          testimonial_date?: string | null
+          testimonial_text?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          authorization_date?: string | null
+          authorized_by?: string | null
+          company_id?: string
+          content?: string
+          contract_total_value?: number | null
+          contracts_concluded?: number | null
+          created_at?: string
+          created_by?: string | null
+          export_increase_percent?: number | null
+          id?: string
+          is_published?: boolean | null
+          jobs_created?: number | null
+          key_results?: Json | null
+          media_urls?: string[] | null
+          new_markets_entered?: string[] | null
+          publication_authorized?: boolean | null
+          story_title?: string
+          story_type?: string | null
+          testimonial_author?: string | null
+          testimonial_date?: string | null
+          testimonial_text?: string | null
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_success_stories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
