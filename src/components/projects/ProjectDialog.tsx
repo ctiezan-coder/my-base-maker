@@ -398,14 +398,14 @@ export function ProjectDialog({ open, onOpenChange, project, onClose }: ProjectD
               <div className="space-y-2">
                 <Label htmlFor="manager_id">Chef de projet</Label>
                 <Select
-                  value={formData.manager_id}
-                  onValueChange={(value) => setFormData({ ...formData, manager_id: value })}
+                  value={formData.manager_id || "_none_"}
+                  onValueChange={(value) => setFormData({ ...formData, manager_id: value === "_none_" ? "" : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Sélectionner un responsable" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Non assigné</SelectItem>
+                    <SelectItem value="_none_">Non assigné</SelectItem>
                     {employees.map((emp) => (
                       <SelectItem key={emp.id} value={emp.id}>
                         {emp.first_name} {emp.last_name} - {emp.position}

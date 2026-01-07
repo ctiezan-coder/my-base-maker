@@ -320,12 +320,15 @@ export function ProjectRisksTab({ projectId, canManage }: ProjectRisksTabProps) 
             </div>
             <div className="space-y-2">
               <Label>Responsable</Label>
-              <Select value={formData.owner_id} onValueChange={(v) => setFormData({ ...formData, owner_id: v })}>
+              <Select 
+                value={formData.owner_id || "_none_"} 
+                onValueChange={(v) => setFormData({ ...formData, owner_id: v === "_none_" ? "" : v })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Non assigné" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Non assigné</SelectItem>
+                  <SelectItem value="_none_">Non assigné</SelectItem>
                   {employees?.map((emp) => (
                     <SelectItem key={emp.id} value={emp.id}>
                       {emp.first_name} {emp.last_name}
