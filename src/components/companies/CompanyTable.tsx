@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useState } from "react";
-import { CompanyDetailsDialog } from "./CompanyDetailsDialog";
+import { CompanyDetailsDialogEnriched } from "./CompanyDetailsDialogEnriched";
 
 interface CompanyTableProps {
   companies: any[];
@@ -161,7 +161,7 @@ export function CompanyTable({ companies, isLoading, onEdit, onDelete, canManage
       </AlertDialog>
 
       {selectedCompany && (
-        <CompanyDetailsDialog
+        <CompanyDetailsDialogEnriched
           open={detailsDialogOpen}
           onOpenChange={setDetailsDialogOpen}
           companyId={selectedCompany.id}
