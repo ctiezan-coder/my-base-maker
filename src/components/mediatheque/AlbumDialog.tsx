@@ -114,14 +114,14 @@ export function AlbumDialog({ open, onOpenChange, album }: AlbumDialogProps) {
             <div className="space-y-2">
               <Label>Album parent</Label>
               <Select
-                value={formData.parent_id}
-                onValueChange={(v) => setFormData({ ...formData, parent_id: v })}
+                value={formData.parent_id || '__none__'}
+                onValueChange={(v) => setFormData({ ...formData, parent_id: v === '__none__' ? '' : v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Aucun" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucun (racine)</SelectItem>
+                  <SelectItem value="__none__">Aucun (racine)</SelectItem>
                   {albums
                     ?.filter((a) => a.id !== album?.id)
                     .map((a) => (
@@ -136,14 +136,14 @@ export function AlbumDialog({ open, onOpenChange, album }: AlbumDialogProps) {
             <div className="space-y-2">
               <Label>Direction</Label>
               <Select
-                value={formData.direction_id}
-                onValueChange={(v) => setFormData({ ...formData, direction_id: v })}
+                value={formData.direction_id || '__none__'}
+                onValueChange={(v) => setFormData({ ...formData, direction_id: v === '__none__' ? '' : v })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Sélectionner" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Aucune</SelectItem>
+                  <SelectItem value="__none__">Aucune</SelectItem>
                   {directions?.map((dir) => (
                     <SelectItem key={dir.id} value={dir.id}>
                       {dir.name}
