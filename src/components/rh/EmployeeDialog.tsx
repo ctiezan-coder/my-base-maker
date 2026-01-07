@@ -342,13 +342,13 @@ export function EmployeeDialog({ open, onOpenChange, employee }: EmployeeDialogP
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Manager</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || undefined}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Sélectionner un manager" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="z-[200] bg-popover">
                         {managers?.map((manager) => (
                           <SelectItem key={manager.id} value={manager.id}>
                             {manager.first_name} {manager.last_name}
