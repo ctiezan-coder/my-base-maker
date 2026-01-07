@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Target, ClipboardList, Star, TrendingDown, DollarSign, LayoutDashboard, FileText } from "lucide-react";
+import { BarChart3, Target, ClipboardList, Star, TrendingDown, DollarSign, LayoutDashboard, FileText, Bell, Scale, FileCheck } from "lucide-react";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 
@@ -12,6 +12,9 @@ import { ActionPlansTab } from "@/components/suivi/ActionPlansTab";
 import { SatisfactionSurveysTab } from "@/components/suivi/SatisfactionSurveysTab";
 import { GapAnalysisTab } from "@/components/suivi/GapAnalysisTab";
 import { ROIAnalysisTab } from "@/components/suivi/ROIAnalysisTab";
+import { EvaluationReportsTab } from "@/components/suivi/EvaluationReportsTab";
+import { MonitoringAlertsTab } from "@/components/suivi/MonitoringAlertsTab";
+import { BenchmarkingTab } from "@/components/suivi/BenchmarkingTab";
 
 export default function SuiviEvaluation() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -63,6 +66,18 @@ export default function SuiviEvaluation() {
             <DollarSign className="h-4 w-4" />
             <span className="hidden sm:inline">ROI</span>
           </TabsTrigger>
+          <TabsTrigger value="reports" className="flex items-center gap-2">
+            <FileCheck className="h-4 w-4" />
+            <span className="hidden sm:inline">Rapports</span>
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            <span className="hidden sm:inline">Alertes</span>
+          </TabsTrigger>
+          <TabsTrigger value="benchmarking" className="flex items-center gap-2">
+            <Scale className="h-4 w-4" />
+            <span className="hidden sm:inline">Benchmarking</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">
@@ -91,6 +106,18 @@ export default function SuiviEvaluation() {
 
         <TabsContent value="roi">
           <ROIAnalysisTab canManage={canManage || isAdmin} />
+        </TabsContent>
+
+        <TabsContent value="reports">
+          <EvaluationReportsTab canManage={canManage || isAdmin} />
+        </TabsContent>
+
+        <TabsContent value="alerts">
+          <MonitoringAlertsTab canManage={canManage || isAdmin} />
+        </TabsContent>
+
+        <TabsContent value="benchmarking">
+          <BenchmarkingTab canManage={canManage || isAdmin} />
         </TabsContent>
       </Tabs>
     </div>
