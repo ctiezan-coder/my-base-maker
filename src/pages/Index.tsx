@@ -303,33 +303,24 @@ const Index = () => {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
       <div className="absolute top-1/2 left-1/2 w-[300px] h-[300px] bg-accent/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
 
-      <div className="w-full px-4 py-6 relative z-10">
-        {/* Hero Section */}
-        <div className="text-center space-y-6 mb-10">
-          <div className="flex justify-center mb-6">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-              <div className="relative bg-card p-4 rounded-2xl border border-primary/10 shadow-lg">
-                <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-16 w-auto" />
-              </div>
+      <div className="w-full px-4 py-4 relative z-10">
+        {/* Hero Section Compact */}
+        <div className="flex items-center justify-center gap-6 mb-6">
+          <div className="relative group">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary rounded-xl blur-lg opacity-20 group-hover:opacity-40 transition-opacity duration-500" />
+            <div className="relative bg-card p-3 rounded-xl border border-primary/10 shadow-md">
+              <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-12 w-auto" />
             </div>
           </div>
-
-          <div className="space-y-3">
-            <h1 className="text-4xl md:text-5xl font-bold">
+          <div className="text-left">
+            <h1 className="text-3xl md:text-4xl font-bold">
               <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
                 ACIEX
               </span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Plateforme de gestion institutionnelle centralisée
+            <p className="text-base text-muted-foreground">
+              Plateforme de gestion institutionnelle
             </p>
-          </div>
-
-          <div className="flex items-center justify-center gap-2">
-            <div className="h-1 w-16 rounded-full bg-gradient-to-r from-primary to-primary/50" />
-            <div className="h-1 w-10 rounded-full bg-gradient-to-r from-accent to-accent/50" />
-            <div className="h-1 w-6 rounded-full bg-gradient-to-r from-secondary to-secondary/50" />
           </div>
         </div>
 
