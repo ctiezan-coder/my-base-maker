@@ -40,7 +40,7 @@ export default function Events() {
     queryFn: async () => {
       let query = supabase
         .from("events")
-        .select("*, directions(name)")
+        .select("*, direction:directions!events_direction_id_fkey(name)")
         .order("start_date", { ascending: true });
 
       if (search) {

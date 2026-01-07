@@ -110,9 +110,9 @@ export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "gri
                               <span>{event.max_participants} participants</span>
                             </div>
                           )}
-                          {event.directions?.name && (
+                          {event.direction?.name && (
                             <Badge variant="outline" className="text-xs">
-                              {event.directions.name}
+                              {event.direction.name}
                             </Badge>
                           )}
                         </div>
@@ -203,9 +203,9 @@ export function EventList({ events, isLoading, onEdit, onDelete, viewMode = "gri
                     <span>{event.max_participants} participants max</span>
                   </div>
                 )}
-                {event.directions?.name && (
+                {event.direction?.name && (
                   <Badge variant="outline" className="text-xs mt-2">
-                    {event.directions.name}
+                    {event.direction.name}
                   </Badge>
                 )}
               </CardContent>
