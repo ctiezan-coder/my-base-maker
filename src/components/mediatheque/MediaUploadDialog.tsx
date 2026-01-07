@@ -202,14 +202,14 @@ export function MediaUploadDialog({ open, onOpenChange }: MediaUploadDialogProps
                 <div className="space-y-2">
                   <Label>Album</Label>
                   <Select
-                    value={metadata.album_id}
-                    onValueChange={(v) => setMetadata({ ...metadata, album_id: v })}
+                    value={metadata.album_id || '__none__'}
+                    onValueChange={(v) => setMetadata({ ...metadata, album_id: v === '__none__' ? '' : v })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Aucun album" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Aucun album</SelectItem>
+                      <SelectItem value="__none__">Aucun album</SelectItem>
                       {albums?.map((album) => (
                         <SelectItem key={album.id} value={album.id}>
                           {album.name}
@@ -311,14 +311,14 @@ export function MediaUploadDialog({ open, onOpenChange }: MediaUploadDialogProps
               <div className="space-y-2">
                 <Label>Album (pour tous)</Label>
                 <Select
-                  value={metadata.album_id}
-                  onValueChange={(v) => setMetadata({ ...metadata, album_id: v })}
+                  value={metadata.album_id || '__none__'}
+                  onValueChange={(v) => setMetadata({ ...metadata, album_id: v === '__none__' ? '' : v })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Aucun album" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Aucun album</SelectItem>
+                    <SelectItem value="__none__">Aucun album</SelectItem>
                     {albums?.map((album) => (
                       <SelectItem key={album.id} value={album.id}>
                         {album.name}

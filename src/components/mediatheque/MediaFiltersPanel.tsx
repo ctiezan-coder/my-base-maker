@@ -163,14 +163,14 @@ export function MediaFiltersPanel({ filters, onChange, onClose }: MediaFiltersPa
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3">
               <Select
-                value={filters.album_id || ''}
-                onValueChange={(v) => updateFilter('album_id', v || undefined)}
+                value={filters.album_id || '__all__'}
+                onValueChange={(v) => updateFilter('album_id', v === '__all__' ? undefined : v)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Tous les albums" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tous les albums</SelectItem>
+                  <SelectItem value="__all__">Tous les albums</SelectItem>
                   {albums?.map((album) => (
                     <SelectItem key={album.id} value={album.id}>
                       {album.name} ({album.file_count})
@@ -194,14 +194,14 @@ export function MediaFiltersPanel({ filters, onChange, onClose }: MediaFiltersPa
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-3">
               <Select
-                value={filters.direction_id || ''}
-                onValueChange={(v) => updateFilter('direction_id', v || undefined)}
+                value={filters.direction_id || '__all__'}
+                onValueChange={(v) => updateFilter('direction_id', v === '__all__' ? undefined : v)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Toutes les directions" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Toutes les directions</SelectItem>
+                  <SelectItem value="__all__">Toutes les directions</SelectItem>
                   {directions?.map((dir) => (
                     <SelectItem key={dir.id} value={dir.id}>
                       {dir.name}
