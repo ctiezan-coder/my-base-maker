@@ -1750,6 +1750,399 @@ export type Database = {
           },
         ]
       }
+      partnership_actions: {
+        Row: {
+          action_description: string
+          completion_date: string | null
+          created_at: string | null
+          due_date: string | null
+          id: string
+          meeting_id: string | null
+          notes: string | null
+          partnership_id: string
+          responsible: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_description: string
+          completion_date?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          meeting_id?: string | null
+          notes?: string | null
+          partnership_id: string
+          responsible?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_description?: string
+          completion_date?: string | null
+          created_at?: string | null
+          due_date?: string | null
+          id?: string
+          meeting_id?: string | null
+          notes?: string | null
+          partnership_id?: string
+          responsible?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_actions_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_actions_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_activities: {
+        Row: {
+          activity_date: string
+          activity_type: string
+          budget_used: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          event_id: string | null
+          id: string
+          location: string | null
+          notes: string | null
+          participants_count: number | null
+          partnership_id: string
+          status: string | null
+          title: string
+          training_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activity_date: string
+          activity_type: string
+          budget_used?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          participants_count?: number | null
+          partnership_id: string
+          status?: string | null
+          title: string
+          training_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activity_date?: string
+          activity_type?: string
+          budget_used?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          event_id?: string | null
+          id?: string
+          location?: string | null
+          notes?: string | null
+          participants_count?: number | null
+          partnership_id?: string
+          status?: string | null
+          title?: string
+          training_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_activities_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_activities_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_activities_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_date: string
+          alert_type: string
+          created_at: string | null
+          id: string
+          is_acknowledged: boolean | null
+          message: string
+          partnership_id: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_date: string
+          alert_type: string
+          created_at?: string | null
+          id?: string
+          is_acknowledged?: boolean | null
+          message: string
+          partnership_id: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_date?: string
+          alert_type?: string
+          created_at?: string | null
+          id?: string
+          is_acknowledged?: boolean | null
+          message?: string
+          partnership_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_alerts_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_contacts: {
+        Row: {
+          contact_name: string
+          created_at: string | null
+          email: string | null
+          id: string
+          is_primary: boolean | null
+          notes: string | null
+          partnership_id: string
+          phone: string | null
+          position: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_name: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          partnership_id: string
+          phone?: string | null
+          position?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_name?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_primary?: boolean | null
+          notes?: string | null
+          partnership_id?: string
+          phone?: string | null
+          position?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_contacts_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_documents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          document_type: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
+          id: string
+          name: string
+          parent_document_id: string | null
+          partnership_id: string
+          updated_at: string | null
+          uploaded_by: string | null
+          version: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          document_type: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name: string
+          parent_document_id?: string | null
+          partnership_id: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          version?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          document_type?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          name?: string
+          parent_document_id?: string | null
+          partnership_id?: string
+          updated_at?: string | null
+          uploaded_by?: string | null
+          version?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "partnership_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partnership_documents_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_finances: {
+        Row: {
+          amount: number
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          partnership_id: string
+          receipt_url: string | null
+          source: string | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          partnership_id: string
+          receipt_url?: string | null
+          source?: string | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          partnership_id?: string
+          receipt_url?: string | null
+          source?: string | null
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_finances_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partnership_meetings: {
+        Row: {
+          action_items: Json | null
+          agenda: string | null
+          attendees: string[] | null
+          created_at: string | null
+          created_by: string | null
+          id: string
+          location: string | null
+          meeting_date: string
+          minutes: string | null
+          next_meeting_date: string | null
+          partnership_id: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          action_items?: Json | null
+          agenda?: string | null
+          attendees?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          meeting_date: string
+          minutes?: string | null
+          next_meeting_date?: string | null
+          partnership_id: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          action_items?: Json | null
+          agenda?: string | null
+          attendees?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          location?: string | null
+          meeting_date?: string
+          minutes?: string | null
+          next_meeting_date?: string | null
+          partnership_id?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partnership_meetings_partnership_id_fkey"
+            columns: ["partnership_id"]
+            isOneToOne: false
+            referencedRelation: "partnerships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partnership_projects: {
         Row: {
           created_at: string
@@ -1788,57 +2181,159 @@ export type Database = {
       }
       partnerships: {
         Row: {
+          aciex_focal_email: string | null
+          aciex_focal_phone: string | null
+          aciex_focal_point: string | null
+          aciex_responsibilities: string | null
           budget: number | null
+          closure_notes: string | null
+          communication_history: Json | null
+          confidentiality_clauses: string | null
           contact_email: string | null
           contact_person: string | null
           contact_phone: string | null
           created_at: string
           created_by: string | null
+          deliverables_schedule: string | null
           description: string | null
           direction_id: string
+          disbursement_terms: string | null
+          domains: string[] | null
+          efficiency_score: number | null
           end_date: string | null
+          expected_results: string | null
+          final_evaluation: string | null
           id: string
+          in_kind_contribution: string | null
+          kpi_indicators: Json | null
+          last_contact_date: string | null
+          lifecycle_stage: string | null
+          mid_term_evaluation: string | null
+          organization_type: string | null
+          partner_contribution: number | null
+          partner_country: string | null
+          partner_logo_url: string | null
           partner_name: string
+          partner_responsibilities: string | null
+          partner_sector: string | null
           partner_type: string | null
+          partner_website: string | null
           priority_level: Database["public"]["Enums"]["priority_level"] | null
+          reference_code: string | null
+          renewal_conditions: string | null
+          renewal_notes: string | null
+          resources_provided: string | null
+          satisfaction_level: number | null
+          signature_date: string | null
           start_date: string | null
           status: string | null
+          strategic_objectives: string | null
+          target_beneficiaries: string | null
+          termination_reason: string | null
           updated_at: string
         }
         Insert: {
+          aciex_focal_email?: string | null
+          aciex_focal_phone?: string | null
+          aciex_focal_point?: string | null
+          aciex_responsibilities?: string | null
           budget?: number | null
+          closure_notes?: string | null
+          communication_history?: Json | null
+          confidentiality_clauses?: string | null
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
           created_at?: string
           created_by?: string | null
+          deliverables_schedule?: string | null
           description?: string | null
           direction_id: string
+          disbursement_terms?: string | null
+          domains?: string[] | null
+          efficiency_score?: number | null
           end_date?: string | null
+          expected_results?: string | null
+          final_evaluation?: string | null
           id?: string
+          in_kind_contribution?: string | null
+          kpi_indicators?: Json | null
+          last_contact_date?: string | null
+          lifecycle_stage?: string | null
+          mid_term_evaluation?: string | null
+          organization_type?: string | null
+          partner_contribution?: number | null
+          partner_country?: string | null
+          partner_logo_url?: string | null
           partner_name: string
+          partner_responsibilities?: string | null
+          partner_sector?: string | null
           partner_type?: string | null
+          partner_website?: string | null
           priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          reference_code?: string | null
+          renewal_conditions?: string | null
+          renewal_notes?: string | null
+          resources_provided?: string | null
+          satisfaction_level?: number | null
+          signature_date?: string | null
           start_date?: string | null
           status?: string | null
+          strategic_objectives?: string | null
+          target_beneficiaries?: string | null
+          termination_reason?: string | null
           updated_at?: string
         }
         Update: {
+          aciex_focal_email?: string | null
+          aciex_focal_phone?: string | null
+          aciex_focal_point?: string | null
+          aciex_responsibilities?: string | null
           budget?: number | null
+          closure_notes?: string | null
+          communication_history?: Json | null
+          confidentiality_clauses?: string | null
           contact_email?: string | null
           contact_person?: string | null
           contact_phone?: string | null
           created_at?: string
           created_by?: string | null
+          deliverables_schedule?: string | null
           description?: string | null
           direction_id?: string
+          disbursement_terms?: string | null
+          domains?: string[] | null
+          efficiency_score?: number | null
           end_date?: string | null
+          expected_results?: string | null
+          final_evaluation?: string | null
           id?: string
+          in_kind_contribution?: string | null
+          kpi_indicators?: Json | null
+          last_contact_date?: string | null
+          lifecycle_stage?: string | null
+          mid_term_evaluation?: string | null
+          organization_type?: string | null
+          partner_contribution?: number | null
+          partner_country?: string | null
+          partner_logo_url?: string | null
           partner_name?: string
+          partner_responsibilities?: string | null
+          partner_sector?: string | null
           partner_type?: string | null
+          partner_website?: string | null
           priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          reference_code?: string | null
+          renewal_conditions?: string | null
+          renewal_notes?: string | null
+          resources_provided?: string | null
+          satisfaction_level?: number | null
+          signature_date?: string | null
           start_date?: string | null
           status?: string | null
+          strategic_objectives?: string | null
+          target_beneficiaries?: string | null
+          termination_reason?: string | null
           updated_at?: string
         }
         Relationships: [
