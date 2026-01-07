@@ -4,9 +4,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, FolderKanban, FileText, GraduationCap, Calendar, Handshake, Image, BarChart3, TrendingUp, Users, Target, Activity, Globe, ArrowRight, Sparkles, LineChart } from "lucide-react";
+import { Building2, FolderKanban, FileText, GraduationCap, Calendar, Handshake, BarChart3, TrendingUp, Users, Target, Activity, Globe, ArrowRight, Sparkles, LineChart, Award, Briefcase, MapPin, Package, DollarSign, UserCheck } from "lucide-react";
 import logo from "@/assets/ci-export-logo.png";
 import { MonthlyActivityChart, SectorDistributionChart, OpportunitiesChart, ConnectionsEvolutionChart } from "@/components/dashboard/DashboardCharts";
+import { Progress } from "@/components/ui/progress";
+
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -28,12 +30,12 @@ const Index = () => {
     enabled: !!user,
   });
 
-  // Fetch dashboard stats
+  // Fetch dashboard stats with new operator data
   const { data: stats } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
       const [companies, projects, trainings, events, partnerships, documents, media, activeProjectsData, opportunities, connections] = await Promise.all([
-        supabase.from("companies").select("id", { count: "exact", head: true }),
+        supabase.from("companies").select("id, accompaniment_status, export_maturity_level, certifications, activity_sector", { count: "exact" }),
         supabase.from("projects").select("id, name"),
         supabase.from("trainings").select("id", { count: "exact", head: true }),
         supabase.from("events").select("id", { count: "exact", head: true }),
@@ -41,8 +43,8 @@ const Index = () => {
         supabase.from("documents").select("id", { count: "exact", head: true }),
         supabase.from("media_content").select("id", { count: "exact", head: true }),
         supabase.from("projects").select("id, name").eq("status", "en cours"),
-        supabase.from("export_opportunities").select("id", { count: "exact", head: true }),
-        supabase.from("business_connections").select("id", { count: "exact", head: true }),
+        supabase.from("export_opportunities").select("id, estimated_value", { count: "exact" }),
+        supabase.from("business_connections").select("id, contract_value, status"),
       ]);
 
       // Filtrer les vrais projets (exclure ceux préfixés "Événement:" ou "Formation:")
@@ -54,8 +56,41 @@ const Index = () => {
         !p.name.startsWith("Événement:") && !p.name.startsWith("Formation:")
       ) || [];
 
+      // Operator stats
+      const companiesData = companies.data || [];
+      const activeAccompaniment = companiesData.filter(c => c.accompaniment_status === 'en_cours').length;
+      const certifiedCompanies = companiesData.filter(c => c.certifications && c.certifications.length > 0).length;
+      
+      // Maturity levels
+      const maturityLevels = {
+        debutant: companiesData.filter(c => c.export_maturity_level === 'debutant').length,
+        intermediaire: companiesData.filter(c => c.export_maturity_level === 'intermediaire').length,
+        confirme: companiesData.filter(c => c.export_maturity_level === 'confirme').length,
+        expert: companiesData.filter(c => c.export_maturity_level === 'expert').length,
+      };
+
+      // Sectors distribution
+      const sectorCounts: Record<string, number> = {};
+      companiesData.forEach(c => {
+        if (c.activity_sector) {
+          sectorCounts[c.activity_sector] = (sectorCounts[c.activity_sector] || 0) + 1;
+        }
+      });
+      const topSectors = Object.entries(sectorCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      // Connections stats
+      const connectionsData = connections.data || [];
+      const successfulConnections = connectionsData.filter(c => c.status === 'Contrat signé').length;
+      const totalContractValue = connectionsData.reduce((sum, c) => sum + (c.contract_value || 0), 0);
+
+      // Opportunities stats
+      const opportunitiesData = opportunities.data || [];
+      const totalOpportunityValue = opportunitiesData.reduce((sum, o) => sum + (o.estimated_value || 0), 0);
+
       return {
-        companies: companies.count || 0,
+        companies: companies.count || companiesData.length,
         projects: realProjects.length,
         trainings: trainings.count || 0,
         events: events.count || 0,
@@ -63,8 +98,16 @@ const Index = () => {
         documents: documents.count || 0,
         media: media.count || 0,
         activeProjects: realActiveProjects.length,
-        opportunities: opportunities.count || 0,
-        connections: connections.count || 0,
+        opportunities: opportunities.count || opportunitiesData.length,
+        connections: connectionsData.length,
+        // New stats
+        activeAccompaniment,
+        certifiedCompanies,
+        maturityLevels,
+        topSectors,
+        successfulConnections,
+        totalContractValue,
+        totalOpportunityValue,
       };
     },
     enabled: !!user,
@@ -100,45 +143,87 @@ const Index = () => {
     return null;
   }
 
+  const formatCurrency = (value: number) => {
+    if (value >= 1000000000) return `${(value / 1000000000).toFixed(1)} Mds`;
+    if (value >= 1000000) return `${(value / 1000000).toFixed(1)} M`;
+    if (value >= 1000) return `${(value / 1000).toFixed(0)} K`;
+    return value.toString();
+  };
+
   const keyMetrics = [
     {
       title: "Opérateurs Accompagnés",
       value: stats?.companies || 0,
       icon: Building2,
       gradient: "from-secondary to-secondary/70",
-      trend: "+12%",
-      trendUp: true,
+      subtitle: `${stats?.activeAccompaniment || 0} en cours`,
     },
     {
       title: "Projets Actifs",
       value: stats?.activeProjects || 0,
       icon: Target,
       gradient: "from-accent to-accent/70",
-      trend: "+8%",
-      trendUp: true,
+      subtitle: `sur ${stats?.projects || 0} projets`,
     },
     {
-      title: "Formations Organisées",
-      value: stats?.trainings || 0,
-      icon: GraduationCap,
-      gradient: "from-primary to-primary/70",
-      trend: "+15%",
-      trendUp: true,
-    },
-    {
-      title: "Partenariats",
-      value: stats?.partnerships || 0,
+      title: "Connexions B2B",
+      value: stats?.connections || 0,
       icon: Handshake,
+      gradient: "from-primary to-primary/70",
+      subtitle: `${stats?.successfulConnections || 0} conclues`,
+    },
+    {
+      title: "Valeur Contrats",
+      value: `${formatCurrency(stats?.totalContractValue || 0)} $`,
+      icon: DollarSign,
       gradient: "from-primary via-accent to-secondary",
-      trend: "+5%",
-      trendUp: true,
+      subtitle: "Cumul contrats signés",
     },
   ];
+
+  const operatorMetrics = [
+    {
+      title: "Entreprises Certifiées",
+      value: stats?.certifiedCompanies || 0,
+      icon: Award,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+    {
+      title: "Accompagnement Actif",
+      value: stats?.activeAccompaniment || 0,
+      icon: UserCheck,
+      color: "text-accent",
+      bgColor: "bg-accent/10",
+    },
+    {
+      title: "Opportunités Export",
+      value: stats?.opportunities || 0,
+      icon: Globe,
+      color: "text-secondary",
+      bgColor: "bg-secondary/10",
+    },
+    {
+      title: "Valeur Opportunités",
+      value: `${formatCurrency(stats?.totalOpportunityValue || 0)} $`,
+      icon: Briefcase,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+  ];
+
+  const maturityData = [
+    { level: "Débutant", count: stats?.maturityLevels?.debutant || 0, color: "bg-muted-foreground" },
+    { level: "Intermédiaire", count: stats?.maturityLevels?.intermediaire || 0, color: "bg-accent" },
+    { level: "Confirmé", count: stats?.maturityLevels?.confirme || 0, color: "bg-primary" },
+    { level: "Expert", count: stats?.maturityLevels?.expert || 0, color: "bg-secondary" },
+  ];
+  const totalMaturity = maturityData.reduce((sum, m) => sum + m.count, 0);
 
   const modules = [
     {
       title: "Opérateurs Économiques",
-      description: "Base de données unifiée des entreprises accompagnées",
+      description: "360° des entreprises accompagnées",
       icon: Building2,
       path: "/companies",
       count: stats?.companies,
@@ -148,7 +233,7 @@ const Index = () => {
     },
     {
       title: "Projets",
-      description: "Gestion et suivi des projets d'accompagnement",
+      description: "Gestion des projets d'accompagnement",
       icon: FolderKanban,
       path: "/projects",
       count: stats?.projects,
@@ -157,18 +242,18 @@ const Index = () => {
       borderColor: "border-accent/30",
     },
     {
-      title: "Documents",
-      description: "GED complète avec versioning et recherche",
-      icon: FileText,
-      path: "/documents",
-      count: stats?.documents,
+      title: "Développement Marchés",
+      description: "Opportunités export et B2B",
+      icon: Globe,
+      path: "/market-development",
+      count: stats?.opportunities,
       gradient: "from-primary/20 to-primary/5",
       iconColor: "text-primary",
       borderColor: "border-primary/30",
     },
     {
       title: "Formations",
-      description: "Suivi des formations et évaluation d'impact",
+      description: "Renforcement des capacités",
       icon: GraduationCap,
       path: "/trainings",
       count: stats?.trainings,
@@ -178,7 +263,7 @@ const Index = () => {
     },
     {
       title: "Événements",
-      description: "Calendrier des événements institutionnels",
+      description: "Foires et missions commerciales",
       icon: Calendar,
       path: "/events",
       count: stats?.events,
@@ -188,7 +273,7 @@ const Index = () => {
     },
     {
       title: "Partenariats",
-      description: "Relations avec les partenaires stratégiques",
+      description: "Relations stratégiques",
       icon: Handshake,
       path: "/partnerships",
       count: stats?.partnerships,
@@ -197,23 +282,23 @@ const Index = () => {
       borderColor: "border-accent/30",
     },
     {
-      title: "Développement Marchés",
-      description: "Opportunités d'export et connexions B2B",
-      icon: Globe,
-      path: "/market-development",
-      count: stats?.opportunities,
-      gradient: "from-primary/20 to-primary/5",
-      iconColor: "text-primary",
-      borderColor: "border-primary/30",
-    },
-    {
-      title: "Suivi des KPIs",
-      description: "Indicateurs de performance clés",
+      title: "Suivi & Évaluation",
+      description: "KPIs et performance",
       icon: BarChart3,
-      path: "/kpis",
+      path: "/suivi-evaluation",
       gradient: "from-secondary/20 to-secondary/5",
       iconColor: "text-secondary",
       borderColor: "border-secondary/30",
+    },
+    {
+      title: "Documents",
+      description: "GED centralisée",
+      icon: FileText,
+      path: "/documents",
+      count: stats?.documents,
+      gradient: "from-primary/20 to-primary/5",
+      iconColor: "text-primary",
+      borderColor: "border-primary/30",
     },
   ];
 
@@ -226,9 +311,8 @@ const Index = () => {
       <div className="absolute top-1/2 left-1/2 w-[300px] h-[300px] bg-accent/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
 
       <div className="w-full px-4 py-6 relative z-10">
-        {/* Hero Section améliorée */}
-        <div className="text-center space-y-6 mb-12">
-          {/* Logo avec effet */}
+        {/* Hero Section */}
+        <div className="text-center space-y-6 mb-10">
           <div className="flex justify-center mb-6">
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
@@ -249,7 +333,6 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Barre décorative */}
           <div className="flex items-center justify-center gap-2">
             <div className="h-1 w-16 rounded-full bg-gradient-to-r from-primary to-primary/50" />
             <div className="h-1 w-10 rounded-full bg-gradient-to-r from-accent to-accent/50" />
@@ -257,14 +340,13 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Key Metrics avec nouveau design */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {keyMetrics.map((metric, index) => (
             <Card 
               key={index} 
               className="relative overflow-hidden border-0 bg-card/80 backdrop-blur-sm hover:shadow-xl transition-all duration-300 group"
             >
-              {/* Bande de couleur en haut */}
               <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${metric.gradient}`} />
               
               <CardHeader className="pb-2">
@@ -272,24 +354,109 @@ const Index = () => {
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${metric.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                     <metric.icon className="w-6 h-6 text-white" />
                   </div>
-                  <div className={`flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${metric.trendUp ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
-                    <TrendingUp className={`w-3 h-3 ${metric.trendUp ? '' : 'rotate-180'}`} />
-                    {metric.trend}
-                  </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-4xl font-bold text-foreground mb-1 group-hover:scale-105 transition-transform duration-300">
+                <div className="text-3xl font-bold text-foreground mb-1 group-hover:scale-105 transition-transform duration-300">
                   {metric.value}
                 </div>
                 <p className="text-sm text-muted-foreground font-medium">{metric.title}</p>
+                <p className="text-xs text-muted-foreground/70 mt-1">{metric.subtitle}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Activity Summary avec nouveau design */}
-        <Card className="mb-10 border-primary/10 bg-card/80 backdrop-blur-sm overflow-hidden">
+        {/* Operator Insights Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Operator Quick Stats */}
+          <Card className="col-span-1 lg:col-span-2 border-primary/10 bg-card/80 backdrop-blur-sm overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-secondary" />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <span className="text-xl">Vue Opérateurs</span>
+                  <CardDescription className="mt-1">Performance et accompagnement</CardDescription>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {operatorMetrics.map((item, index) => (
+                  <div key={index} className={`text-center p-4 rounded-xl ${item.bgColor} border border-transparent hover:border-primary/20 transition-colors duration-300`}>
+                    <item.icon className={`w-6 h-6 ${item.color} mx-auto mb-2`} />
+                    <div className="text-2xl font-bold text-foreground mb-1">{item.value}</div>
+                    <p className="text-xs text-muted-foreground font-medium">{item.title}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Maturity Level Distribution */}
+          <Card className="border-secondary/10 bg-card/80 backdrop-blur-sm overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-secondary to-accent" />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <span className="text-lg">Maturité Export</span>
+                  <CardDescription className="mt-1">Répartition des niveaux</CardDescription>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {maturityData.map((item, index) => (
+                <div key={index} className="space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">{item.level}</span>
+                    <span className="font-medium text-foreground">{item.count}</span>
+                  </div>
+                  <Progress 
+                    value={totalMaturity > 0 ? (item.count / totalMaturity) * 100 : 0} 
+                    className="h-2"
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Top Sectors */}
+        {stats?.topSectors && stats.topSectors.length > 0 && (
+          <Card className="mb-8 border-accent/10 bg-card/80 backdrop-blur-sm overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-accent to-primary" />
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center">
+                  <Package className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <span className="text-xl">Secteurs d'Activité</span>
+                  <CardDescription className="mt-1">Top 5 des secteurs les plus représentés</CardDescription>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                {stats.topSectors.map(([sector, count], index) => (
+                  <div key={index} className="text-center p-4 rounded-xl bg-accent/5 border border-accent/10 hover:border-accent/30 transition-colors duration-300">
+                    <div className="text-2xl font-bold text-foreground mb-1">{count}</div>
+                    <p className="text-xs text-muted-foreground font-medium line-clamp-2">{sector}</p>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Activity Summary */}
+        <Card className="mb-8 border-primary/10 bg-card/80 backdrop-blur-sm overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-accent to-secondary" />
           <CardHeader>
             <CardTitle className="flex items-center gap-3">
@@ -298,19 +465,20 @@ const Index = () => {
               </div>
               <div>
                 <span className="text-xl">Résumé d'Activité</span>
-                <CardDescription className="mt-1">Vue d'ensemble des ressources et modules</CardDescription>
+                <CardDescription className="mt-1">Vue d'ensemble des ressources</CardDescription>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Documents", value: stats?.documents || 0, color: "primary" },
-                { label: "Médias", value: stats?.media || 0, color: "accent" },
-                { label: "Événements", value: stats?.events || 0, color: "secondary" },
-                { label: "Projets Total", value: stats?.projects || 0, color: "primary" },
+                { label: "Formations", value: stats?.trainings || 0, icon: GraduationCap, color: "primary" },
+                { label: "Événements", value: stats?.events || 0, icon: Calendar, color: "secondary" },
+                { label: "Partenariats", value: stats?.partnerships || 0, icon: Handshake, color: "accent" },
+                { label: "Documents", value: stats?.documents || 0, icon: FileText, color: "primary" },
               ].map((item, index) => (
                 <div key={index} className={`text-center p-4 rounded-xl bg-${item.color}/5 border border-${item.color}/10 hover:border-${item.color}/30 transition-colors duration-300`}>
+                  <item.icon className={`w-6 h-6 text-${item.color} mx-auto mb-2`} />
                   <div className="text-3xl font-bold text-foreground mb-1">{item.value}</div>
                   <p className="text-xs text-muted-foreground font-medium">{item.label}</p>
                 </div>
@@ -320,7 +488,7 @@ const Index = () => {
         </Card>
 
         {/* Section Analytics */}
-        <div className="space-y-4 mb-10">
+        <div className="space-y-4 mb-8">
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <LineChart className="w-6 h-6 text-accent" />
             Analytiques
@@ -334,7 +502,7 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Modules Grid avec nouveau design */}
+        {/* Modules Grid */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
