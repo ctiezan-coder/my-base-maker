@@ -145,6 +145,220 @@ export type Database = {
           },
         ]
       }
+      action_plan_activities: {
+        Row: {
+          action_plan_id: string
+          created_at: string
+          current_value: number | null
+          description: string | null
+          end_date: string | null
+          id: string
+          kpi_indicator: string | null
+          notes: string | null
+          obstacles: string | null
+          resources_needed: string | null
+          responsible: string | null
+          start_date: string | null
+          status: string | null
+          target_value: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_plan_id: string
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          kpi_indicator?: string | null
+          notes?: string | null
+          obstacles?: string | null
+          resources_needed?: string | null
+          responsible?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_value?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_plan_id?: string
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          kpi_indicator?: string | null
+          notes?: string | null
+          obstacles?: string | null
+          resources_needed?: string | null
+          responsible?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_value?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plan_activities_action_plan_id_fkey"
+            columns: ["action_plan_id"]
+            isOneToOne: false
+            referencedRelation: "action_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      action_plans: {
+        Row: {
+          budget_allocated: number | null
+          budget_consumed: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string
+          end_date: string | null
+          fiscal_year: number
+          id: string
+          notes: string | null
+          objective_id: string | null
+          responsible_user_id: string | null
+          start_date: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          budget_allocated?: number | null
+          budget_consumed?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id: string
+          end_date?: string | null
+          fiscal_year?: number
+          id?: string
+          notes?: string | null
+          objective_id?: string | null
+          responsible_user_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          budget_allocated?: number | null
+          budget_consumed?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string
+          end_date?: string | null
+          fiscal_year?: number
+          id?: string
+          notes?: string | null
+          objective_id?: string | null
+          responsible_user_id?: string | null
+          start_date?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_plans_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "action_plans_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_objectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      activity_roi: {
+        Row: {
+          activity_id: string | null
+          activity_title: string
+          activity_type: string
+          analysis_period: string | null
+          companies_benefited: number | null
+          contracts_value: number | null
+          created_at: string
+          created_by: string | null
+          direct_benefits: string | null
+          direction_id: string | null
+          id: string
+          indirect_benefits: string | null
+          jobs_created: number | null
+          methodology: string | null
+          notes: string | null
+          roi_percentage: number | null
+          social_impact: string | null
+          total_cost: number
+          total_value_created: number
+          updated_at: string
+        }
+        Insert: {
+          activity_id?: string | null
+          activity_title: string
+          activity_type: string
+          analysis_period?: string | null
+          companies_benefited?: number | null
+          contracts_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          direct_benefits?: string | null
+          direction_id?: string | null
+          id?: string
+          indirect_benefits?: string | null
+          jobs_created?: number | null
+          methodology?: string | null
+          notes?: string | null
+          roi_percentage?: number | null
+          social_impact?: string | null
+          total_cost?: number
+          total_value_created?: number
+          updated_at?: string
+        }
+        Update: {
+          activity_id?: string | null
+          activity_title?: string
+          activity_type?: string
+          analysis_period?: string | null
+          companies_benefited?: number | null
+          contracts_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          direct_benefits?: string | null
+          direction_id?: string | null
+          id?: string
+          indirect_benefits?: string | null
+          jobs_created?: number | null
+          methodology?: string | null
+          notes?: string | null
+          roi_percentage?: number | null
+          social_impact?: string | null
+          total_cost?: number
+          total_value_created?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_roi_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       allowed_emails: {
         Row: {
           added_by: string | null
@@ -166,6 +380,66 @@ export type Database = {
           email?: string
           id?: string
           notes?: string | null
+        }
+        Relationships: []
+      }
+      benchmarks: {
+        Row: {
+          analysis_period: string | null
+          benchmark_type: string
+          benchmark_value: number | null
+          category: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          findings: string | null
+          id: string
+          indicator: string
+          lessons_learned: string | null
+          our_value: number | null
+          recommendations: string | null
+          source: string | null
+          title: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          analysis_period?: string | null
+          benchmark_type: string
+          benchmark_value?: number | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          findings?: string | null
+          id?: string
+          indicator: string
+          lessons_learned?: string | null
+          our_value?: number | null
+          recommendations?: string | null
+          source?: string | null
+          title: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          analysis_period?: string | null
+          benchmark_type?: string
+          benchmark_value?: number | null
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          findings?: string | null
+          id?: string
+          indicator?: string
+          lessons_learned?: string | null
+          our_value?: number | null
+          recommendations?: string | null
+          source?: string | null
+          title?: string
+          unit?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -702,6 +976,134 @@ export type Database = {
           },
         ]
       }
+      corrective_actions: {
+        Row: {
+          completion_date: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string | null
+          due_date: string | null
+          effectiveness_notes: string | null
+          effectiveness_rating: number | null
+          gap_analysis_id: string | null
+          id: string
+          priority: string | null
+          responsible_name: string | null
+          responsible_user_id: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          due_date?: string | null
+          effectiveness_notes?: string | null
+          effectiveness_rating?: number | null
+          gap_analysis_id?: string | null
+          id?: string
+          priority?: string | null
+          responsible_name?: string | null
+          responsible_user_id?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completion_date?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          due_date?: string | null
+          effectiveness_notes?: string | null
+          effectiveness_rating?: number | null
+          gap_analysis_id?: string | null
+          id?: string
+          priority?: string | null
+          responsible_name?: string | null
+          responsible_user_id?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corrective_actions_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corrective_actions_gap_analysis_id_fkey"
+            columns: ["gap_analysis_id"]
+            isOneToOne: false
+            referencedRelation: "gap_analyses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboard_widgets: {
+        Row: {
+          configuration: Json | null
+          created_at: string
+          direction_id: string | null
+          height: number | null
+          id: string
+          is_active: boolean | null
+          position_x: number | null
+          position_y: number | null
+          title: string
+          updated_at: string
+          user_id: string
+          widget_type: string
+          width: number | null
+        }
+        Insert: {
+          configuration?: Json | null
+          created_at?: string
+          direction_id?: string | null
+          height?: number | null
+          id?: string
+          is_active?: boolean | null
+          position_x?: number | null
+          position_y?: number | null
+          title: string
+          updated_at?: string
+          user_id: string
+          widget_type: string
+          width?: number | null
+        }
+        Update: {
+          configuration?: Json | null
+          created_at?: string
+          direction_id?: string | null
+          height?: number | null
+          id?: string
+          is_active?: boolean | null
+          position_x?: number | null
+          position_y?: number | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          widget_type?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_widgets_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       directions: {
         Row: {
           created_at: string
@@ -943,6 +1345,74 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "equipments_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      evaluation_reports: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          content: Json | null
+          created_at: string
+          created_by: string | null
+          direction_id: string | null
+          file_url: string | null
+          id: string
+          key_findings: string | null
+          period_end: string
+          period_start: string
+          recommendations: string | null
+          report_type: string
+          status: string | null
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          file_url?: string | null
+          id?: string
+          key_findings?: string | null
+          period_end: string
+          period_start: string
+          recommendations?: string | null
+          report_type: string
+          status?: string | null
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          file_url?: string | null
+          id?: string
+          key_findings?: string | null
+          period_end?: string
+          period_start?: string
+          recommendations?: string | null
+          report_type?: string
+          status?: string | null
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_reports_direction_id_fkey"
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
@@ -1235,6 +1705,94 @@ export type Database = {
             columns: ["parent_folder_id"]
             isOneToOne: false
             referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gap_analyses: {
+        Row: {
+          actual_value: number
+          analysis_period: string
+          created_at: string
+          created_by: string | null
+          direction_id: string | null
+          expected_value: number
+          external_factors: string | null
+          gap_percentage: number | null
+          gap_type: string | null
+          gap_value: number | null
+          id: string
+          impact_assessment: string | null
+          internal_factors: string | null
+          kpi_id: string | null
+          lessons_learned: string | null
+          objective_id: string | null
+          root_cause_analysis: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actual_value: number
+          analysis_period: string
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          expected_value: number
+          external_factors?: string | null
+          gap_percentage?: number | null
+          gap_type?: string | null
+          gap_value?: number | null
+          id?: string
+          impact_assessment?: string | null
+          internal_factors?: string | null
+          kpi_id?: string | null
+          lessons_learned?: string | null
+          objective_id?: string | null
+          root_cause_analysis?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actual_value?: number
+          analysis_period?: string
+          created_at?: string
+          created_by?: string | null
+          direction_id?: string | null
+          expected_value?: number
+          external_factors?: string | null
+          gap_percentage?: number | null
+          gap_type?: string | null
+          gap_value?: number | null
+          id?: string
+          impact_assessment?: string | null
+          internal_factors?: string | null
+          kpi_id?: string | null
+          lessons_learned?: string | null
+          objective_id?: string | null
+          root_cause_analysis?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gap_analyses_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gap_analyses_kpi_id_fkey"
+            columns: ["kpi_id"]
+            isOneToOne: false
+            referencedRelation: "kpi_tracking"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gap_analyses_objective_id_fkey"
+            columns: ["objective_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_objectives"
             referencedColumns: ["id"]
           },
         ]
@@ -2061,6 +2619,71 @@ export type Database = {
             columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          current_value: number | null
+          direction_id: string | null
+          id: string
+          is_read: boolean | null
+          is_resolved: boolean | null
+          message: string
+          reference_id: string | null
+          reference_type: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string | null
+          threshold_value: number | null
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          current_value?: number | null
+          direction_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          message: string
+          reference_id?: string | null
+          reference_type?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          threshold_value?: number | null
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          current_value?: number | null
+          direction_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          message?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string | null
+          threshold_value?: number | null
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_alerts_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
             referencedColumns: ["id"]
           },
         ]
@@ -3813,6 +4436,143 @@ export type Database = {
         }
         Relationships: []
       }
+      satisfaction_surveys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          direction_id: string | null
+          end_date: string | null
+          id: string
+          questions: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          start_date: string | null
+          status: string | null
+          survey_type: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          end_date?: string | null
+          id?: string
+          questions?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          start_date?: string | null
+          status?: string | null
+          survey_type: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          direction_id?: string | null
+          end_date?: string | null
+          id?: string
+          questions?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          start_date?: string | null
+          status?: string | null
+          survey_type?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "satisfaction_surveys_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      strategic_objectives: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_value: number | null
+          description: string | null
+          direction_id: string | null
+          end_date: string | null
+          fiscal_year: number
+          id: string
+          notes: string | null
+          objective_type: string
+          parent_objective_id: string | null
+          priority: string | null
+          start_date: string | null
+          status: string | null
+          target_value: number | null
+          title: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          description?: string | null
+          direction_id?: string | null
+          end_date?: string | null
+          fiscal_year?: number
+          id?: string
+          notes?: string | null
+          objective_type: string
+          parent_objective_id?: string | null
+          priority?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_value?: number | null
+          title: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          description?: string | null
+          direction_id?: string | null
+          end_date?: string | null
+          fiscal_year?: number
+          id?: string
+          notes?: string | null
+          objective_type?: string
+          parent_objective_id?: string | null
+          priority?: string | null
+          start_date?: string | null
+          status?: string | null
+          target_value?: number | null
+          title?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategic_objectives_direction_id_fkey"
+            columns: ["direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "strategic_objectives_parent_objective_id_fkey"
+            columns: ["parent_objective_id"]
+            isOneToOne: false
+            referencedRelation: "strategic_objectives"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -3919,6 +4679,50 @@ export type Database = {
             columns: ["direction_id"]
             isOneToOne: false
             referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          comments: string | null
+          id: string
+          overall_rating: number | null
+          respondent_email: string | null
+          respondent_id: string | null
+          respondent_type: string | null
+          responses: Json
+          submitted_at: string
+          survey_id: string
+        }
+        Insert: {
+          comments?: string | null
+          id?: string
+          overall_rating?: number | null
+          respondent_email?: string | null
+          respondent_id?: string | null
+          respondent_type?: string | null
+          responses?: Json
+          submitted_at?: string
+          survey_id: string
+        }
+        Update: {
+          comments?: string | null
+          id?: string
+          overall_rating?: number | null
+          respondent_email?: string | null
+          respondent_id?: string | null
+          respondent_type?: string | null
+          responses?: Json
+          submitted_at?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "satisfaction_surveys"
             referencedColumns: ["id"]
           },
         ]
