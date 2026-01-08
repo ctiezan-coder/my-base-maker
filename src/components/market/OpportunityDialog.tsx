@@ -118,7 +118,7 @@ export const OpportunityDialog = ({
 
         if (error) throw error;
 
-        // Créer automatiquement un projet associé à l'opportunité export
+        // Créer automatiquement un projet associé à l'opportunité export (sans budget auto)
         if (newOpportunity) {
           const projectData = {
             name: `Opportunité Export: ${values.title}`,
@@ -129,7 +129,6 @@ export const OpportunityDialog = ({
             end_date: values.deadline || null,
             project_type: 'Développement de marché',
             priority_level: values.status === 'URGENT' ? '1' as const : '3' as const,
-            budget: values.estimated_value || null,
           };
 
           const { data: projectResult, error: projectError } = await supabase

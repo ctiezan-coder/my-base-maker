@@ -301,7 +301,7 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
         if (error) throw error;
         partnershipId = data.id;
 
-        // Automatically create a project for this partnership
+        // Automatically create a project for this partnership (no budget auto-filled)
         const projectData = {
           name: `Partenariat: ${formData.partner_name}`,
           description: formData.description || `Projet lié au partenariat avec ${formData.partner_name}`,
@@ -309,7 +309,6 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
           status: mapPartnershipStatusToProjectStatus(formData.status),
           start_date: formData.start_date || null,
           end_date: formData.end_date || null,
-          budget: formData.budget ? parseFloat(formData.budget) : null,
           project_type: 'partenariat',
           priority_level: '3' as const, // Medium priority
         };
