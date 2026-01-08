@@ -16,26 +16,32 @@ const exportMarkers = [
 export const WorldGlobeBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Fond uni vert clair */}
+      <div 
+        className="absolute inset-0" 
+        style={{ backgroundColor: 'hsl(152, 25%, 85%)' }} 
+      />
+
       {/* Image du globe du monde avec couleur verte de la plateforme */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-[140%] h-auto translate-y-[5%]">
+        <div className="relative w-[140%] h-auto translate-y-[5%] translate-x-[15%]">
           {/* Image en niveaux de gris */}
           <img
             src={worldGlobeImage}
             alt="Globe du monde"
             className="w-full h-auto object-contain"
             style={{
-              filter: 'grayscale(100%) brightness(0.4)',
-              opacity: 0.9,
+              filter: 'grayscale(100%) brightness(0.6)',
+              opacity: 0.4,
             }}
           />
           {/* Overlay vert avec blend mode */}
           <div 
             className="absolute inset-0"
             style={{
-              backgroundColor: 'hsl(152, 100%, 22%)',
-              mixBlendMode: 'screen',
-              opacity: 0.8,
+              backgroundColor: 'hsl(152, 35%, 65%)',
+              mixBlendMode: 'multiply',
+              opacity: 1,
             }}
           />
         </div>
@@ -129,9 +135,6 @@ export const WorldGlobeBackground = () => {
         />
       </svg>
 
-      {/* Overlay gradient pour la lisibilité du formulaire */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background/60" />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-background/50" />
     </div>
   );
 };

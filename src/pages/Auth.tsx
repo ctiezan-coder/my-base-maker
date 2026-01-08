@@ -212,17 +212,13 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: 'hsl(152, 25%, 85%)' }}>
       {/* Globe du monde en arrière-plan */}
       <WorldGlobeBackground />
-      
-      {/* Formes décoratives subtiles */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
 
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 relative z-10">
         {/* Carte principale */}
-        <Card className="w-full backdrop-blur-sm bg-card/95 border-primary/20 shadow-2xl">
+        <Card className="w-full backdrop-blur-sm bg-white border-0 shadow-2xl rounded-3xl">
           <CardHeader className="space-y-4 text-center pb-2">
             {/* Logo avec effet glow */}
             <div className="flex justify-center">
