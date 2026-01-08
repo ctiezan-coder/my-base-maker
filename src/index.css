@@ -213,4 +213,14 @@ All colors MUST be HSL.
   z-index: 400;
 }
 
+/* Animation pour les lignes de connexion sur le globe */
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.animate-dash {
+  animation: dash 2s linear infinite;
+}
 

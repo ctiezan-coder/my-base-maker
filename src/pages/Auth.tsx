@@ -14,6 +14,7 @@ import { z } from 'zod';
 import logo from '@/assets/ci-export-logo.png';
 import { useUserRole } from '@/hooks/useUserRole';
 import { QuickApprovalPanel } from '@/components/admin/QuickApprovalPanel';
+import { WorldGlobeBackground } from '@/components/auth/WorldGlobeBackground';
 
 const loginSchema = z.object({
   email: z.string()
@@ -211,20 +212,13 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-      {/* Fond avec gradient animé */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/10" />
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
+      {/* Globe du monde en arrière-plan */}
+      <WorldGlobeBackground />
       
-      {/* Formes décoratives */}
-      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2 animate-pulse" />
-      <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-accent/15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-      
-      {/* Pattern hexagonal subtil */}
-      <div className="absolute inset-0 opacity-5" style={{
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 17.32v34.64L30 60L0 51.96V17.32L30 0z' fill='none' stroke='%23009846' stroke-width='1'/%3E%3C/svg%3E")`,
-        backgroundSize: '60px 60px'
-      }} />
+      {/* Formes décoratives subtiles */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
 
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 relative z-10">
         {/* Carte principale */}
