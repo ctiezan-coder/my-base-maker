@@ -3164,6 +3164,42 @@ export type Database = {
           },
         ]
       }
+      event_projects: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_projects_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_reports: {
         Row: {
           approved_at: string | null
@@ -8536,6 +8572,42 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      training_projects: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          training_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          training_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          training_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_projects_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       training_registrations: {
         Row: {

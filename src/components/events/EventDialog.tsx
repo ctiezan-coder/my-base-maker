@@ -131,7 +131,7 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
             start_date: formData.start_date || null,
             end_date: formData.end_date || null,
             project_type: 'Événement commercial',
-            priority_level: '2',
+            priority_level: '1' as const,
           };
 
           const { data: projectResult, error: projectError } = await supabase
@@ -143,9 +143,9 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
           if (projectError) {
             console.error("Erreur lors de la création du projet associé:", projectError);
           } else if (projectResult) {
-            // Lier l'événement au projet via event_projects si la table existe
+            // Lier l'événement au projet via event_projects
             const { error: linkError } = await supabase
-              .from("event_projects")
+              .from("event_projects" as any)
               .insert([{
                 event_id: newEvent.id,
                 project_id: projectResult.id,
