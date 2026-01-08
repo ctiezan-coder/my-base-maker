@@ -14,7 +14,6 @@ import { z } from 'zod';
 import logo from '@/assets/ci-export-logo.png';
 import { useUserRole } from '@/hooks/useUserRole';
 import { QuickApprovalPanel } from '@/components/admin/QuickApprovalPanel';
-import { WorldGlobeBackground } from '@/components/auth/WorldGlobeBackground';
 
 const loginSchema = z.object({
   email: z.string()
@@ -213,9 +212,6 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
-      {/* Globe du monde en arrière-plan */}
-      <WorldGlobeBackground />
-      
       {/* Formes décoratives subtiles */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
