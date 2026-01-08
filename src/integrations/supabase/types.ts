@@ -5245,6 +5245,50 @@ export type Database = {
           },
         ]
       }
+      mission_alerts: {
+        Row: {
+          alert_message: string
+          alert_type: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          is_resolved: boolean | null
+          mission_id: string
+          resolved_at: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          alert_message: string
+          alert_type: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          mission_id: string
+          resolved_at?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          alert_message?: string
+          alert_type?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          is_resolved?: boolean | null
+          mission_id?: string
+          resolved_at?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_alerts_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_attachments: {
         Row: {
           created_at: string | null
@@ -5289,75 +5333,558 @@ export type Database = {
           },
         ]
       }
+      mission_expenses: {
+        Row: {
+          amount: number
+          comptable_comments: string | null
+          created_at: string | null
+          currency: string | null
+          description: string
+          expense_category: string
+          expense_date: string | null
+          id: string
+          is_justified: boolean | null
+          justification_status: string | null
+          mission_id: string
+          receipt_number: string | null
+          receipt_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          comptable_comments?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description: string
+          expense_category: string
+          expense_date?: string | null
+          id?: string
+          is_justified?: boolean | null
+          justification_status?: string | null
+          mission_id: string
+          receipt_number?: string | null
+          receipt_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          comptable_comments?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string
+          expense_category?: string
+          expense_date?: string | null
+          id?: string
+          is_justified?: boolean | null
+          justification_status?: string | null
+          mission_id?: string
+          receipt_number?: string | null
+          receipt_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_expenses_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_itineraries: {
+        Row: {
+          accommodation: string | null
+          arrival_date: string | null
+          arrival_location: string
+          created_at: string | null
+          departure_date: string | null
+          departure_location: string
+          id: string
+          mission_id: string
+          notes: string | null
+          step_order: number
+          transport_details: string | null
+          transport_mode: string | null
+        }
+        Insert: {
+          accommodation?: string | null
+          arrival_date?: string | null
+          arrival_location: string
+          created_at?: string | null
+          departure_date?: string | null
+          departure_location: string
+          id?: string
+          mission_id: string
+          notes?: string | null
+          step_order: number
+          transport_details?: string | null
+          transport_mode?: string | null
+        }
+        Update: {
+          accommodation?: string | null
+          arrival_date?: string | null
+          arrival_location?: string
+          created_at?: string | null
+          departure_date?: string | null
+          departure_location?: string
+          id?: string
+          mission_id?: string
+          notes?: string | null
+          step_order?: number
+          transport_details?: string | null
+          transport_mode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_itineraries_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_liquidations: {
+        Row: {
+          accounting_entry_number: string | null
+          advance_received: number | null
+          amount_to_refund: number | null
+          amount_to_reimburse: number | null
+          analytical_code: string | null
+          comptable_comments: string | null
+          comptable_id: string | null
+          comptable_validation_date: string | null
+          created_at: string | null
+          id: string
+          mission_id: string
+          payment_date: string | null
+          payment_reference: string | null
+          status: Database["public"]["Enums"]["liquidation_status"] | null
+          total_expenses: number | null
+          updated_at: string | null
+          variance: number | null
+        }
+        Insert: {
+          accounting_entry_number?: string | null
+          advance_received?: number | null
+          amount_to_refund?: number | null
+          amount_to_reimburse?: number | null
+          analytical_code?: string | null
+          comptable_comments?: string | null
+          comptable_id?: string | null
+          comptable_validation_date?: string | null
+          created_at?: string | null
+          id?: string
+          mission_id: string
+          payment_date?: string | null
+          payment_reference?: string | null
+          status?: Database["public"]["Enums"]["liquidation_status"] | null
+          total_expenses?: number | null
+          updated_at?: string | null
+          variance?: number | null
+        }
+        Update: {
+          accounting_entry_number?: string | null
+          advance_received?: number | null
+          amount_to_refund?: number | null
+          amount_to_reimburse?: number | null
+          analytical_code?: string | null
+          comptable_comments?: string | null
+          comptable_id?: string | null
+          comptable_validation_date?: string | null
+          created_at?: string | null
+          id?: string
+          mission_id?: string
+          payment_date?: string | null
+          payment_reference?: string | null
+          status?: Database["public"]["Enums"]["liquidation_status"] | null
+          total_expenses?: number | null
+          updated_at?: string | null
+          variance?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_liquidations_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mission_orders: {
         Row: {
+          accommodation_cost: number | null
+          accounting_entry_ref: string | null
+          activities_summary: string | null
           actual_cost: number | null
+          actual_departure_date: string | null
+          actual_return_date: string | null
           advance_amount: number | null
+          advance_currency: string | null
+          advance_payment_date: string | null
+          advance_payment_mode:
+            | Database["public"]["Enums"]["payment_mode"]
+            | null
+          advance_status: Database["public"]["Enums"]["advance_status"] | null
+          advance_transaction_ref: string | null
+          agreements_made: string | null
+          airline: string | null
+          amount_to_refund: number | null
+          amount_to_reimburse: number | null
+          b2b_contacts_made: number | null
+          budget_alert_sent: boolean | null
+          budget_available: boolean | null
+          budget_line_id: string | null
+          budget_variance: number | null
+          converted_budget: number | null
+          cost_center: string | null
           created_at: string
           created_by: string | null
+          currency: string | null
+          departure_time: string | null
           destination: string
+          destination_cities: string[] | null
+          destination_country: string | null
+          difficulties_encountered: string | null
           direction_id: string | null
+          discussions_summary: string | null
+          documents_brought: string[] | null
+          driver_name: string | null
+          driver_phone: string | null
           duration_days: number
+          emergency_contact_local: string | null
           employee_id: string
           end_date: string
           estimated_budget: number | null
+          exchange_rate: number | null
+          expected_results: string | null
+          extended_status:
+            | Database["public"]["Enums"]["mission_status_extended"]
+            | null
+          flight_arrival_time: string | null
+          flight_class: string | null
+          flight_departure_time: string | null
+          flight_number: string | null
+          gps_coordinates: Json | null
+          hotel_address: string | null
+          hotel_check_in: string | null
+          hotel_check_out: string | null
+          hotel_confirmation_ref: string | null
+          hotel_name: string | null
+          hotel_nights: number | null
           id: string
+          insurance_cost: number | null
+          justification: string | null
+          liquidation_date: string | null
+          liquidation_status:
+            | Database["public"]["Enums"]["liquidation_status"]
+            | null
+          liquidation_transaction_ref: string | null
+          liquidation_validated_by: string | null
+          local_contact_name: string | null
+          local_contact_phone: string | null
+          mission_incidents: string | null
           mission_number: string
+          mission_type: Database["public"]["Enums"]["mission_type"] | null
           notes: string | null
+          objectives_achieved: string | null
+          opportunities_identified: string | null
+          other_costs: number | null
+          passport_alert_sent: boolean | null
+          passport_expiry: string | null
+          people_met: string | null
+          per_diem_amount: number | null
+          per_diem_days: number | null
+          photos_uploaded: string[] | null
+          places_to_visit: string[] | null
+          pnr_reference: string | null
+          program_changes: string | null
           project_id: string | null
           purpose: string
+          recommendations: string | null
+          rental_agency: string | null
+          rental_vehicle_type: string | null
           report: string | null
+          report_due_date: string | null
+          report_submitted_date: string | null
+          report_validated: boolean | null
+          report_validated_by: string | null
+          report_validated_date: string | null
+          request_date: string | null
+          requester_matricule: string | null
+          requester_position: string | null
+          return_time: string | null
           start_date: string
           status: Database["public"]["Enums"]["mission_status"]
+          total_actual_expenses: number | null
+          transport_cost: number | null
+          travel_insurance_company: string | null
+          travel_insurance_number: string | null
           updated_at: string
+          urgency_level: Database["public"]["Enums"]["mission_urgency"] | null
+          vaccination_card_valid: boolean | null
+          vaccinations_required: string[] | null
           validated_by: string | null
           validation_date: string | null
+          visa_cost: number | null
+          visa_number: string | null
+          visa_obtained_date: string | null
+          visa_request_date: string | null
+          visa_required: boolean | null
+          visa_status: Database["public"]["Enums"]["visa_status"] | null
+          visa_type: string | null
+          weekend_days: number | null
+          working_days: number | null
         }
         Insert: {
+          accommodation_cost?: number | null
+          accounting_entry_ref?: string | null
+          activities_summary?: string | null
           actual_cost?: number | null
+          actual_departure_date?: string | null
+          actual_return_date?: string | null
           advance_amount?: number | null
+          advance_currency?: string | null
+          advance_payment_date?: string | null
+          advance_payment_mode?:
+            | Database["public"]["Enums"]["payment_mode"]
+            | null
+          advance_status?: Database["public"]["Enums"]["advance_status"] | null
+          advance_transaction_ref?: string | null
+          agreements_made?: string | null
+          airline?: string | null
+          amount_to_refund?: number | null
+          amount_to_reimburse?: number | null
+          b2b_contacts_made?: number | null
+          budget_alert_sent?: boolean | null
+          budget_available?: boolean | null
+          budget_line_id?: string | null
+          budget_variance?: number | null
+          converted_budget?: number | null
+          cost_center?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
+          departure_time?: string | null
           destination: string
+          destination_cities?: string[] | null
+          destination_country?: string | null
+          difficulties_encountered?: string | null
           direction_id?: string | null
+          discussions_summary?: string | null
+          documents_brought?: string[] | null
+          driver_name?: string | null
+          driver_phone?: string | null
           duration_days: number
+          emergency_contact_local?: string | null
           employee_id: string
           end_date: string
           estimated_budget?: number | null
+          exchange_rate?: number | null
+          expected_results?: string | null
+          extended_status?:
+            | Database["public"]["Enums"]["mission_status_extended"]
+            | null
+          flight_arrival_time?: string | null
+          flight_class?: string | null
+          flight_departure_time?: string | null
+          flight_number?: string | null
+          gps_coordinates?: Json | null
+          hotel_address?: string | null
+          hotel_check_in?: string | null
+          hotel_check_out?: string | null
+          hotel_confirmation_ref?: string | null
+          hotel_name?: string | null
+          hotel_nights?: number | null
           id?: string
+          insurance_cost?: number | null
+          justification?: string | null
+          liquidation_date?: string | null
+          liquidation_status?:
+            | Database["public"]["Enums"]["liquidation_status"]
+            | null
+          liquidation_transaction_ref?: string | null
+          liquidation_validated_by?: string | null
+          local_contact_name?: string | null
+          local_contact_phone?: string | null
+          mission_incidents?: string | null
           mission_number: string
+          mission_type?: Database["public"]["Enums"]["mission_type"] | null
           notes?: string | null
+          objectives_achieved?: string | null
+          opportunities_identified?: string | null
+          other_costs?: number | null
+          passport_alert_sent?: boolean | null
+          passport_expiry?: string | null
+          people_met?: string | null
+          per_diem_amount?: number | null
+          per_diem_days?: number | null
+          photos_uploaded?: string[] | null
+          places_to_visit?: string[] | null
+          pnr_reference?: string | null
+          program_changes?: string | null
           project_id?: string | null
           purpose: string
+          recommendations?: string | null
+          rental_agency?: string | null
+          rental_vehicle_type?: string | null
           report?: string | null
+          report_due_date?: string | null
+          report_submitted_date?: string | null
+          report_validated?: boolean | null
+          report_validated_by?: string | null
+          report_validated_date?: string | null
+          request_date?: string | null
+          requester_matricule?: string | null
+          requester_position?: string | null
+          return_time?: string | null
           start_date: string
           status?: Database["public"]["Enums"]["mission_status"]
+          total_actual_expenses?: number | null
+          transport_cost?: number | null
+          travel_insurance_company?: string | null
+          travel_insurance_number?: string | null
           updated_at?: string
+          urgency_level?: Database["public"]["Enums"]["mission_urgency"] | null
+          vaccination_card_valid?: boolean | null
+          vaccinations_required?: string[] | null
           validated_by?: string | null
           validation_date?: string | null
+          visa_cost?: number | null
+          visa_number?: string | null
+          visa_obtained_date?: string | null
+          visa_request_date?: string | null
+          visa_required?: boolean | null
+          visa_status?: Database["public"]["Enums"]["visa_status"] | null
+          visa_type?: string | null
+          weekend_days?: number | null
+          working_days?: number | null
         }
         Update: {
+          accommodation_cost?: number | null
+          accounting_entry_ref?: string | null
+          activities_summary?: string | null
           actual_cost?: number | null
+          actual_departure_date?: string | null
+          actual_return_date?: string | null
           advance_amount?: number | null
+          advance_currency?: string | null
+          advance_payment_date?: string | null
+          advance_payment_mode?:
+            | Database["public"]["Enums"]["payment_mode"]
+            | null
+          advance_status?: Database["public"]["Enums"]["advance_status"] | null
+          advance_transaction_ref?: string | null
+          agreements_made?: string | null
+          airline?: string | null
+          amount_to_refund?: number | null
+          amount_to_reimburse?: number | null
+          b2b_contacts_made?: number | null
+          budget_alert_sent?: boolean | null
+          budget_available?: boolean | null
+          budget_line_id?: string | null
+          budget_variance?: number | null
+          converted_budget?: number | null
+          cost_center?: string | null
           created_at?: string
           created_by?: string | null
+          currency?: string | null
+          departure_time?: string | null
           destination?: string
+          destination_cities?: string[] | null
+          destination_country?: string | null
+          difficulties_encountered?: string | null
           direction_id?: string | null
+          discussions_summary?: string | null
+          documents_brought?: string[] | null
+          driver_name?: string | null
+          driver_phone?: string | null
           duration_days?: number
+          emergency_contact_local?: string | null
           employee_id?: string
           end_date?: string
           estimated_budget?: number | null
+          exchange_rate?: number | null
+          expected_results?: string | null
+          extended_status?:
+            | Database["public"]["Enums"]["mission_status_extended"]
+            | null
+          flight_arrival_time?: string | null
+          flight_class?: string | null
+          flight_departure_time?: string | null
+          flight_number?: string | null
+          gps_coordinates?: Json | null
+          hotel_address?: string | null
+          hotel_check_in?: string | null
+          hotel_check_out?: string | null
+          hotel_confirmation_ref?: string | null
+          hotel_name?: string | null
+          hotel_nights?: number | null
           id?: string
+          insurance_cost?: number | null
+          justification?: string | null
+          liquidation_date?: string | null
+          liquidation_status?:
+            | Database["public"]["Enums"]["liquidation_status"]
+            | null
+          liquidation_transaction_ref?: string | null
+          liquidation_validated_by?: string | null
+          local_contact_name?: string | null
+          local_contact_phone?: string | null
+          mission_incidents?: string | null
           mission_number?: string
+          mission_type?: Database["public"]["Enums"]["mission_type"] | null
           notes?: string | null
+          objectives_achieved?: string | null
+          opportunities_identified?: string | null
+          other_costs?: number | null
+          passport_alert_sent?: boolean | null
+          passport_expiry?: string | null
+          people_met?: string | null
+          per_diem_amount?: number | null
+          per_diem_days?: number | null
+          photos_uploaded?: string[] | null
+          places_to_visit?: string[] | null
+          pnr_reference?: string | null
+          program_changes?: string | null
           project_id?: string | null
           purpose?: string
+          recommendations?: string | null
+          rental_agency?: string | null
+          rental_vehicle_type?: string | null
           report?: string | null
+          report_due_date?: string | null
+          report_submitted_date?: string | null
+          report_validated?: boolean | null
+          report_validated_by?: string | null
+          report_validated_date?: string | null
+          request_date?: string | null
+          requester_matricule?: string | null
+          requester_position?: string | null
+          return_time?: string | null
           start_date?: string
           status?: Database["public"]["Enums"]["mission_status"]
+          total_actual_expenses?: number | null
+          transport_cost?: number | null
+          travel_insurance_company?: string | null
+          travel_insurance_number?: string | null
           updated_at?: string
+          urgency_level?: Database["public"]["Enums"]["mission_urgency"] | null
+          vaccination_card_valid?: boolean | null
+          vaccinations_required?: string[] | null
           validated_by?: string | null
           validation_date?: string | null
+          visa_cost?: number | null
+          visa_number?: string | null
+          visa_obtained_date?: string | null
+          visa_request_date?: string | null
+          visa_required?: boolean | null
+          visa_status?: Database["public"]["Enums"]["visa_status"] | null
+          visa_type?: string | null
+          weekend_days?: number | null
+          working_days?: number | null
         }
         Relationships: [
           {
@@ -5386,6 +5913,222 @@ export type Database = {
             columns: ["validated_by"]
             isOneToOne: false
             referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_program_days: {
+        Row: {
+          activities: Json | null
+          contacts_to_meet: Json | null
+          created_at: string | null
+          day_date: string
+          day_number: number
+          events_to_cover: string[] | null
+          id: string
+          meetings: Json | null
+          mission_id: string
+          notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activities?: Json | null
+          contacts_to_meet?: Json | null
+          created_at?: string | null
+          day_date: string
+          day_number: number
+          events_to_cover?: string[] | null
+          id?: string
+          meetings?: Json | null
+          mission_id: string
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activities?: Json | null
+          contacts_to_meet?: Json | null
+          created_at?: string | null
+          day_date?: string
+          day_number?: number
+          events_to_cover?: string[] | null
+          id?: string
+          meetings?: Json | null
+          mission_id?: string
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_program_days_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_reports: {
+        Row: {
+          agreements: Json | null
+          b2b_contacts: Json | null
+          created_at: string | null
+          created_by: string | null
+          daily_activities: Json | null
+          difficulties: string | null
+          documents_collected: string[] | null
+          executive_summary: string | null
+          follow_up_actions: Json | null
+          id: string
+          mission_id: string
+          objectives_reminder: string | null
+          opportunities: Json | null
+          people_met: Json | null
+          photo_urls: string[] | null
+          recommendations: string | null
+          report_file_url: string | null
+          report_title: string
+          results_obtained: string | null
+          submitted_at: string | null
+          topics_discussed: string | null
+          updated_at: string | null
+          validated_at: string | null
+          validated_by: string | null
+          validation_comments: string | null
+        }
+        Insert: {
+          agreements?: Json | null
+          b2b_contacts?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          daily_activities?: Json | null
+          difficulties?: string | null
+          documents_collected?: string[] | null
+          executive_summary?: string | null
+          follow_up_actions?: Json | null
+          id?: string
+          mission_id: string
+          objectives_reminder?: string | null
+          opportunities?: Json | null
+          people_met?: Json | null
+          photo_urls?: string[] | null
+          recommendations?: string | null
+          report_file_url?: string | null
+          report_title: string
+          results_obtained?: string | null
+          submitted_at?: string | null
+          topics_discussed?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_comments?: string | null
+        }
+        Update: {
+          agreements?: Json | null
+          b2b_contacts?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          daily_activities?: Json | null
+          difficulties?: string | null
+          documents_collected?: string[] | null
+          executive_summary?: string | null
+          follow_up_actions?: Json | null
+          id?: string
+          mission_id?: string
+          objectives_reminder?: string | null
+          opportunities?: Json | null
+          people_met?: Json | null
+          photo_urls?: string[] | null
+          recommendations?: string | null
+          report_file_url?: string | null
+          report_title?: string
+          results_obtained?: string | null
+          submitted_at?: string | null
+          topics_discussed?: string | null
+          updated_at?: string | null
+          validated_at?: string | null
+          validated_by?: string | null
+          validation_comments?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_reports_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_settings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      mission_validations: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          id: string
+          mission_id: string
+          status: Database["public"]["Enums"]["validation_status"] | null
+          validated_at: string | null
+          validation_level: Database["public"]["Enums"]["validation_level"]
+          validator_id: string | null
+          validator_name: string | null
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          mission_id: string
+          status?: Database["public"]["Enums"]["validation_status"] | null
+          validated_at?: string | null
+          validation_level: Database["public"]["Enums"]["validation_level"]
+          validator_id?: string | null
+          validator_name?: string | null
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string | null
+          id?: string
+          mission_id?: string
+          status?: Database["public"]["Enums"]["validation_status"] | null
+          validated_at?: string | null
+          validation_level?: Database["public"]["Enums"]["validation_level"]
+          validator_id?: string | null
+          validator_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_validations_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "mission_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -6137,6 +6880,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      per_diem_rates: {
+        Row: {
+          accommodation_rate: number | null
+          city: string | null
+          country: string
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          daily_rate: number
+          effective_date: string | null
+          end_date: string | null
+          id: string
+          meal_rate: number | null
+          notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accommodation_rate?: number | null
+          city?: string | null
+          country: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          daily_rate: number
+          effective_date?: string | null
+          end_date?: string | null
+          id?: string
+          meal_rate?: number | null
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accommodation_rate?: number | null
+          city?: string | null
+          country?: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          daily_rate?: number
+          effective_date?: string | null
+          end_date?: string | null
+          id?: string
+          meal_rate?: number | null
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       permission_history: {
         Row: {
@@ -7951,6 +8742,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_overdue_mission_reports: { Args: never; Returns: undefined }
       create_notification: {
         Args: {
           p_message: string
@@ -8003,6 +8795,7 @@ export type Database = {
     }
     Enums: {
       accounting_entry_type: "Débit" | "Crédit"
+      advance_status: "En attente" | "Approuvée" | "Versée" | "Liquidée"
       app_module:
         | "companies"
         | "projects"
@@ -8069,6 +8862,12 @@ export type Database = {
         | "Congé paternité"
         | "Permission"
         | "Autre"
+      liquidation_status:
+        | "En attente"
+        | "En cours"
+        | "Validée"
+        | "Rejetée"
+        | "Soldée"
       market_region:
         | "Europe"
         | "Afrique"
@@ -8107,6 +8906,25 @@ export type Database = {
         | "En cours"
         | "Terminée"
         | "Annulée"
+      mission_status_extended:
+        | "Brouillon"
+        | "Soumise"
+        | "En validation N1"
+        | "En validation DAF"
+        | "En validation DG"
+        | "Approuvée"
+        | "Rejetée"
+        | "Annulée"
+        | "Planifiée"
+        | "En cours"
+        | "Terminée"
+        | "En attente rapport"
+        | "Rapport soumis"
+        | "En liquidation"
+        | "Liquidée"
+        | "Soldée"
+      mission_type: "Nationale" | "Internationale"
+      mission_urgency: "Normale" | "Urgente" | "Très urgente"
       niveau_categorisation: "Niveau 1" | "Niveau 2" | "Niveau 3"
       opportunity_status:
         | "URGENT"
@@ -8122,6 +8940,7 @@ export type Database = {
         | "Clôturée"
         | "Annulée"
       participation_type: "Foires" | "Salons" | "Jamais"
+      payment_mode: "Virement" | "Chèque" | "Espèces"
       phase_communication:
         | "Avant événement"
         | "Pendant événement"
@@ -8172,6 +8991,9 @@ export type Database = {
         | "Mission officielle"
         | "Journée Portes Ouvertes"
         | "Autre"
+      validation_level: "N1_Superieur" | "N2_DAF" | "N3_DG"
+      validation_status: "En attente" | "Approuvé" | "Rejeté"
+      visa_status: "Non requis" | "En cours" | "Obtenu" | "Refusé" | "Expiré"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -8300,6 +9122,7 @@ export const Constants = {
   public: {
     Enums: {
       accounting_entry_type: ["Débit", "Crédit"],
+      advance_status: ["En attente", "Approuvée", "Versée", "Liquidée"],
       app_module: [
         "companies",
         "projects",
@@ -8363,6 +9186,13 @@ export const Constants = {
         "Permission",
         "Autre",
       ],
+      liquidation_status: [
+        "En attente",
+        "En cours",
+        "Validée",
+        "Rejetée",
+        "Soldée",
+      ],
       market_region: [
         "Europe",
         "Afrique",
@@ -8404,6 +9234,26 @@ export const Constants = {
         "Terminée",
         "Annulée",
       ],
+      mission_status_extended: [
+        "Brouillon",
+        "Soumise",
+        "En validation N1",
+        "En validation DAF",
+        "En validation DG",
+        "Approuvée",
+        "Rejetée",
+        "Annulée",
+        "Planifiée",
+        "En cours",
+        "Terminée",
+        "En attente rapport",
+        "Rapport soumis",
+        "En liquidation",
+        "Liquidée",
+        "Soldée",
+      ],
+      mission_type: ["Nationale", "Internationale"],
+      mission_urgency: ["Normale", "Urgente", "Très urgente"],
       niveau_categorisation: ["Niveau 1", "Niveau 2", "Niveau 3"],
       opportunity_status: [
         "URGENT",
@@ -8421,6 +9271,7 @@ export const Constants = {
         "Annulée",
       ],
       participation_type: ["Foires", "Salons", "Jamais"],
+      payment_mode: ["Virement", "Chèque", "Espèces"],
       phase_communication: [
         "Avant événement",
         "Pendant événement",
@@ -8471,6 +9322,9 @@ export const Constants = {
         "Journée Portes Ouvertes",
         "Autre",
       ],
+      validation_level: ["N1_Superieur", "N2_DAF", "N3_DG"],
+      validation_status: ["En attente", "Approuvé", "Rejeté"],
+      visa_status: ["Non requis", "En cours", "Obtenu", "Refusé", "Expiré"],
     },
   },
 } as const
