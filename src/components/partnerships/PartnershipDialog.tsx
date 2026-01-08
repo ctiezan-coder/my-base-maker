@@ -74,6 +74,21 @@ const DOMAINS = [
   "Marketing"
 ];
 
+// Map partnership status to project status
+const mapPartnershipStatusToProjectStatus = (partnershipStatus: string): string => {
+  const statusMap: Record<string, string> = {
+    'prospection': 'planifié',
+    'en négociation': 'planifié',
+    'signé': 'en cours',
+    'actif': 'en cours',
+    'suspendu': 'en pause',
+    'expiré': 'terminé',
+    'renouvelé': 'en cours',
+    'résilié': 'annulé'
+  };
+  return statusMap[partnershipStatus] || 'planifié';
+};
+
 export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: PartnershipDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -285,30 +300,68 @@ export function PartnershipDialog({ open, onOpenChange, partnership, onClose }: 
 
         if (error) throw error;
         partnershipId = data.id;
+
+        // Automatically create a project for this partnership
+        const projectData = {
+          name: `Partenariat: ${formData.partner_name}`,
+          description: formData.description || `Projet lié au partenariat avec ${formData.partner_name}`,
+          direction_id: directionId,
+          status: mapPartnershipStatusToProjectStatus(formData.status),
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          budget: formData.budget ? parseFloat(formData.budget) : null,
+          project_type: 'partenariat',
+          priority_level: '3' as const, // Medium priority
+        };
+
+        const { data: projectResult, error: projectError } = await supabase
+          .from("projects")
+          .insert([projectData])
+          .select()
+          .single();
+
+        if (projectError) {
+          console.error("Erreur lors de la création du projet associé:", projectError);
+        } else {
+          // Link the partnership to the project
+          const { error: linkError } = await supabase
+            .from("partnership_projects")
+            .insert([{
+              partnership_id: partnershipId,
+              project_id: projectResult.id,
+            }]);
+
+          if (linkError) {
+            console.error("Erreur lors du lien partenariat-projet:", linkError);
+          }
+        }
       }
 
-      // Delete existing project links
-      await supabase
-        .from("partnership_projects")
-        .delete()
-        .eq("partnership_id", partnershipId);
-
-      // Insert new project links
-      if (selectedProjects.length > 0) {
-        const projectLinks = selectedProjects.map(projectId => ({
-          partnership_id: partnershipId,
-          project_id: projectId,
-        }));
-
-        const { error: linkError } = await supabase
+      // For updates, manage selected projects
+      if (partnership) {
+        // Delete existing project links
+        await supabase
           .from("partnership_projects")
-          .insert(projectLinks);
+          .delete()
+          .eq("partnership_id", partnershipId);
 
-        if (linkError) throw linkError;
+        // Insert new project links
+        if (selectedProjects.length > 0) {
+          const projectLinks = selectedProjects.map(projectId => ({
+            partnership_id: partnershipId,
+            project_id: projectId,
+          }));
+
+          const { error: linkError } = await supabase
+            .from("partnership_projects")
+            .insert(projectLinks);
+
+          if (linkError) throw linkError;
+        }
       }
 
       toast({ 
-        title: partnership ? "Partenariat mis à jour avec succès" : "Partenariat créé avec succès"
+        title: partnership ? "Partenariat mis à jour avec succès" : "Partenariat créé avec succès (projet associé créé automatiquement)"
       });
       onClose();
     } catch (error: any) {
