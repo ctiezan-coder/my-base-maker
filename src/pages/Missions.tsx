@@ -1,152 +1,151 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plane, MapPin, Calendar, DollarSign, Plus } from "lucide-react";
+import { Plus, FileBarChart, Settings } from "lucide-react";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { useMissions } from "@/hooks/useMissions";
+import { MissionStatsCards } from "@/components/missions/MissionStatsCards";
+import { MissionFilters } from "@/components/missions/MissionFilters";
+import { MissionTable } from "@/components/missions/MissionTable";
+import { MissionDetailsDialog } from "@/components/missions/MissionDetailsDialog";
 import { MissionOrderDialog } from "@/components/missions/MissionOrderDialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MissionDashboard } from "@/components/missions/MissionDashboard";
+import { MissionSettings } from "@/components/missions/MissionSettings";
+import type { MissionOrder } from "@/types/mission";
 
 export default function Missions() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { canAccess: isManager } = useCanAccessModule('missions', 'manager');
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedMission, setSelectedMission] = useState<MissionOrder | null>(null);
+  const [editingMission, setEditingMission] = useState<MissionOrder | null>(null);
+  const [activeTab, setActiveTab] = useState("list");
+  
+  // Filters state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
 
-  const { data: missions } = useQuery({
-    queryKey: ['mission_orders'],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from('mission_orders')
-        .select('*, employee:employees!mission_orders_employee_id_fkey(first_name, last_name), direction:directions(name)')
-        .order('created_at', { ascending: false });
-      return data || [];
+  const { canAccess: isManager } = useCanAccessModule('missions', 'manager');
+  const { canAccess: isAdmin } = useCanAccessModule('missions', 'admin');
+  const { missions, isLoading, stats } = useMissions();
+
+  // Apply filters
+  const filteredMissions = missions?.filter((mission) => {
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = 
+        mission.mission_number?.toLowerCase().includes(searchLower) ||
+        mission.purpose?.toLowerCase().includes(searchLower) ||
+        mission.destination?.toLowerCase().includes(searchLower) ||
+        mission.destination_country?.toLowerCase().includes(searchLower);
+      if (!matchesSearch) return false;
     }
+    if (statusFilter !== "all" && mission.extended_status !== statusFilter) return false;
+    if (typeFilter !== "all" && mission.mission_type !== typeFilter) return false;
+    return true;
   });
 
-  const getStatusColor = (status: string) => {
-    const colors: Record<string, string> = {
-      'Brouillon': 'bg-gray-500',
-      'En attente validation': 'bg-yellow-500',
-      'Validée': 'bg-blue-500',
-      'En cours': 'bg-green-500',
-      'Terminée': 'bg-gray-700',
-      'Annulée': 'bg-red-500'
-    };
-    return colors[status] || 'bg-gray-500';
+  const handleViewDetails = (mission: MissionOrder) => {
+    setSelectedMission(mission);
+    setDetailsDialogOpen(true);
   };
 
-  const stats = {
-    total: missions?.length || 0,
-    validated: missions?.filter(m => m.status === 'Validée').length || 0,
-    ongoing: missions?.filter(m => m.status === 'En cours').length || 0,
-    completed: missions?.filter(m => m.status === 'Terminée').length || 0
+  const handleEdit = (mission: MissionOrder) => {
+    setEditingMission(mission);
+    setDialogOpen(true);
+  };
+
+  const handleCreateNew = () => {
+    setEditingMission(null);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) {
+      setEditingMission(null);
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setStatusFilter("all");
+    setTypeFilter("all");
   };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Module Gestion des Missions</h1>
-          <p className="text-muted-foreground">Ordres de mission et déplacements</p>
+          <h1 className="text-3xl font-bold">Module Ordres de Mission</h1>
+          <p className="text-muted-foreground">Gestion complète des missions et déplacements</p>
         </div>
         {isManager && (
-          <Button onClick={() => setDialogOpen(true)}>
+          <Button onClick={handleCreateNew}>
             <Plus className="mr-2 h-4 w-4" />
             Nouvel Ordre de Mission
           </Button>
         )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Missions</CardTitle>
-            <Plane className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Validées</CardTitle>
-            <Calendar className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.validated}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En Cours</CardTitle>
-            <MapPin className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.ongoing}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Terminées</CardTitle>
-            <DollarSign className="h-4 w-4 text-gray-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.completed}</div>
-          </CardContent>
-        </Card>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="list">Liste des Missions</TabsTrigger>
+          <TabsTrigger value="dashboard">
+            <FileBarChart className="mr-2 h-4 w-4" />
+            Tableau de Bord
+          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="settings">
+              <Settings className="mr-2 h-4 w-4" />
+              Paramètres
+            </TabsTrigger>
+          )}
+        </TabsList>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Liste des Ordres de Mission</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>N° Mission</TableHead>
-                <TableHead>Employé</TableHead>
-                <TableHead>Destination</TableHead>
-                <TableHead>Période</TableHead>
-                <TableHead>Durée</TableHead>
-                <TableHead>Budget</TableHead>
-                <TableHead>Statut</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {missions?.map((mission) => (
-                <TableRow key={mission.id}>
-                  <TableCell className="font-medium">{mission.mission_number}</TableCell>
-                  <TableCell>
-                    {mission.employee?.first_name} {mission.employee?.last_name}
-                  </TableCell>
-                  <TableCell>{mission.destination}</TableCell>
-                  <TableCell>
-                    {new Date(mission.start_date).toLocaleDateString('fr-FR')} - {new Date(mission.end_date).toLocaleDateString('fr-FR')}
-                  </TableCell>
-                  <TableCell>{mission.duration_days} jours</TableCell>
-                  <TableCell>
-                    {mission.estimated_budget ? `${mission.estimated_budget.toLocaleString()} FCFA` : 'N/A'}
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(mission.status)}>{mission.status}</Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-              {missions?.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground">
-                    Aucune mission
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+        <TabsContent value="list" className="space-y-6">
+          <MissionStatsCards stats={stats} />
+          
+          <MissionFilters 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            typeFilter={typeFilter}
+            onTypeChange={setTypeFilter}
+            onClear={handleClearFilters}
+          />
+          
+          <MissionTable 
+            missions={filteredMissions || []} 
+            onView={handleViewDetails}
+            onEdit={handleEdit}
+          />
+        </TabsContent>
 
-      <MissionOrderDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+        <TabsContent value="dashboard">
+          <MissionDashboard missions={missions || []} stats={stats} />
+        </TabsContent>
+
+        {isAdmin && (
+          <TabsContent value="settings">
+            <MissionSettings />
+          </TabsContent>
+        )}
+      </Tabs>
+
+      <MissionOrderDialog
+        open={dialogOpen} 
+        onOpenChange={handleDialogClose}
+        mission={editingMission}
+      />
+
+      <MissionDetailsDialog
+        open={detailsDialogOpen}
+        onOpenChange={setDetailsDialogOpen}
+        mission={selectedMission}
+        onEdit={() => selectedMission && handleEdit(selectedMission)}
+      />
     </div>
   );
 }
