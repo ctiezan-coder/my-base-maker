@@ -18,14 +18,27 @@ export const WorldGlobeBackground = () => {
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {/* Image du globe du monde avec couleur verte de la plateforme */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <img
-          src={worldGlobeImage}
-          alt="Globe du monde"
-          className="w-[140%] max-w-none h-auto opacity-30 object-contain translate-y-[5%]"
-          style={{
-            filter: 'hue-rotate(120deg) saturate(1.5) brightness(0.9)',
-          }}
-        />
+        <div className="relative w-[140%] h-auto translate-y-[5%]">
+          {/* Image en niveaux de gris */}
+          <img
+            src={worldGlobeImage}
+            alt="Globe du monde"
+            className="w-full h-auto object-contain"
+            style={{
+              filter: 'grayscale(100%) brightness(0.4)',
+              opacity: 0.9,
+            }}
+          />
+          {/* Overlay vert avec blend mode */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              backgroundColor: 'hsl(152, 100%, 22%)',
+              mixBlendMode: 'screen',
+              opacity: 0.8,
+            }}
+          />
+        </div>
       </div>
 
       {/* Marqueurs de localisation animés */}
