@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Plus, Search, FileText, FolderPlus, Upload, Folder, ChevronRight, Home, LayoutList, TreePine } from "lucide-react";
+import { Plus, Search, FileText, FolderPlus, Upload, Folder, ChevronRight, Home, LayoutList, TreePine, Share2 } from "lucide-react";
 import { DocumentDialog } from "@/components/documents/DocumentDialog";
 import { DocumentList } from "@/components/documents/DocumentList";
 import { FolderDialog } from "@/components/documents/FolderDialog";
 import { FileUploadDialog } from "@/components/documents/FileUploadDialog";
 import { FolderTreeView } from "@/components/documents/FolderTreeView";
+import { ShareDialog } from "@/components/documents/ShareDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
@@ -25,7 +26,8 @@ export default function Documents() {
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null);
   const [folderPath, setFolderPath] = useState<any[]>([]);
   const [viewMode, setViewMode] = useState<"grid" | "tree">("grid");
-
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [folderToShare, setFolderToShare] = useState<any>(null);
   const { data: folders, refetch: refetchFolders } = useQuery({
     queryKey: ["folders", currentFolderId],
     queryFn: async () => {
@@ -342,6 +344,19 @@ export default function Documents() {
                           className="flex-1 text-xs"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setFolderToShare(folder);
+                            setShareDialogOpen(true);
+                          }}
+                        >
+                          <Share2 className="w-3 h-3 mr-1" />
+                          Partager
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setCurrentFolderId(folder.id);
                             setFolderDialogOpen(true);
                           }}
@@ -409,6 +424,16 @@ export default function Documents() {
         folderId={currentFolderId}
         onClose={handleCloseUploadDialog}
       />
+
+      {folderToShare && (
+        <ShareDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          itemType="folder"
+          itemId={folderToShare.id}
+          itemName={folderToShare.name}
+        />
+      )}
     </div>
   );
 }

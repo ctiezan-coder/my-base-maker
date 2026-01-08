@@ -2496,6 +2496,36 @@ export type Database = {
         }
         Relationships: []
       }
+      document_shares: {
+        Row: {
+          created_at: string
+          id: string
+          item_id: string
+          item_type: string
+          permission_level: string
+          shared_by: string
+          shared_with: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_id: string
+          item_type: string
+          permission_level?: string
+          shared_by: string
+          shared_with: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_id?: string
+          item_type?: string
+          permission_level?: string
+          shared_by?: string
+          shared_with?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           category: string | null
@@ -8870,6 +8900,8 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_document_access: { Args: { doc_id: string }; Returns: boolean }
+      has_folder_access: { Args: { folder_id: string }; Returns: boolean }
       has_module_permission: {
         Args: {
           _direction_id: string
