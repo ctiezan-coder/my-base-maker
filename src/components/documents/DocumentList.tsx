@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Download, FileText, AlertTriangle } from "lucide-react";
+import { Pencil, Trash2, Download, FileText, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
@@ -17,6 +17,7 @@ import {
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { ShareDialog } from "./ShareDialog";
 
 interface DocumentListProps {
   documents: any[];
@@ -30,6 +31,8 @@ export function DocumentList({ documents, isLoading, onEdit, onDelete, canManage
   const { toast } = useToast();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<any>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [documentToShare, setDocumentToShare] = useState<any>(null);
 
   const handleDownload = async (doc: any) => {
     try {
@@ -63,6 +66,11 @@ export function DocumentList({ documents, isLoading, onEdit, onDelete, canManage
       setDeleteDialogOpen(false);
       setDocumentToDelete(null);
     }
+  };
+
+  const handleShareClick = (document: any) => {
+    setDocumentToShare(document);
+    setShareDialogOpen(true);
   };
 
   const getPriorityColor = (level: string) => {
@@ -128,6 +136,14 @@ export function DocumentList({ documents, isLoading, onEdit, onDelete, canManage
                   )}
                   {canManage && (
                     <>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleShareClick(doc)}
+                        title="Partager"
+                      >
+                        <Share2 className="w-4 h-4 text-primary" />
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => onEdit(doc)}>
                         <Pencil className="w-4 h-4" />
                       </Button>
@@ -172,6 +188,16 @@ export function DocumentList({ documents, isLoading, onEdit, onDelete, canManage
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {documentToShare && (
+        <ShareDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          itemType="document"
+          itemId={documentToShare.id}
+          itemName={documentToShare.title}
+        />
+      )}
     </>
   );
 }
