@@ -16,14 +16,14 @@ const exportMarkers = [
 export const WorldGlobeBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Image du globe du monde */}
+      {/* Image du globe du monde avec couleur verte de la plateforme */}
       <div className="absolute inset-0 flex items-center justify-center">
         <img
           src={worldGlobeImage}
           alt="Globe du monde"
-          className="w-[140%] max-w-none h-auto opacity-25 object-contain translate-y-[5%]"
+          className="w-[140%] max-w-none h-auto opacity-30 object-contain translate-y-[5%]"
           style={{
-            filter: 'hue-rotate(-10deg) saturate(1.2)',
+            filter: 'hue-rotate(120deg) saturate(1.5) brightness(0.9)',
           }}
         />
       </div>
