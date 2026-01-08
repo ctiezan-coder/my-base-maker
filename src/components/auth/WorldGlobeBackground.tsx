@@ -42,18 +42,19 @@ export const WorldGlobeBackground = () => {
             <div className="relative group">
               {/* Effet de pulse autour du marqueur */}
               <div 
-                className="absolute inset-0 w-6 h-6 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/40 animate-ping"
-                style={{ animationDuration: '2.5s', animationDelay: `${index * 0.4}s` }}
+                className="absolute inset-0 w-6 h-6 -translate-x-1/2 -translate-y-1/2 rounded-full animate-ping"
+                style={{ animationDuration: '2.5s', animationDelay: `${index * 0.4}s`, backgroundColor: 'rgba(0, 92, 49, 0.4)' }}
               />
               {/* Cercle de fond */}
               <div 
-                className="absolute w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/60 animate-pulse"
-                style={{ animationDelay: `${index * 0.3}s` }}
+                className="absolute w-3 h-3 -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse"
+                style={{ animationDelay: `${index * 0.3}s`, backgroundColor: 'rgba(0, 92, 49, 0.6)' }}
               />
               <div className="relative">
                 <MapPin 
-                  className="w-6 h-6 text-secondary drop-shadow-lg" 
-                  fill="hsl(32, 94%, 54%)"
+                  className="w-6 h-6 drop-shadow-lg" 
+                  fill="#005C31"
+                  stroke="#005C31"
                   strokeWidth={1.5}
                 />
               </div>
