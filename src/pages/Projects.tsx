@@ -21,7 +21,7 @@ export default function Projects() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("en cours");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterDirection, setFilterDirection] = useState<string>("all");
   const [filterYear, setFilterYear] = useState<string>("all");
   const { data: userDirection } = useUserDirection();
