@@ -212,13 +212,13 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: 'hsl(152, 25%, 85%)' }}>
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden" style={{ backgroundColor: 'hsl(152, 22%, 65%)' }}>
       {/* Globe du monde en arrière-plan */}
       <WorldGlobeBackground />
 
       <div className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-8 p-4 relative z-10">
-        {/* Carte principale */}
-        <Card className="w-full backdrop-blur-sm bg-white border-0 shadow-2xl rounded-3xl">
+        {/* Carte principale - fond vert clair uni */}
+        <Card className="w-full border-0 shadow-2xl rounded-3xl" style={{ backgroundColor: 'hsl(152, 25%, 88%)' }}>
           <CardHeader className="space-y-4 text-center pb-2">
             {/* Logo avec effet glow */}
             <div className="flex justify-center">
