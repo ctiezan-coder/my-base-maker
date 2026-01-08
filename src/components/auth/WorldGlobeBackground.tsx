@@ -11,6 +11,18 @@ const exportMarkers = [
   { id: 6, x: 48, y: 50, label: 'Afrique' },
   { id: 7, x: 80, y: 65, label: 'Océanie' },
   { id: 8, x: 65, y: 45, label: 'Inde' },
+  { id: 9, x: 52, y: 30, label: 'Turquie' },
+  { id: 10, x: 70, y: 35, label: 'Chine' },
+  { id: 11, x: 78, y: 45, label: 'Japon' },
+  { id: 12, x: 42, y: 28, label: 'Royaume-Uni' },
+  { id: 13, x: 45, y: 32, label: 'France' },
+  { id: 14, x: 50, y: 28, label: 'Allemagne' },
+  { id: 15, x: 35, y: 55, label: 'Brésil' },
+  { id: 16, x: 58, y: 42, label: 'Émirats' },
+  { id: 17, x: 45, y: 45, label: 'Maroc' },
+  { id: 18, x: 50, y: 55, label: 'Afrique du Sud' },
+  { id: 19, x: 68, y: 50, label: 'Thaïlande' },
+  { id: 20, x: 15, y: 40, label: 'États-Unis Ouest' },
 ];
 
 export const WorldGlobeBackground = () => {
