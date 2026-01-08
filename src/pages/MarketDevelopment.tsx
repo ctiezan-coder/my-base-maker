@@ -18,8 +18,6 @@ import { OpportunityCard } from "@/components/market/OpportunityCard";
 import { MarketCard } from "@/components/market/MarketCard";
 import { ConnectionsTable } from "@/components/market/ConnectionsTable";
 import { OpportunityDialog } from "@/components/market/OpportunityDialog";
-import { MarketDialog } from "@/components/market/MarketDialog";
-import { ConnectionDialog } from "@/components/market/ConnectionDialog";
 import { ApplicationDialog } from "@/components/market/ApplicationDialog";
 import { SendToOperatorsDialog } from "@/components/market/SendToOperatorsDialog";
 import { WebMarketSearch } from "@/components/market/WebMarketSearch";
@@ -53,12 +51,6 @@ export default function MarketDevelopment() {
     sector: string;
   } | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  
-  // New dialog states
-  const [marketDialogOpen, setMarketDialogOpen] = useState(false);
-  const [connectionDialogOpen, setConnectionDialogOpen] = useState(false);
-  const [selectedMarket, setSelectedMarket] = useState<PotentialMarket | undefined>();
-  const [selectedConnection, setSelectedConnection] = useState<BusinessConnection | undefined>();
 
   // Fetch opportunities (excluding closed ones)
   const { data: opportunities = [], isLoading: loadingOpportunities, refetch: refetchOpportunities } = useQuery({
@@ -106,7 +98,7 @@ export default function MarketDevelopment() {
   });
 
   // Fetch potential markets
-  const { data: markets = [], isLoading: loadingMarkets, refetch: refetchMarkets } = useQuery({
+  const { data: markets = [], isLoading: loadingMarkets } = useQuery({
     queryKey: ["potential-markets", regionFilter],
     queryFn: async () => {
       let query = supabase
@@ -125,7 +117,7 @@ export default function MarketDevelopment() {
   });
 
   // Fetch business connections
-  const { data: connections = [], isLoading: loadingConnections, refetch: refetchConnections } = useQuery({
+  const { data: connections = [], isLoading: loadingConnections } = useQuery({
     queryKey: ["business-connections"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -242,14 +234,6 @@ export default function MarketDevelopment() {
         </TabsList>
 
         <TabsContent value="opportunities" className="space-y-6">
-          <div className="flex justify-end">
-            {canManageMarket && (
-              <Button onClick={() => { setSelectedOpportunity(undefined); setDialogMode("edit"); setDialogOpen(true); }} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Nouvelle opportunité
-              </Button>
-            )}
-          </div>
           <OpportunitiesMap 
             opportunities={opportunities}
             canManage={canManageMarket}
@@ -296,12 +280,6 @@ export default function MarketDevelopment() {
                 <SelectItem value="Moyen-Orient">Moyen-Orient</SelectItem>
               </SelectContent>
             </Select>
-            {canManageMarket && (
-              <Button onClick={() => { setSelectedMarket(undefined); setMarketDialogOpen(true); }} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Nouveau marché
-              </Button>
-            )}
           </div>
 
           {loadingMarkets ? (
@@ -323,14 +301,6 @@ export default function MarketDevelopment() {
         </TabsContent>
 
         <TabsContent value="connections" className="space-y-6">
-          <div className="flex justify-end">
-            {canManageMarket && (
-              <Button onClick={() => { setSelectedConnection(undefined); setConnectionDialogOpen(true); }} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Nouvelle mise en relation
-              </Button>
-            )}
-          </div>
           {loadingConnections ? (
             <p>Chargement...</p>
           ) : (
@@ -370,28 +340,6 @@ export default function MarketDevelopment() {
           opportunitySector={selectedOpportunityForOperators.sector}
         />
       )}
-
-      <MarketDialog
-        open={marketDialogOpen}
-        onOpenChange={setMarketDialogOpen}
-        market={selectedMarket}
-        onClose={() => {
-          setMarketDialogOpen(false);
-          setSelectedMarket(undefined);
-          refetchMarkets();
-        }}
-      />
-
-      <ConnectionDialog
-        open={connectionDialogOpen}
-        onOpenChange={setConnectionDialogOpen}
-        connection={selectedConnection}
-        onClose={() => {
-          setConnectionDialogOpen(false);
-          setSelectedConnection(undefined);
-          refetchConnections();
-        }}
-      />
     </div>
   );
 }

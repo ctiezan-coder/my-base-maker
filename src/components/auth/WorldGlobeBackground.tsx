@@ -16,35 +16,16 @@ const exportMarkers = [
 export const WorldGlobeBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Fond uni vert - même couleur partout */}
-      <div 
-        className="absolute inset-0" 
-        style={{ backgroundColor: 'hsl(152, 22%, 65%)' }} 
-      />
-
-      {/* Image du globe du monde avec couleur verte de la plateforme - sans bordure */}
-      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-        <div className="relative w-[150%] h-[150%] translate-y-[5%] translate-x-[15%]">
-          {/* Image en niveaux de gris */}
-          <img
-            src={worldGlobeImage}
-            alt="Globe du monde"
-            className="w-full h-full object-cover"
-            style={{
-              filter: 'grayscale(100%) brightness(0.7)',
-              opacity: 0.35,
-            }}
-          />
-          {/* Overlay vert avec blend mode */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundColor: 'hsl(152, 30%, 55%)',
-              mixBlendMode: 'multiply',
-              opacity: 1,
-            }}
-          />
-        </div>
+      {/* Image du globe du monde */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <img
+          src={worldGlobeImage}
+          alt="Globe du monde"
+          className="w-[140%] max-w-none h-auto opacity-25 object-contain translate-y-[5%]"
+          style={{
+            filter: 'hue-rotate(-10deg) saturate(1.2)',
+          }}
+        />
       </div>
 
       {/* Marqueurs de localisation animés */}
@@ -135,6 +116,9 @@ export const WorldGlobeBackground = () => {
         />
       </svg>
 
+      {/* Overlay gradient pour la lisibilité du formulaire */}
+      <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background/60" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background/50 via-transparent to-background/50" />
     </div>
   );
 };
