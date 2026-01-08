@@ -22,14 +22,14 @@ export const WorldGlobeBackground = () => {
         style={{ backgroundColor: 'hsl(152, 22%, 65%)' }} 
       />
 
-      {/* Image du globe du monde avec couleur verte de la plateforme */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-[140%] h-auto translate-y-[5%] translate-x-[15%]">
+      {/* Image du globe du monde avec couleur verte de la plateforme - sans bordure */}
+      <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+        <div className="relative w-[150%] h-[150%] translate-y-[5%] translate-x-[15%]">
           {/* Image en niveaux de gris */}
           <img
             src={worldGlobeImage}
             alt="Globe du monde"
-            className="w-full h-auto object-contain"
+            className="w-full h-full object-cover"
             style={{
               filter: 'grayscale(100%) brightness(0.7)',
               opacity: 0.35,

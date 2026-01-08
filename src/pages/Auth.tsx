@@ -220,14 +220,9 @@ export default function Auth() {
         {/* Carte principale - sans cadre, fond transparent */}
         <Card className="w-full border-0 shadow-none bg-transparent">
           <CardHeader className="space-y-4 text-center pb-2">
-            {/* Logo avec effet glow */}
+            {/* Logo sans cadre */}
             <div className="flex justify-center">
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-secondary rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-500" />
-                <div className="relative bg-card p-4 rounded-2xl border border-primary/10 shadow-lg">
-                  <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-20 w-auto" />
-                </div>
-              </div>
+              <img src={logo} alt="CÔTE D'IVOIRE EXPORT" className="h-20 w-auto" />
             </div>
             
             {/* Titre avec gradient */}
