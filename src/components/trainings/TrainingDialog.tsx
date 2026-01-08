@@ -246,7 +246,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
           } else if (projectResult) {
             // Lier la formation au projet via training_projects
             const { error: linkError } = await supabase
-              .from("training_projects" as any)
+              .from("training_projects")
               .insert([{
                 training_id: newTraining.id,
                 project_id: projectResult.id,
