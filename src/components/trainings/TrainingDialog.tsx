@@ -222,6 +222,42 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
 
         if (error) throw error;
 
+        // Créer automatiquement un projet associé à la formation
+        if (newTraining) {
+          const projectData = {
+            name: `Formation: ${formData.title}`,
+            description: formData.description || `Projet lié à la formation "${formData.title}"`,
+            direction_id: directionId,
+            status: 'planifié',
+            start_date: formData.start_date || null,
+            end_date: formData.end_date || null,
+            project_type: 'Formation',
+            priority_level: '1' as const,
+          };
+
+          const { data: projectResult, error: projectError } = await supabase
+            .from("projects")
+            .insert([projectData])
+            .select()
+            .single();
+
+          if (projectError) {
+            console.error("Erreur lors de la création du projet associé:", projectError);
+          } else if (projectResult) {
+            // Lier la formation au projet via training_projects
+            const { error: linkError } = await supabase
+              .from("training_projects" as any)
+              .insert([{
+                training_id: newTraining.id,
+                project_id: projectResult.id,
+              }]);
+
+            if (linkError) {
+              console.error("Erreur lors du lien formation-projet:", linkError);
+            }
+          }
+        }
+
         // Add trainer links
         if (selectedTrainers.length > 0 && newTraining) {
           const trainerLinks = selectedTrainers.map(trainerId => ({
@@ -279,7 +315,7 @@ export function TrainingDialog({ open, onOpenChange, training, onClose }: Traini
           }
         }
 
-        toast({ title: "Formation créée avec succès" });
+        toast({ title: "Formation créée avec succès (projet associé créé automatiquement)" });
       }
       onClose();
     } catch (error) {
