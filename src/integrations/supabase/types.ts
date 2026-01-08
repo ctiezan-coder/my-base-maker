@@ -6321,6 +6321,42 @@ export type Database = {
           },
         ]
       }
+      opportunity_projects: {
+        Row: {
+          created_at: string
+          id: string
+          opportunity_id: string
+          project_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          project_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_projects_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "export_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_projects_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partnership_actions: {
         Row: {
           action_description: string

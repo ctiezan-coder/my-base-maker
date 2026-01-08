@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useUserDirection } from "@/hooks/useUserDirection";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -65,6 +66,7 @@ export const OpportunityDialog = ({
 }: OpportunityDialogProps) => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { data: userDirection } = useUserDirection();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -108,12 +110,52 @@ export const OpportunityDialog = ({
         if (error) throw error;
         toast({ title: "Opportunité mise à jour avec succès" });
       } else {
-        const { error } = await supabase
+        const { data: newOpportunity, error } = await supabase
           .from("export_opportunities")
-          .insert([{ ...values, created_by: user.id } as any]);
+          .insert([{ ...values, created_by: user.id } as any])
+          .select()
+          .single();
 
         if (error) throw error;
-        toast({ title: "Opportunité créée avec succès" });
+
+        // Créer automatiquement un projet associé à l'opportunité export
+        if (newOpportunity) {
+          const projectData = {
+            name: `Opportunité Export: ${values.title}`,
+            description: values.description || `Projet lié à l'opportunité export "${values.title}" - ${values.destination_country}`,
+            direction_id: userDirection?.direction_id || null,
+            status: 'planifié',
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: values.deadline || null,
+            project_type: 'Développement de marché',
+            priority_level: values.status === 'URGENT' ? '1' as const : '3' as const,
+            budget: values.estimated_value || null,
+          };
+
+          const { data: projectResult, error: projectError } = await supabase
+            .from("projects")
+            .insert([projectData])
+            .select()
+            .single();
+
+          if (projectError) {
+            console.error("Erreur lors de la création du projet associé:", projectError);
+          } else if (projectResult) {
+            // Lier l'opportunité au projet
+            const { error: linkError } = await supabase
+              .from("opportunity_projects")
+              .insert([{
+                opportunity_id: newOpportunity.id,
+                project_id: projectResult.id,
+              }]);
+
+            if (linkError) {
+              console.error("Erreur lors du lien opportunité-projet:", linkError);
+            }
+          }
+        }
+
+        toast({ title: "Opportunité créée avec succès (projet associé créé automatiquement)" });
       }
 
       onClose();

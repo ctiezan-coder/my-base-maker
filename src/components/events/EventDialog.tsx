@@ -145,7 +145,7 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
           } else if (projectResult) {
             // Lier l'événement au projet via event_projects
             const { error: linkError } = await supabase
-              .from("event_projects" as any)
+              .from("event_projects")
               .insert([{
                 event_id: newEvent.id,
                 project_id: projectResult.id,
