@@ -51,7 +51,7 @@ export const WorldGlobeBackground = () => {
               top: `${marker.y}%`,
             }}
           >
-            <div className="relative group">
+            <div className="relative group flex flex-col items-center">
               {/* Effet de pulse autour du marqueur */}
               <div 
                 className="absolute inset-0 w-6 h-6 -translate-x-1/2 -translate-y-1/2 rounded-full animate-ping"
@@ -64,12 +64,19 @@ export const WorldGlobeBackground = () => {
               />
               <div className="relative">
                 <MapPin 
-                  className="w-6 h-6 drop-shadow-lg" 
+                  className="w-5 h-5 drop-shadow-lg" 
                   fill="#005C31"
                   stroke="#005C31"
                   strokeWidth={1.5}
                 />
               </div>
+              {/* Label du pays */}
+              <span 
+                className="mt-0.5 text-[9px] font-semibold text-[#005C31] whitespace-nowrap drop-shadow-sm bg-white/70 px-1 rounded"
+                style={{ textShadow: '0 1px 2px rgba(255,255,255,0.8)' }}
+              >
+                {marker.label}
+              </span>
             </div>
           </div>
         ))}
