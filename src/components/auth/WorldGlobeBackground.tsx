@@ -16,10 +16,10 @@ const exportMarkers = [
 export const WorldGlobeBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Fond uni vert clair */}
+      {/* Fond uni vert - même couleur partout */}
       <div 
         className="absolute inset-0" 
-        style={{ backgroundColor: 'hsl(152, 25%, 85%)' }} 
+        style={{ backgroundColor: 'hsl(152, 22%, 65%)' }} 
       />
 
       {/* Image du globe du monde avec couleur verte de la plateforme */}
@@ -31,15 +31,15 @@ export const WorldGlobeBackground = () => {
             alt="Globe du monde"
             className="w-full h-auto object-contain"
             style={{
-              filter: 'grayscale(100%) brightness(0.6)',
-              opacity: 0.4,
+              filter: 'grayscale(100%) brightness(0.7)',
+              opacity: 0.35,
             }}
           />
           {/* Overlay vert avec blend mode */}
           <div 
             className="absolute inset-0"
             style={{
-              backgroundColor: 'hsl(152, 35%, 65%)',
+              backgroundColor: 'hsl(152, 30%, 55%)',
               mixBlendMode: 'multiply',
               opacity: 1,
             }}
