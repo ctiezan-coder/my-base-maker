@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line, Legend } from "recharts";
 import { TrendingUp, PieChartIcon, BarChart3, Activity } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const COLORS = {
   primary: "hsl(152, 100%, 22%)",
@@ -12,8 +13,10 @@ const COLORS = {
 };
 
 export function MonthlyActivityChart() {
+  const { t, i18n } = useTranslation();
+  
   const { data: monthlyData, isLoading } = useQuery({
-    queryKey: ["monthly-activity"],
+    queryKey: ["monthly-activity", i18n.language],
     queryFn: async () => {
       const now = new Date();
       const months = [];
@@ -36,13 +39,13 @@ export function MonthlyActivityChart() {
             .gte("created_at", startDate).lt("created_at", endDate),
         ]);
         
-        const monthName = date.toLocaleDateString('fr-FR', { month: 'short' });
+        const locale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
+        const monthName = date.toLocaleDateString(locale, { month: 'short' });
         
         months.push({
           name: monthName.charAt(0).toUpperCase() + monthName.slice(1),
           operateurs: companies.count || 0,
           formations: trainings.count || 0,
-          evenements: events.count || 0,
           projets: projects.count || 0,
         });
       }
@@ -57,7 +60,7 @@ export function MonthlyActivityChart() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="w-5 h-5 text-primary" />
-            Activité Mensuelle
+            {t('index.monthlyActivity')}
           </CardTitle>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
@@ -75,9 +78,9 @@ export function MonthlyActivityChart() {
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <Activity className="w-4 h-4 text-primary" />
           </div>
-          Activité Mensuelle
+          {t('index.monthlyActivity')}
         </CardTitle>
-        <CardDescription>Évolution des activités sur 6 mois</CardDescription>
+        <CardDescription>{t('index.evolutionYearly')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
@@ -111,7 +114,7 @@ export function MonthlyActivityChart() {
             <Area 
               type="monotone" 
               dataKey="operateurs" 
-              name="Opérateurs"
+              name={t('index.operators')}
               stroke={COLORS.secondary} 
               fillOpacity={1} 
               fill="url(#colorOperateurs)" 
@@ -120,7 +123,7 @@ export function MonthlyActivityChart() {
             <Area 
               type="monotone" 
               dataKey="formations" 
-              name="Formations"
+              name={t('index.trainingsLegend')}
               stroke={COLORS.primary} 
               fillOpacity={1} 
               fill="url(#colorFormations)" 
@@ -129,7 +132,7 @@ export function MonthlyActivityChart() {
             <Area 
               type="monotone" 
               dataKey="projets" 
-              name="Projets"
+              name={t('index.projectsLegend')}
               stroke={COLORS.accent} 
               fillOpacity={1} 
               fill="url(#colorProjets)" 
@@ -143,6 +146,8 @@ export function MonthlyActivityChart() {
 }
 
 export function SectorDistributionChart() {
+  const { t } = useTranslation();
+  
   const { data: sectorData, isLoading } = useQuery({
     queryKey: ["sector-distribution"],
     queryFn: async () => {
@@ -154,7 +159,7 @@ export function SectorDistributionChart() {
       
       const sectorCounts: Record<string, number> = {};
       data.forEach((company) => {
-        const sector = company.activity_sector || "Non défini";
+        const sector = company.activity_sector || t('index.undefined');
         sectorCounts[sector] = (sectorCounts[sector] || 0) + 1;
       });
       
@@ -173,7 +178,7 @@ export function SectorDistributionChart() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <PieChartIcon className="w-5 h-5 text-accent" />
-            Répartition par Secteur
+            {t('index.sectorDistribution')}
           </CardTitle>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
@@ -191,9 +196,9 @@ export function SectorDistributionChart() {
           <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center">
             <PieChartIcon className="w-4 h-4 text-accent" />
           </div>
-          Répartition par Secteur
+          {t('index.sectorDistribution')}
         </CardTitle>
-        <CardDescription>Distribution des opérateurs par secteur d'activité</CardDescription>
+        <CardDescription>{t('index.sectorSubtitle')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
@@ -228,6 +233,8 @@ export function SectorDistributionChart() {
 }
 
 export function OpportunitiesChart() {
+  const { t } = useTranslation();
+  
   const { data: opportunityData, isLoading } = useQuery({
     queryKey: ["opportunities-by-region"],
     queryFn: async () => {
@@ -250,7 +257,7 @@ export function OpportunitiesChart() {
         .map(([region, data]) => ({
           region,
           opportunites: data.count,
-          valeur: Math.round(data.value / 1000000), // En millions
+          valeur: Math.round(data.value / 1000000),
         }))
         .sort((a, b) => b.opportunites - a.opportunites);
     },
@@ -262,7 +269,7 @@ export function OpportunitiesChart() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-secondary" />
-            Opportunités par Région
+            {t('index.opportunitiesByRegion')}
           </CardTitle>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
@@ -280,9 +287,9 @@ export function OpportunitiesChart() {
           <div className="w-8 h-8 rounded-lg bg-secondary/10 flex items-center justify-center">
             <BarChart3 className="w-4 h-4 text-secondary" />
           </div>
-          Opportunités par Région
+          {t('index.opportunitiesByRegion')}
         </CardTitle>
-        <CardDescription>Nombre d'opportunités et valeur estimée (en millions FCFA)</CardDescription>
+        <CardDescription>{t('index.opportunitiesValue')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
@@ -298,8 +305,8 @@ export function OpportunitiesChart() {
               }} 
             />
             <Legend />
-            <Bar dataKey="opportunites" name="Opportunités" fill={COLORS.secondary} radius={[0, 4, 4, 0]} />
-            <Bar dataKey="valeur" name="Valeur (M FCFA)" fill={COLORS.accent} radius={[0, 4, 4, 0]} />
+            <Bar dataKey="opportunites" name={t('index.opportunitiesLegend')} fill={COLORS.secondary} radius={[0, 4, 4, 0]} />
+            <Bar dataKey="valeur" name={t('index.valueMFCFA')} fill={COLORS.accent} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </CardContent>
@@ -308,8 +315,10 @@ export function OpportunitiesChart() {
 }
 
 export function ConnectionsEvolutionChart() {
+  const { t, i18n } = useTranslation();
+  
   const { data: connectionsData, isLoading } = useQuery({
-    queryKey: ["connections-evolution"],
+    queryKey: ["connections-evolution", i18n.language],
     queryFn: async () => {
       const { data } = await supabase
         .from("business_connections")
@@ -334,11 +343,13 @@ export function ConnectionsEvolutionChart() {
         }
       });
       
+      const locale = i18n.language === 'en' ? 'en-US' : 'fr-FR';
+      
       return Object.entries(monthlyData)
         .map(([month, data]) => {
           const date = new Date(month + '-01');
           return {
-            month: date.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }),
+            month: date.toLocaleDateString(locale, { month: 'short', year: '2-digit' }),
             connexions: data.count,
             reussies: data.successful,
             valeur: Math.round(data.value / 1000000),
@@ -354,7 +365,7 @@ export function ConnectionsEvolutionChart() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-primary" />
-            Évolution des Connexions B2B
+            {t('index.connectionsEvolution')}
           </CardTitle>
         </CardHeader>
         <CardContent className="h-[300px] flex items-center justify-center">
@@ -372,9 +383,9 @@ export function ConnectionsEvolutionChart() {
           <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
             <TrendingUp className="w-4 h-4 text-primary" />
           </div>
-          Évolution des Connexions B2B
+          {t('index.connectionsEvolution')}
         </CardTitle>
-        <CardDescription>Tendance des mises en relation commerciales</CardDescription>
+        <CardDescription>{t('index.connectionsSubtitle')}</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={280}>
@@ -393,7 +404,7 @@ export function ConnectionsEvolutionChart() {
             <Line 
               type="monotone" 
               dataKey="connexions" 
-              name="Total Connexions"
+              name={t('index.totalConnections')}
               stroke={COLORS.primary} 
               strokeWidth={3}
               dot={{ fill: COLORS.primary, strokeWidth: 2, r: 4 }}
@@ -402,7 +413,7 @@ export function ConnectionsEvolutionChart() {
             <Line 
               type="monotone" 
               dataKey="reussies" 
-              name="Connexions Réussies"
+              name={t('index.successfulConnections')}
               stroke={COLORS.secondary} 
               strokeWidth={3}
               dot={{ fill: COLORS.secondary, strokeWidth: 2, r: 4 }}

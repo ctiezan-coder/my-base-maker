@@ -450,18 +450,18 @@ const Index = () => {
                 <Activity className="w-5 h-5 text-white" />
               </div>
               <div>
-                <span className="text-xl">Résumé d'Activité</span>
-                <CardDescription className="mt-1">Vue d'ensemble des ressources</CardDescription>
+                <span className="text-xl">{t('index.activitySummary')}</span>
+                <CardDescription className="mt-1">{t('index.resourcesOverview')}</CardDescription>
               </div>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Formations", value: stats?.trainings || 0, icon: GraduationCap, color: "primary" },
-                { label: "Événements", value: stats?.events || 0, icon: Calendar, color: "secondary" },
-                { label: "Partenariats", value: stats?.partnerships || 0, icon: Handshake, color: "accent" },
-                { label: "Documents", value: stats?.documents || 0, icon: FileText, color: "primary" },
+                { label: t('index.trainings'), value: stats?.trainings || 0, icon: GraduationCap, color: "primary" },
+                { label: t('index.events'), value: stats?.events || 0, icon: Calendar, color: "secondary" },
+                { label: t('index.partnerships'), value: stats?.partnerships || 0, icon: Handshake, color: "accent" },
+                { label: t('index.documents'), value: stats?.documents || 0, icon: FileText, color: "primary" },
               ].map((item, index) => (
                 <div key={index} className={`text-center p-4 rounded-xl bg-${item.color}/5 border border-${item.color}/10 hover:border-${item.color}/30 transition-colors duration-300`}>
                   <item.icon className={`w-6 h-6 text-${item.color} mx-auto mb-2`} />
@@ -477,7 +477,7 @@ const Index = () => {
         <div className="space-y-4 mb-8">
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <LineChart className="w-6 h-6 text-accent" />
-            Analytiques
+            {t('index.analytics')}
           </h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -492,7 +492,7 @@ const Index = () => {
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <Sparkles className="w-6 h-6 text-primary" />
-            Modules
+            {t('index.modules')}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -518,7 +518,7 @@ const Index = () => {
                   <CardContent className="pt-0">
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-bold text-foreground">{module.count}</span>
-                      <span className="text-xs text-muted-foreground">éléments</span>
+                      <span className="text-xs text-muted-foreground">{t('index.elements')}</span>
                     </div>
                   </CardContent>
                 )}
