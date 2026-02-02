@@ -36,48 +36,49 @@ import {
 } from "@/components/ui/collapsible";
 import { useState } from "react";
 import logo from "@/assets/ci-export-logo.png";
+import { useTranslation } from "react-i18next";
 
 interface MenuItem {
   icon: any;
-  label: string;
+  labelKey: string;
   path: string;
   module: AppModule | null;
 }
 
 const dgItems: MenuItem[] = [
-  { icon: LayoutDashboard, label: "Tableau de bord", path: "/", module: null },
-  { icon: MessageSquare, label: "Messagerie", path: "/chat", module: null },
-  { icon: Building2, label: "Opérateurs", path: "/companies", module: "companies" },
-  { icon: FolderKanban, label: "Projets", path: "/projects", module: "projects" },
-  { icon: FileText, label: "Documents", path: "/documents", module: "documents" },
-  { icon: TrendingUp, label: "Suivi & Évaluation", path: "/suivi-evaluation", module: "suivi_evaluation" },
-  { icon: BarChart3, label: "KPIs", path: "/kpis", module: "kpis" },
+  { icon: LayoutDashboard, labelKey: "sidebar.dashboard", path: "/", module: null },
+  { icon: MessageSquare, labelKey: "sidebar.chat", path: "/chat", module: null },
+  { icon: Building2, labelKey: "sidebar.companies", path: "/companies", module: "companies" },
+  { icon: FolderKanban, labelKey: "sidebar.projects", path: "/projects", module: "projects" },
+  { icon: FileText, labelKey: "sidebar.documents", path: "/documents", module: "documents" },
+  { icon: TrendingUp, labelKey: "sidebar.monitoring", path: "/suivi-evaluation", module: "suivi_evaluation" },
+  { icon: BarChart3, labelKey: "sidebar.kpis", path: "/kpis", module: "kpis" },
 ];
 
 const dafItems: MenuItem[] = [
-  { icon: ShoppingCart, label: "Achats", path: "/achats", module: "achats" },
-  { icon: Headphones, label: "Support", path: "/support", module: "support" },
-  { icon: UserCheck, label: "Ressources Humaines", path: "/rh", module: "rh" },
-  { icon: Plane, label: "Missions", path: "/missions", module: "missions" },
-  { icon: Wallet, label: "Budgets", path: "/budgets", module: "comptabilite" },
-  { icon: Calculator, label: "Comptabilité", path: "/comptabilite", module: "comptabilite" },
+  { icon: ShoppingCart, labelKey: "sidebar.purchases", path: "/achats", module: "achats" },
+  { icon: Headphones, labelKey: "sidebar.support", path: "/support", module: "support" },
+  { icon: UserCheck, labelKey: "sidebar.hr", path: "/rh", module: "rh" },
+  { icon: Plane, labelKey: "sidebar.missions", path: "/missions", module: "missions" },
+  { icon: Wallet, labelKey: "sidebar.budgets", path: "/budgets", module: "comptabilite" },
+  { icon: Calculator, labelKey: "sidebar.accounting", path: "/comptabilite", module: "comptabilite" },
 ];
 
 const operationalItems: MenuItem[] = [
-  { icon: Globe, label: "Marchés Export", path: "/market-development", module: "market_development" },
-  { icon: Handshake, label: "Partenariats", path: "/partnerships", module: "partnerships" },
-  { icon: GraduationCap, label: "Formations", path: "/trainings", module: "trainings" },
-  { icon: Calendar, label: "Agenda", path: "/agenda", module: "events" },
-  { icon: Calendar, label: "Événements", path: "/events", module: "events" },
-  { icon: Image, label: "Médias", path: "/media", module: "media" },
-  { icon: ClipboardList, label: "Imputations", path: "/imputations", module: "imputations" },
-  { icon: Archive, label: "Archive Activités", path: "/activities-archive", module: null },
-  { icon: UserCircle, label: "Espace Collaborateurs", path: "/collaborateurs", module: "collaborators" },
+  { icon: Globe, labelKey: "sidebar.marketDevelopment", path: "/market-development", module: "market_development" },
+  { icon: Handshake, labelKey: "sidebar.partnerships", path: "/partnerships", module: "partnerships" },
+  { icon: GraduationCap, labelKey: "sidebar.trainings", path: "/trainings", module: "trainings" },
+  { icon: Calendar, labelKey: "sidebar.calendar", path: "/agenda", module: "events" },
+  { icon: Calendar, labelKey: "sidebar.events", path: "/events", module: "events" },
+  { icon: Image, labelKey: "sidebar.media", path: "/media", module: "media" },
+  { icon: ClipboardList, labelKey: "sidebar.imputations", path: "/imputations", module: "imputations" },
+  { icon: Archive, labelKey: "activitiesArchive", path: "/activities-archive", module: null },
+  { icon: UserCircle, labelKey: "sidebar.collaborators", path: "/collaborateurs", module: "collaborators" },
 ];
 
 const adminItems: MenuItem[] = [
-  { icon: Shield, label: "Administration", path: "/admin", module: null },
-  { icon: Shield, label: "Gestion Permissions", path: "/permissions", module: null },
+  { icon: Shield, labelKey: "sidebar.admin", path: "/admin", module: null },
+  { icon: Shield, labelKey: "permissions", path: "/permissions", module: null },
 ];
 
 interface MenuSectionProps {
@@ -124,6 +125,7 @@ const MenuSection = ({
 }: MenuSectionProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const colors = colorMap[color];
+  const { t } = useTranslation();
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -159,7 +161,7 @@ const MenuSection = ({
                 }
               >
                 <item.icon className="w-5 h-5" />
-                {item.label}
+                {t(item.labelKey)}
               </NavLink>
             );
           }
@@ -173,6 +175,7 @@ const MenuSection = ({
 export function Sidebar() {
   const { data: userRole } = useUserRole();
   const isAdmin = userRole === 'admin';
+  const { t } = useTranslation();
 
   return (
     <aside className="w-64 border-r border-border bg-card/50 min-h-[calc(100vh-4rem)] p-4 overflow-y-auto">
@@ -183,7 +186,7 @@ export function Sidebar() {
       
       <nav className="space-y-4">
         <MenuSection 
-          title="Direction Générale" 
+          title={t('sectionDG', 'Direction Générale')} 
           items={dgItems} 
           isAdmin={isAdmin} 
           color="orange"
@@ -191,7 +194,7 @@ export function Sidebar() {
         />
         
         <MenuSection 
-          title="DAF" 
+          title={t('sectionDAF', 'DAF')} 
           items={dafItems} 
           isAdmin={isAdmin} 
           color="green"
@@ -199,7 +202,7 @@ export function Sidebar() {
         />
         
         <MenuSection 
-          title="Directions Opérationnelles" 
+          title={t('sectionOperational', 'Directions Opérationnelles')} 
           items={operationalItems} 
           isAdmin={isAdmin} 
           color="cyan"
@@ -208,7 +211,7 @@ export function Sidebar() {
         
         {isAdmin && (
           <MenuSection 
-            title="Administration" 
+            title={t('sidebar.admin')} 
             items={adminItems} 
             isAdmin={isAdmin} 
             color="red"
