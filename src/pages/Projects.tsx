@@ -16,6 +16,7 @@ import { ProjectDialog } from "@/components/projects/ProjectDialog";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { useUserDirection } from "@/hooks/useUserDirection";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { useTranslation } from "react-i18next";
 
 export default function Projects() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -26,6 +27,7 @@ export default function Projects() {
   const [filterYear, setFilterYear] = useState<string>("all");
   const { data: userDirection } = useUserDirection();
   const { canAccess: canManageProjects } = useCanAccessModule("projects", "manager");
+  const { t } = useTranslation();
 
   const { data: projects, isLoading, refetch } = useQuery({
     queryKey: ["projects-all"],
@@ -105,16 +107,16 @@ export default function Projects() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <FolderKanban className="w-8 h-8 text-primary" />
-            Projets de l'Agence
+            {t('projects.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Projets d'accompagnement liés aux événements export
+            {t('projects.subtitle')}
           </p>
         </div>
         {canManageProjects && (
           <Button onClick={() => setDialogOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Nouveau projet
+            {t('projects.addProject')}
           </Button>
         )}
       </div>
@@ -127,7 +129,7 @@ export default function Projects() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par nom, description, statut..."
+                  placeholder={t('projects.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9"
@@ -137,23 +139,23 @@ export default function Projects() {
 
             <Select value={filterStatus} onValueChange={setFilterStatus}>
               <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Tous les statuts" />
+                <SelectValue placeholder={t('projects.allStatuses')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="planifié">Planifié</SelectItem>
-                <SelectItem value="en cours">En cours</SelectItem>
-                <SelectItem value="terminé">Terminé</SelectItem>
-                <SelectItem value="suspendu">Suspendu</SelectItem>
+                <SelectItem value="all">{t('projects.allStatuses')}</SelectItem>
+                <SelectItem value="planifié">{t('projects.planned')}</SelectItem>
+                <SelectItem value="en cours">{t('projects.inProgress')}</SelectItem>
+                <SelectItem value="terminé">{t('projects.completed')}</SelectItem>
+                <SelectItem value="suspendu">{t('projects.suspended')}</SelectItem>
               </SelectContent>
             </Select>
 
             <Select value={filterDirection} onValueChange={setFilterDirection}>
               <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder="Toutes directions" />
+                <SelectValue placeholder={t('projects.allDirections')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes directions</SelectItem>
+                <SelectItem value="all">{t('projects.allDirections')}</SelectItem>
                 {directions?.map((dir) => (
                   <SelectItem key={dir.id} value={dir.id}>
                     {dir.name}
@@ -165,10 +167,10 @@ export default function Projects() {
 
             <Select value={filterYear} onValueChange={setFilterYear}>
               <SelectTrigger className="w-full md:w-[140px]">
-                <SelectValue placeholder="Toutes années" />
+                <SelectValue placeholder={t('projects.allYears')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Toutes années</SelectItem>
+                <SelectItem value="all">{t('projects.allYears')}</SelectItem>
                 {availableYears.map((year) => (
                   <SelectItem key={year} value={year.toString()}>
                     {year}
@@ -183,7 +185,7 @@ export default function Projects() {
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold">
-            {filterStatus === "en cours" ? "Projets Actifs" : "Projets"} ({filteredProjects.length})
+            {filterStatus === "en cours" ? t('projects.activeProjects') : t('sidebar.projects')} ({filteredProjects.length})
           </h3>
         </CardHeader>
         <CardContent>

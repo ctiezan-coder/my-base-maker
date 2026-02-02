@@ -14,6 +14,8 @@ import { z } from 'zod';
 import logo from '@/assets/ci-export-logo.png';
 import { useUserRole } from '@/hooks/useUserRole';
 import { QuickApprovalPanel } from '@/components/admin/QuickApprovalPanel';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 
 const loginSchema = z.object({
   email: z.string()
@@ -60,6 +62,7 @@ export default function Auth() {
   const { toast } = useToast();
   const { data: userRole } = useUserRole();
   const isAdmin = userRole === 'admin';
+  const { t } = useTranslation();
 
   // Fetch directions for signup
   const { data: directions, isLoading: directionsLoading, error: directionsError } = useQuery({
@@ -212,6 +215,11 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
+      {/* Language switcher */}
+      <div className="absolute top-4 right-4 z-20">
+        <LanguageSwitcher />
+      </div>
+
       {/* Formes décoratives subtiles */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-secondary/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
@@ -255,13 +263,13 @@ export default function Auth() {
                   value="login" 
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                 >
-                  Connexion
+                  {t('auth.login')}
                 </TabsTrigger>
                 <TabsTrigger 
                   value="signup"
                   className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-300"
                 >
-                  Inscription
+                  {t('auth.register')}
                 </TabsTrigger>
               </TabsList>
               
@@ -280,7 +288,7 @@ export default function Auth() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password" className="text-sm font-medium">Mot de passe</Label>
+                    <Label htmlFor="login-password" className="text-sm font-medium">{t('auth.password')}</Label>
                     <Input
                       id="login-password"
                       type="password"
@@ -298,9 +306,9 @@ export default function Auth() {
                     {loading ? (
                       <span className="flex items-center gap-2">
                         <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        Connexion...
+                        {t('common.loading')}
                       </span>
-                    ) : "Se connecter"}
+                    ) : t('auth.signIn')}
                   </Button>
                 </form>
               </TabsContent>
@@ -375,7 +383,7 @@ export default function Auth() {
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-confirm" className="text-sm font-medium">Confirmer le mot de passe</Label>
+                    <Label htmlFor="signup-confirm" className="text-sm font-medium">{t('auth.confirmPassword')}</Label>
                     <Input
                       id="signup-confirm"
                       type="password"
@@ -393,9 +401,9 @@ export default function Auth() {
                     {loading ? (
                       <span className="flex items-center gap-2">
                         <span className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                        Inscription...
+                        {t('common.loading')}
                       </span>
-                    ) : "S'inscrire"}
+                    ) : t('auth.signUp')}
                   </Button>
                 </form>
               </TabsContent>
