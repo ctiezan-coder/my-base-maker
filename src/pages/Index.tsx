@@ -8,10 +8,12 @@ import { Building2, FolderKanban, FileText, GraduationCap, Calendar, Handshake, 
 import logo from "@/assets/ci-export-logo.png";
 import { MonthlyActivityChart, SectorDistributionChart, OpportunitiesChart, ConnectionsEvolutionChart } from "@/components/dashboard/DashboardCharts";
 import { Progress } from "@/components/ui/progress";
+import { useTranslation } from "react-i18next";
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // Check user profile and account status
   const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
@@ -133,7 +135,7 @@ const Index = () => {
               <Sparkles className="w-6 h-6 text-primary animate-pulse" />
             </div>
           </div>
-          <p className="mt-6 text-muted-foreground font-medium">Chargement de votre espace...</p>
+          <p className="mt-6 text-muted-foreground font-medium">{t('common.loadingSpace')}</p>
         </div>
       </div>
     );
@@ -152,52 +154,52 @@ const Index = () => {
 
   const keyMetrics = [
     {
-      title: "Opérateurs Accompagnés",
+      title: t('index.operatorsSupported'),
       value: stats?.companies || 0,
       icon: Building2,
       gradient: "from-secondary to-secondary/70",
-      subtitle: `${stats?.activeAccompaniment || 0} en cours`,
+      subtitle: `${stats?.activeAccompaniment || 0} ${t('index.inProgress')}`,
     },
     {
-      title: "Projets Actifs",
+      title: t('index.activeProjects'),
       value: stats?.activeProjects || 0,
       icon: Target,
       gradient: "from-accent to-accent/70",
-      subtitle: `sur ${stats?.projects || 0} projets`,
+      subtitle: `${t('index.outOf')} ${stats?.projects || 0} ${t('index.projects')}`,
     },
     {
-      title: "Connexions B2B",
+      title: t('index.b2bConnections'),
       value: stats?.connections || 0,
       icon: Handshake,
       gradient: "from-primary to-primary/70",
-      subtitle: `${stats?.successfulConnections || 0} conclues`,
+      subtitle: `${stats?.successfulConnections || 0} ${t('index.concluded')}`,
     },
     {
-      title: "Partenariats",
+      title: t('index.partnerships'),
       value: stats?.partnerships || 0,
       icon: Users,
       gradient: "from-primary via-accent to-secondary",
-      subtitle: "Relations actives",
+      subtitle: t('index.activeRelations'),
     },
   ];
 
   const operatorMetrics = [
     {
-      title: "Entreprises Certifiées",
+      title: t('index.certifiedCompanies'),
       value: stats?.certifiedCompanies || 0,
       icon: Award,
       color: "text-primary",
       bgColor: "bg-primary/10",
     },
     {
-      title: "Accompagnement Actif",
+      title: t('index.activeAccompaniment'),
       value: stats?.activeAccompaniment || 0,
       icon: UserCheck,
       color: "text-accent",
       bgColor: "bg-accent/10",
     },
     {
-      title: "Opportunités Export",
+      title: t('index.exportOpportunities'),
       value: stats?.opportunities || 0,
       icon: Globe,
       color: "text-secondary",
@@ -206,17 +208,17 @@ const Index = () => {
   ];
 
   const maturityData = [
-    { level: "Débutant", count: stats?.maturityLevels?.debutant || 0, color: "bg-muted-foreground" },
-    { level: "Intermédiaire", count: stats?.maturityLevels?.intermediaire || 0, color: "bg-accent" },
-    { level: "Confirmé", count: stats?.maturityLevels?.confirme || 0, color: "bg-primary" },
-    { level: "Expert", count: stats?.maturityLevels?.expert || 0, color: "bg-secondary" },
+    { level: t('index.beginner'), count: stats?.maturityLevels?.debutant || 0, color: "bg-muted-foreground" },
+    { level: t('index.intermediate'), count: stats?.maturityLevels?.intermediaire || 0, color: "bg-accent" },
+    { level: t('index.confirmed'), count: stats?.maturityLevels?.confirme || 0, color: "bg-primary" },
+    { level: t('index.expert'), count: stats?.maturityLevels?.expert || 0, color: "bg-secondary" },
   ];
   const totalMaturity = maturityData.reduce((sum, m) => sum + m.count, 0);
 
   const modules = [
     {
-      title: "Opérateurs Économiques",
-      description: "360° des entreprises accompagnées",
+      title: t('index.economicOperators'),
+      description: t('index.companiesFullView'),
       icon: Building2,
       path: "/companies",
       count: stats?.companies,
@@ -225,8 +227,8 @@ const Index = () => {
       borderColor: "border-secondary/30",
     },
     {
-      title: "Projets",
-      description: "Gestion des projets d'accompagnement",
+      title: t('sidebar.projects'),
+      description: t('index.projectsManagement'),
       icon: FolderKanban,
       path: "/projects",
       count: stats?.projects,
@@ -235,8 +237,8 @@ const Index = () => {
       borderColor: "border-accent/30",
     },
     {
-      title: "Développement Marchés",
-      description: "Opportunités export et B2B",
+      title: t('index.marketDevelopment'),
+      description: t('index.exportOpportunitiesB2B'),
       icon: Globe,
       path: "/market-development",
       count: stats?.opportunities,
@@ -245,8 +247,8 @@ const Index = () => {
       borderColor: "border-primary/30",
     },
     {
-      title: "Formations",
-      description: "Renforcement des capacités",
+      title: t('index.trainings'),
+      description: t('index.capacityBuilding'),
       icon: GraduationCap,
       path: "/trainings",
       count: stats?.trainings,
@@ -255,8 +257,8 @@ const Index = () => {
       borderColor: "border-primary/30",
     },
     {
-      title: "Événements",
-      description: "Foires et missions commerciales",
+      title: t('index.events'),
+      description: t('index.tradeFairsMissions'),
       icon: Calendar,
       path: "/events",
       count: stats?.events,
@@ -265,8 +267,8 @@ const Index = () => {
       borderColor: "border-secondary/30",
     },
     {
-      title: "Partenariats",
-      description: "Relations stratégiques",
+      title: t('index.partnerships'),
+      description: t('index.strategicRelations'),
       icon: Handshake,
       path: "/partnerships",
       count: stats?.partnerships,
@@ -275,8 +277,8 @@ const Index = () => {
       borderColor: "border-accent/30",
     },
     {
-      title: "Suivi & Évaluation",
-      description: "KPIs et performance",
+      title: t('index.monitoringEvaluation'),
+      description: t('index.kpisPerformance'),
       icon: BarChart3,
       path: "/suivi-evaluation",
       gradient: "from-secondary/20 to-secondary/5",
@@ -284,8 +286,8 @@ const Index = () => {
       borderColor: "border-secondary/30",
     },
     {
-      title: "Documents",
-      description: "GED centralisée",
+      title: t('index.documents'),
+      description: t('index.centralizedGed'),
       icon: FileText,
       path: "/documents",
       count: stats?.documents,
@@ -315,11 +317,11 @@ const Index = () => {
           <div className="text-left">
             <h1 className="text-3xl md:text-4xl font-bold">
               <span className="bg-gradient-to-r from-primary via-accent to-secondary bg-clip-text text-transparent">
-                ACIEX
+                {t('index.title')}
               </span>
             </h1>
             <p className="text-base text-muted-foreground">
-              Plateforme de gestion institutionnelle
+              {t('index.subtitle')}
             </p>
           </div>
         </div>
@@ -362,8 +364,8 @@ const Index = () => {
                   <Building2 className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-xl">Vue Opérateurs</span>
-                  <CardDescription className="mt-1">Performance et accompagnement</CardDescription>
+                  <span className="text-xl">{t('index.operatorView')}</span>
+                  <CardDescription className="mt-1">{t('index.performanceAccompaniment')}</CardDescription>
                 </div>
               </CardTitle>
             </CardHeader>
@@ -389,8 +391,8 @@ const Index = () => {
                   <TrendingUp className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-lg">Maturité Export</span>
-                  <CardDescription className="mt-1">Répartition des niveaux</CardDescription>
+                  <span className="text-lg">{t('index.exportMaturity')}</span>
+                  <CardDescription className="mt-1">{t('index.levelDistribution')}</CardDescription>
                 </div>
               </CardTitle>
             </CardHeader>
@@ -421,8 +423,8 @@ const Index = () => {
                   <Package className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <span className="text-xl">Secteurs d'Activité</span>
-                  <CardDescription className="mt-1">Top 5 des secteurs les plus représentés</CardDescription>
+                  <span className="text-xl">{t('index.activitySectors')}</span>
+                  <CardDescription className="mt-1">{t('index.topSectors')}</CardDescription>
                 </div>
               </CardTitle>
             </CardHeader>

@@ -15,11 +15,13 @@ import type { Company } from "@/types/company";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { useTranslation } from "react-i18next";
 
 const ITEMS_PER_PAGE = 15;
 
 export default function Companies() {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const { canAccess: canManageCompanies } = useCanAccessModule("companies", "manager");
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -129,10 +131,9 @@ export default function Companies() {
   };
 
   const handleDelete = async (company: Company) => {
-    // Confirmation avant suppression
     const confirmed = window.confirm(
-      `Êtes-vous sûr de vouloir supprimer l'entreprise "${company.company_name}" ?\n\n` +
-      `Cette action est irréversible.`
+      `${t('companies.deleteConfirm')} "${company.company_name}" ?\n\n` +
+      `${t('companies.deleteWarning')}`
     );
     
     if (!confirmed) return;
@@ -146,15 +147,15 @@ export default function Companies() {
       if (error) throw error;
 
       toast({ 
-        title: "Opérateur supprimé avec succès",
-        description: `${company.company_name} a été supprimé de la base de données.`
+        title: t('companies.deleteSuccess'),
+        description: `${company.company_name} ${t('companies.deleteSuccessDesc')}`
       });
       refetch();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";
+      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       toast({
         variant: "destructive",
-        title: "Erreur lors de la suppression",
+        title: t('companies.deleteError'),
         description: errorMessage,
       });
     }
@@ -164,8 +165,8 @@ export default function Companies() {
     if (!companies || companies.length === 0) {
       toast({
         variant: "destructive",
-        title: "Aucune donnée à exporter",
-        description: "La liste des entreprises est vide",
+        title: t('companies.noDataExport'),
+        description: t('companies.emptyList'),
       });
       return;
     }
@@ -193,11 +194,11 @@ export default function Companies() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Entreprises");
     
-    XLSX.writeFile(wb, `entreprises-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `companies-export-${new Date().toISOString().split('T')[0]}.xlsx`);
     
     toast({
-      title: "Export réussi",
-      description: `${companies.length} entreprises exportées`,
+      title: t('companies.exportSuccess'),
+      description: `${companies.length} ${t('companies.exportSuccessDesc')}`,
     });
   };
 
@@ -221,26 +222,26 @@ export default function Companies() {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Building2 className="w-8 h-8 text-primary" />
-            Opérateurs Économiques
+            {t('companies.title')}
           </h1>
           <p className="text-muted-foreground mt-1">
-            Base de données unifiée des entreprises accompagnées
+            {t('companies.subtitle')}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleExportExcel} disabled={!companies || companies.length === 0}>
             <Download className="w-4 h-4 mr-2" />
-            Exporter Excel
+            {t('common.exportExcel')}
           </Button>
           {canManageCompanies && (
             <>
               <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
                 <Upload className="w-4 h-4 mr-2" />
-                Import en masse
+                {t('common.bulkImport')}
               </Button>
               <Button onClick={() => setDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
-                Nouvel opérateur
+                {t('companies.addCompany')}
               </Button>
             </>
           )}
@@ -254,7 +255,7 @@ export default function Companies() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
-                  placeholder="Rechercher par nom, RCCM ou email..."
+                  placeholder={t('companies.searchPlaceholder')}
                   value={search}
                   onChange={(e) => {
                     setSearch(e.target.value);
@@ -268,14 +269,14 @@ export default function Companies() {
                 onClick={() => setShowFilters(!showFilters)}
               >
                 <Filter className="w-4 h-4 mr-2" />
-                Filtres
+                {t('common.filters')}
               </Button>
             </div>
 
             {showFilters && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg bg-muted/50">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Secteur d'activité</label>
+                  <label className="text-sm font-medium">{t('companies.sector')}</label>
                   <Select
                     value={filters.sector}
                     onValueChange={(value) => {
@@ -284,10 +285,10 @@ export default function Companies() {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Tous les secteurs" />
+                      <SelectValue placeholder={t('companies.allSectors')} />
                     </SelectTrigger>
                     <SelectContent className="z-50 bg-popover">
-                      <SelectItem value="all">Tous les secteurs</SelectItem>
+                      <SelectItem value="all">{t('companies.allSectors')}</SelectItem>
                       {availableSectors.map((sector) => (
                         <SelectItem key={sector} value={sector}>
                           {sector}
@@ -297,7 +298,7 @@ export default function Companies() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Participation événements</label>
+                  <label className="text-sm font-medium">{t('companies.eventParticipation')}</label>
                   <Select
                     value={filters.participation}
                     onValueChange={(value) => {
@@ -306,10 +307,10 @@ export default function Companies() {
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Tous" />
+                      <SelectValue placeholder={t('common.all')} />
                     </SelectTrigger>
                     <SelectContent className="z-50 bg-popover">
-                      <SelectItem value="all">Tous</SelectItem>
+                      <SelectItem value="all">{t('common.all')}</SelectItem>
                       <SelectItem value="Jamais">Jamais</SelectItem>
                       <SelectItem value="Foires">Foires</SelectItem>
                       <SelectItem value="Salons">Salons</SelectItem>
@@ -317,7 +318,7 @@ export default function Companies() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Type d'accompagnement</label>
+                  <label className="text-sm font-medium">{t('companies.supportType')}</label>
                   <div className="space-y-3 p-3 border rounded-lg bg-background">
                     <div className="flex items-center space-x-2">
                       <Checkbox
@@ -332,7 +333,7 @@ export default function Companies() {
                         }}
                       />
                       <label htmlFor="filter-financier" className="text-sm cursor-pointer font-normal">
-                        Financier
+                        {t('companies.financial')}
                       </label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -348,7 +349,7 @@ export default function Companies() {
                         }}
                       />
                       <label htmlFor="filter-nonFinancier" className="text-sm cursor-pointer font-normal">
-                        Non financier
+                        {t('companies.nonFinancial')}
                       </label>
                     </div>
                     <div className="space-y-2">
@@ -365,12 +366,12 @@ export default function Companies() {
                           }}
                         />
                         <label htmlFor="filter-autres" className="text-sm cursor-pointer font-normal">
-                          Autres
+                          {t('companies.other')}
                         </label>
                       </div>
                       {filters.support.autres && (
                         <Input
-                          placeholder="Précisez..."
+                          placeholder={t('companies.specify')}
                           value={filters.support.autresText}
                           onChange={(e) => {
                             setFilters({ 
@@ -387,7 +388,7 @@ export default function Companies() {
                 </div>
                 <div className="col-span-full flex justify-end">
                   <Button variant="ghost" onClick={resetFilters}>
-                    Réinitialiser les filtres
+                    {t('common.resetFilters')}
                   </Button>
                 </div>
               </div>
