@@ -137,8 +137,6 @@ export default function PmeRegistration() {
         aciex_interaction_history: formData.observations || null,
         exported_products: formData.produits || null,
         headquarters_location: "Côte d'Ivoire",
-        direction_id: userDirection?.direction_id || null,
-        created_by: user.id,
         accompaniment_status: "Prospection",
       }]);
 
