@@ -140,7 +140,7 @@ export default function PmeRegistration() {
         main_contact_name: formData.personneRessource || null,
         phone: formData.contacts || null,
         legal_representative_name: formData.nomDirigeant || null,
-        legal_representative_gender: formData.genreDirigeant === "Homme" ? "male" : formData.genreDirigeant === "Femme" ? "female" : null,
+        legal_representative_gender: formData.genreDirigeant === "Homme" ? "Homme" : formData.genreDirigeant === "Femme" ? "Femme" : null,
         aciex_interaction_history: formData.observations || null,
         exported_products: formData.produits || null,
         headquarters_location: "Côte d'Ivoire",
