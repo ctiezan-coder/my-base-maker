@@ -121,6 +121,7 @@ export default function Auth() {
         title: "Connexion réussie",
         description: "Bienvenue sur ACIEX !",
       });
+      navigate('/pme-registration');
     }
   };
 

@@ -34,6 +34,7 @@ import Budgets from "./pages/Budgets";
 import DatabaseExport from "./pages/DatabaseExport";
 import NotFound from "./pages/NotFound";
 import Trainers from "./pages/Trainers";
+import PmeRegistration from "./pages/PmeRegistration";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +47,7 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/pme-registration" element={<PmeRegistration />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/database-export" element={<DatabaseExport />} />
             <Route path="/" element={<Dashboard />}>
