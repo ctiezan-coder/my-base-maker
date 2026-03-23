@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 const EXTERNAL_SUPABASE_URL = 'https://zztkvexbgvgttiwwfwjg.supabase.co'
-const EXTERNAL_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6dGt2ZXhiZ3ZndHRpd3dmd2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1MjIwNjUsImV4cCI6MjA4ODA5ODA2NX0.ugrVeefPKHvsXTjcO_GLsKYNlbunBxjK-vX3O5FWg4E'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -48,8 +47,16 @@ Deno.serve(async (req) => {
       // No body
     }
 
-    // Connect to external project
-    const externalSupabase = createClient(EXTERNAL_SUPABASE_URL, EXTERNAL_SUPABASE_ANON_KEY)
+    // Connect to external project with service role key to bypass RLS
+    const externalServiceKey = Deno.env.get('EXTERNAL_SUPABASE_SERVICE_ROLE_KEY')
+    if (!externalServiceKey) {
+      return new Response(JSON.stringify({ error: 'Clé de service externe non configurée' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const externalSupabase = createClient(EXTERNAL_SUPABASE_URL, externalServiceKey)
 
     // Fetch formations
     const { data: formations, error: fetchError } = await externalSupabase
@@ -65,21 +72,51 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Fetch all inscriptions with participants via the view
-    const { data: inscriptionsView } = await externalSupabase
-      .from('v_inscriptions')
-      .select('*')
+    console.log(`Fetched ${formations?.length || 0} formations`)
+
+    // Fetch inscriptions with participant details
+    const { data: inscriptions, error: inscError } = await externalSupabase
+      .from('inscriptions')
+      .select(`
+        *,
+        participants (
+          id,
+          nom_dirigeant,
+          nom_entreprise,
+          email,
+          telephone
+        )
+      `)
+
+    if (inscError) {
+      console.error('Error fetching inscriptions:', inscError)
+    }
+
+    console.log(`Fetched ${inscriptions?.length || 0} inscriptions`)
+
+    // Fetch presences
+    const { data: presences } = await externalSupabase
+      .from('presences')
+      .select('inscription_id, present')
+
+    const presenceMap: Record<string, boolean> = {}
+    if (presences) {
+      for (const p of presences) {
+        presenceMap[p.inscription_id] = p.present
+      }
+    }
 
     // Group inscriptions by formation_id
     const inscriptionsByFormation: Record<string, any[]> = {}
-    if (inscriptionsView) {
-      for (const insc of inscriptionsView) {
-        if (insc.formation_id) {
-          if (!inscriptionsByFormation[insc.formation_id]) {
-            inscriptionsByFormation[insc.formation_id] = []
-          }
-          inscriptionsByFormation[insc.formation_id].push(insc)
+    if (inscriptions) {
+      for (const insc of inscriptions) {
+        if (!inscriptionsByFormation[insc.formation_id]) {
+          inscriptionsByFormation[insc.formation_id] = []
         }
+        inscriptionsByFormation[insc.formation_id].push({
+          ...insc,
+          present: presenceMap[insc.id] || false,
+        })
       }
     }
 
@@ -87,6 +124,7 @@ Deno.serve(async (req) => {
     let updated = 0
     let skipped = 0
     let participantsImported = 0
+    let participantsUpdated = 0
 
     for (const formation of formations || []) {
       // Check if already imported by external_id
@@ -151,9 +189,11 @@ Deno.serve(async (req) => {
       // Import participants for this formation
       if (localTrainingId && inscriptionsByFormation[formation.id]) {
         const participants = inscriptionsByFormation[formation.id]
+        console.log(`Processing ${participants.length} participants for formation ${formation.titre}`)
 
-        for (const participant of participants) {
-          if (!participant.email) continue
+        for (const insc of participants) {
+          const participant = insc.participants
+          if (!participant || !participant.email) continue
 
           // Check if participant already registered
           const { data: existingReg } = await localSupabase
@@ -168,17 +208,20 @@ Deno.serve(async (req) => {
             participant_name: participant.nom_dirigeant || 'Inconnu',
             participant_email: participant.email,
             participant_phone: participant.telephone || null,
-            participant_position: 'Dirigeant',
-            attended: participant.present || false,
-            status: participant.statut_inscription === 'confirmé' ? 'Confirmée' : 'En attente',
-            registration_date: participant.date_inscription || new Date().toISOString(),
+            participant_position: participant.nom_entreprise || 'Dirigeant',
+            attended: insc.present || false,
+            status: insc.statut === 'confirmé' ? 'Confirmée' : 'En attente',
+            registration_date: insc.date_inscription || new Date().toISOString(),
           }
 
           if (existingReg) {
-            await localSupabase
+            const { error: updateRegError } = await localSupabase
               .from('training_registrations')
               .update(regData as any)
               .eq('id', existingReg.id)
+
+            if (!updateRegError) participantsUpdated++
+            else console.error('Reg update error:', updateRegError)
           } else {
             const { error: regError } = await localSupabase
               .from('training_registrations')
@@ -187,16 +230,15 @@ Deno.serve(async (req) => {
             if (!regError) {
               participantsImported++
             } else {
-              console.error('Registration insert error:', regError)
+              console.error('Reg insert error:', regError)
             }
           }
         }
 
         // Update current_participants count
-        const participantCount = participants.length
         await localSupabase
           .from('trainings')
-          .update({ current_participants: participantCount } as any)
+          .update({ current_participants: participants.length } as any)
           .eq('id', localTrainingId)
       }
     }
@@ -209,6 +251,7 @@ Deno.serve(async (req) => {
         updated,
         skipped,
         participantsImported,
+        participantsUpdated,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
