@@ -50,6 +50,7 @@ const App = () => (
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/database-export" element={<DatabaseExport />} />
             <Route path="/" element={<Dashboard />}>
+              <Route path="pme-registration" element={<PmeRegistration />} />
               <Route index element={<Index />} />
               <Route path="chat" element={<Chat />} />
               <Route path="companies" element={<Companies />} />
