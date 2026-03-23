@@ -2,10 +2,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 }
 
 const EXTERNAL_SUPABASE_URL = 'https://zztkvexbgvgttiwwfwjg.supabase.co'
+const EXTERNAL_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6dGt2ZXhiZ3ZndHRpd3dmd2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1MjIwNjUsImV4cCI6MjA4ODA5ODA2NX0.ugrVeefPKHvsXTjcO_GLsKYNlbunBxjK-vX3O5FWg4E'
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -47,77 +48,64 @@ Deno.serve(async (req) => {
       // No body
     }
 
-    // Connect to external project with service role key to bypass RLS
-    const externalServiceKey = Deno.env.get('EXTERNAL_SUPABASE_SERVICE_ROLE_KEY')
-    if (!externalServiceKey) {
-      return new Response(JSON.stringify({ error: 'Clé de service externe non configurée' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    const externalSupabase = createClient(EXTERNAL_SUPABASE_URL, externalServiceKey)
-
-    // Fetch formations
-    const { data: formations, error: fetchError } = await externalSupabase
-      .from('formations')
-      .select('*')
-      .order('date_debut', { ascending: false })
-
-    if (fetchError) {
-      console.error('Error fetching formations:', fetchError)
-      return new Response(JSON.stringify({ error: fetchError.message }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
-
-    console.log(`Fetched ${formations?.length || 0} formations`)
-
-    // Fetch inscriptions with participant details
-    const { data: inscriptions, error: inscError } = await externalSupabase
-      .from('inscriptions')
-      .select(`
-        *,
-        participants (
-          id,
-          nom_dirigeant,
-          nom_entreprise,
-          email,
-          telephone
-        )
-      `)
-
-    if (inscError) {
-      console.error('Error fetching inscriptions:', inscError)
-    }
-
-    console.log(`Fetched ${inscriptions?.length || 0} inscriptions`)
-
-    // Fetch presences
-    const { data: presences } = await externalSupabase
-      .from('presences')
-      .select('inscription_id, present')
-
-    const presenceMap: Record<string, boolean> = {}
-    if (presences) {
-      for (const p of presences) {
-        presenceMap[p.inscription_id] = p.present
+    // Call the external project's admin-operations edge function
+    console.log('Calling external admin-operations endpoint...')
+    const response = await fetch(
+      `${EXTERNAL_SUPABASE_URL}/functions/v1/admin-operations`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${EXTERNAL_ANON_KEY}`,
+          'apikey': EXTERNAL_ANON_KEY,
+        },
+        body: JSON.stringify({ action: 'export_participants' }),
       }
+    )
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('External API error:', response.status, errorText)
+      return new Response(
+        JSON.stringify({ error: `Erreur API externe: ${response.status} - ${errorText}` }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const externalData = await response.json()
+    console.log('External data received:', JSON.stringify(externalData).substring(0, 500))
+
+    // Extract formations and participants from the response
+    const formations = externalData?.data?.formations || externalData?.formations || []
+    const participants = externalData?.data?.participants || externalData?.participants || []
+    const inscriptions = externalData?.data?.inscriptions || externalData?.inscriptions || []
+    const presences = externalData?.data?.presences || externalData?.presences || []
+
+    console.log(`Received: ${formations.length} formations, ${participants.length} participants, ${inscriptions.length} inscriptions, ${presences.length} presences`)
+
+    // Build presence map
+    const presenceMap: Record<string, boolean> = {}
+    for (const p of presences) {
+      presenceMap[p.inscription_id] = p.present
+    }
+
+    // Build participants map
+    const participantsMap: Record<string, any> = {}
+    for (const p of participants) {
+      participantsMap[p.id] = p
     }
 
     // Group inscriptions by formation_id
     const inscriptionsByFormation: Record<string, any[]> = {}
-    if (inscriptions) {
-      for (const insc of inscriptions) {
-        if (!inscriptionsByFormation[insc.formation_id]) {
-          inscriptionsByFormation[insc.formation_id] = []
-        }
-        inscriptionsByFormation[insc.formation_id].push({
-          ...insc,
-          present: presenceMap[insc.id] || false,
-        })
+    for (const insc of inscriptions) {
+      if (!inscriptionsByFormation[insc.formation_id]) {
+        inscriptionsByFormation[insc.formation_id] = []
       }
+      inscriptionsByFormation[insc.formation_id].push({
+        ...insc,
+        participant: participantsMap[insc.participant_id],
+        present: presenceMap[insc.id] || false,
+      })
     }
 
     let imported = 0
@@ -126,8 +114,7 @@ Deno.serve(async (req) => {
     let participantsImported = 0
     let participantsUpdated = 0
 
-    for (const formation of formations || []) {
-      // Check if already imported by external_id
+    for (const formation of formations) {
       const { data: existing } = await localSupabase
         .from('trainings')
         .select('id')
@@ -188,14 +175,13 @@ Deno.serve(async (req) => {
 
       // Import participants for this formation
       if (localTrainingId && inscriptionsByFormation[formation.id]) {
-        const participants = inscriptionsByFormation[formation.id]
-        console.log(`Processing ${participants.length} participants for formation ${formation.titre}`)
+        const formationParticipants = inscriptionsByFormation[formation.id]
+        console.log(`Processing ${formationParticipants.length} participants for formation ${formation.titre}`)
 
-        for (const insc of participants) {
-          const participant = insc.participants
+        for (const insc of formationParticipants) {
+          const participant = insc.participant
           if (!participant || !participant.email) continue
 
-          // Check if participant already registered
           const { data: existingReg } = await localSupabase
             .from('training_registrations')
             .select('id')
@@ -235,10 +221,9 @@ Deno.serve(async (req) => {
           }
         }
 
-        // Update current_participants count
         await localSupabase
           .from('trainings')
-          .update({ current_participants: participants.length } as any)
+          .update({ current_participants: formationParticipants.length } as any)
           .eq('id', localTrainingId)
       }
     }
@@ -246,7 +231,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        total: formations?.length || 0,
+        total: formations.length,
         imported,
         updated,
         skipped,
