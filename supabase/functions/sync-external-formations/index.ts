@@ -99,7 +99,7 @@ Deno.serve(async (req) => {
       const trainingData: Record<string, any> = {
         title: formation.titre,
         description: `Thème: ${formation.theme}${formation.duree ? ' | Durée: ' + formation.duree : ''}`,
-        training_type: 'séminaire',
+        training_type: 'Formation',
         start_date: formation.date_debut,
         end_date: formation.date_debut,
         location: formation.lieu || 'Non spécifié',
