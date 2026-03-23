@@ -82,7 +82,7 @@ export default function Trainings() {
 
       toast({
         title: "Synchronisation réussie",
-        description: `${data.imported} importée(s), ${data.updated} mise(s) à jour, ${data.skipped} ignorée(s) sur ${data.total} formation(s)`,
+        description: `${data.imported} formation(s) importée(s), ${data.updated} mise(s) à jour, ${data.participantsImported || 0} participant(s) importé(s)`,
       });
 
       refetchTrainings();

@@ -40,41 +40,45 @@ Deno.serve(async (req) => {
 
     const userId = claims.claims.sub as string
 
-    // Parse request body
     let directionId: string | null = null
     try {
       const body = await req.json()
       directionId = body?.direction_id || null
     } catch {
-      // No body, that's fine
+      // No body
     }
 
-    // Fetch formations from external project
+    // Connect to external project
     const externalSupabase = createClient(EXTERNAL_SUPABASE_URL, EXTERNAL_SUPABASE_ANON_KEY)
 
+    // Fetch formations
     const { data: formations, error: fetchError } = await externalSupabase
       .from('formations')
       .select('*')
       .order('date_debut', { ascending: false })
 
     if (fetchError) {
-      console.error('Error fetching external formations:', fetchError)
-      return new Response(JSON.stringify({ error: 'Erreur lors de la récupération des formations', details: fetchError.message }), {
+      console.error('Error fetching formations:', fetchError)
+      return new Response(JSON.stringify({ error: fetchError.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Fetch inscription counts
-    const { data: inscriptions } = await externalSupabase
-      .from('inscriptions')
-      .select('formation_id, statut')
+    // Fetch all inscriptions with participants via the view
+    const { data: inscriptionsView } = await externalSupabase
+      .from('v_inscriptions')
+      .select('*')
 
-    const inscriptionCounts: Record<string, number> = {}
-    if (inscriptions) {
-      for (const insc of inscriptions) {
-        if (insc.statut === 'inscrit' || insc.statut === 'confirmé') {
-          inscriptionCounts[insc.formation_id] = (inscriptionCounts[insc.formation_id] || 0) + 1
+    // Group inscriptions by formation_id
+    const inscriptionsByFormation: Record<string, any[]> = {}
+    if (inscriptionsView) {
+      for (const insc of inscriptionsView) {
+        if (insc.formation_id) {
+          if (!inscriptionsByFormation[insc.formation_id]) {
+            inscriptionsByFormation[insc.formation_id] = []
+          }
+          inscriptionsByFormation[insc.formation_id].push(insc)
         }
       }
     }
@@ -82,6 +86,7 @@ Deno.serve(async (req) => {
     let imported = 0
     let updated = 0
     let skipped = 0
+    let participantsImported = 0
 
     for (const formation of formations || []) {
       // Check if already imported by external_id
@@ -99,8 +104,6 @@ Deno.serve(async (req) => {
         end_date: formation.date_debut,
         location: formation.lieu || 'Non spécifié',
         max_participants: formation.places,
-        current_participants: inscriptionCounts[formation.id] || 0,
-        status: formation.statut === 'active' ? 'planifiée' : formation.statut,
         created_by: userId,
         external_id: formation.id,
       }
@@ -109,27 +112,92 @@ Deno.serve(async (req) => {
         trainingData.direction_id = directionId
       }
 
+      let localTrainingId: string | null = null
+
       if (existing) {
         const { error: updateError } = await localSupabase
           .from('trainings')
           .update(trainingData as any)
           .eq('id', existing.id)
 
-        if (!updateError) updated++
-        else { console.error('Update error:', updateError); skipped++ }
+        if (!updateError) {
+          updated++
+          localTrainingId = existing.id
+        } else {
+          console.error('Update error:', updateError)
+          skipped++
+        }
       } else {
         if (!directionId) {
-          // Need direction_id for insert, skip
           console.error('Cannot insert without direction_id')
           skipped++
           continue
         }
-        const { error: insertError } = await localSupabase
+        const { data: inserted, error: insertError } = await localSupabase
           .from('trainings')
           .insert(trainingData as any)
+          .select('id')
+          .single()
 
-        if (!insertError) imported++
-        else { console.error('Insert error:', insertError); skipped++ }
+        if (!insertError && inserted) {
+          imported++
+          localTrainingId = inserted.id
+        } else {
+          console.error('Insert error:', insertError)
+          skipped++
+        }
+      }
+
+      // Import participants for this formation
+      if (localTrainingId && inscriptionsByFormation[formation.id]) {
+        const participants = inscriptionsByFormation[formation.id]
+
+        for (const participant of participants) {
+          if (!participant.email) continue
+
+          // Check if participant already registered
+          const { data: existingReg } = await localSupabase
+            .from('training_registrations')
+            .select('id')
+            .eq('training_id', localTrainingId)
+            .eq('participant_email', participant.email)
+            .maybeSingle()
+
+          const regData = {
+            training_id: localTrainingId,
+            participant_name: participant.nom_dirigeant || 'Inconnu',
+            participant_email: participant.email,
+            participant_phone: participant.telephone || null,
+            participant_position: 'Dirigeant',
+            attended: participant.present || false,
+            status: participant.statut_inscription === 'confirmé' ? 'Confirmée' : 'En attente',
+            registration_date: participant.date_inscription || new Date().toISOString(),
+          }
+
+          if (existingReg) {
+            await localSupabase
+              .from('training_registrations')
+              .update(regData as any)
+              .eq('id', existingReg.id)
+          } else {
+            const { error: regError } = await localSupabase
+              .from('training_registrations')
+              .insert(regData as any)
+
+            if (!regError) {
+              participantsImported++
+            } else {
+              console.error('Registration insert error:', regError)
+            }
+          }
+        }
+
+        // Update current_participants count
+        const participantCount = participants.length
+        await localSupabase
+          .from('trainings')
+          .update({ current_participants: participantCount } as any)
+          .eq('id', localTrainingId)
       }
     }
 
@@ -140,19 +208,7 @@ Deno.serve(async (req) => {
         imported,
         updated,
         skipped,
-        formations: formations?.map(f => ({
-          id: f.id,
-          titre: f.titre,
-          theme: f.theme,
-          date_debut: f.date_debut,
-          lieu: f.lieu,
-          places: f.places,
-          inscrits: inscriptionCounts[f.id] || 0,
-          places_restantes: f.places - (inscriptionCounts[f.id] || 0),
-          image_url: f.image_url,
-          statut: f.statut,
-          duree: f.duree,
-        })),
+        participantsImported,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
