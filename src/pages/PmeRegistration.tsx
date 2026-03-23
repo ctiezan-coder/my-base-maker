@@ -127,7 +127,7 @@ export default function PmeRegistration() {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("companies").insert({
+      const { error } = await supabase.from("companies").insert([{
         company_name: formData.companyName,
         creation_date: formData.creationDate || null,
         filiere: formData.filiere || null,
@@ -147,7 +147,7 @@ export default function PmeRegistration() {
         direction_id: userDirection?.direction_id || null,
         created_by: user.id,
         accompaniment_status: "Prospection",
-      });
+      }]);
 
       if (error) throw error;
 
