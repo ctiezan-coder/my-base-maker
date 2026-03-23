@@ -20,7 +20,7 @@ export default function UserPermissions() {
   // Redirect if not admin
   useEffect(() => {
     if (userRole && userRole !== 'admin') {
-      navigate('/');
+      navigate('/dashboard');
     }
   }, [userRole, navigate]);
 

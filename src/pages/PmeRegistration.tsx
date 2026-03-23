@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useUserDirection } from "@/hooks/useUserDirection";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,9 +99,7 @@ const STEPS = [
 ];
 
 export default function PmeRegistration() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: userDirection } = useUserDirection();
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,11 +110,6 @@ export default function PmeRegistration() {
   };
 
   const handleSubmit = async () => {
-    if (!user) {
-      toast.error("Vous devez être connecté");
-      return;
-    }
-
     if (!formData.companyName || !formData.compteContribuable || !formData.rccm) {
       toast.error("Veuillez remplir les champs obligatoires : Nom de l'entreprise, N° Compte Contribuable et RCCM");
       return;
@@ -144,15 +135,13 @@ export default function PmeRegistration() {
         aciex_interaction_history: formData.observations || null,
         exported_products: formData.produits || null,
         headquarters_location: "Côte d'Ivoire",
-        direction_id: userDirection?.direction_id || null,
-        created_by: user.id,
         accompaniment_status: "Prospection",
       }]);
 
       if (error) throw error;
 
       toast.success("Entreprise enregistrée avec succès !");
-      navigate("/");
+      navigate("/auth");
     } catch (error) {
       console.error("Error registering PME:", error);
       toast.error("Erreur lors de l'enregistrement de l'entreprise");
@@ -354,7 +343,7 @@ export default function PmeRegistration() {
                 )}
               </div>
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => navigate("/")} className="text-muted-foreground">
+                <Button variant="ghost" onClick={() => navigate("/auth")} className="text-muted-foreground">
                   Passer / Skip
                 </Button>
                 {currentStep < 4 ? (

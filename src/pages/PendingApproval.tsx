@@ -27,7 +27,7 @@ export default function PendingApproval() {
 
   useEffect(() => {
     if (profile?.account_status === 'approved') {
-      navigate('/');
+      navigate('/dashboard');
     } else if (profile?.account_status === 'rejected') {
       // Handle rejected status
     }

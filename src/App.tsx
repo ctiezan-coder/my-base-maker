@@ -46,11 +46,11 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            <Route path="/" element={<PmeRegistration />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/database-export" element={<DatabaseExport />} />
-            <Route path="/" element={<Dashboard />}>
-              <Route path="pme-registration" element={<PmeRegistration />} />
+            <Route path="/dashboard" element={<Dashboard />}>
               <Route index element={<Index />} />
               <Route path="chat" element={<Chat />} />
               <Route path="companies" element={<Companies />} />
