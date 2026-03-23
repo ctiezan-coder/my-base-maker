@@ -4,12 +4,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, GraduationCap, Users } from "lucide-react";
+import { Plus, GraduationCap, Users, RefreshCw } from "lucide-react";
 import { TrainingDialog } from "@/components/trainings/TrainingDialog";
 import { TrainingList } from "@/components/trainings/TrainingList";
 import { TrainerDialog } from "@/components/trainers/TrainerDialog";
 import { TrainerTable } from "@/components/trainers/TrainerTable";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { useUserDirection } from "@/hooks/useUserDirection";
 import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -30,7 +31,9 @@ export default function Trainings() {
   const [trainerDialogOpen, setTrainerDialogOpen] = useState(false);
   const [selectedTraining, setSelectedTraining] = useState<Training | null>(null);
   const [selectedTrainer, setSelectedTrainer] = useState<Trainer | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
   const { canAccess: canManageTrainings } = useCanAccessModule("trainings", "manager");
+  const { data: userDirection } = useUserDirection();
   const { toast } = useToast();
 
   const { data: trainings, isLoading: loadingTrainings, refetch: refetchTrainings } = useQuery({
@@ -67,6 +70,33 @@ export default function Trainings() {
       return data;
     },
   });
+
+  const handleSyncFormations = async () => {
+    setIsSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("sync-external-formations", {
+        body: { direction_id: userDirection?.direction_id },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Synchronisation réussie",
+        description: `${data.imported} importée(s), ${data.updated} mise(s) à jour, ${data.skipped} ignorée(s) sur ${data.total} formation(s)`,
+      });
+
+      refetchTrainings();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Erreur de synchronisation";
+      toast({
+        variant: "destructive",
+        title: "Erreur de synchronisation",
+        description: errorMessage,
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const handleEditTraining = (training: Training) => {
     setSelectedTraining(training);
@@ -127,6 +157,17 @@ export default function Trainings() {
             Gestion des formations, événements et formateurs
           </p>
         </div>
+        {canManageTrainings && (
+          <Button
+            variant="outline"
+            onClick={handleSyncFormations}
+            disabled={isSyncing}
+            className="gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
+            {isSyncing ? "Synchronisation..." : "Importer depuis le site public"}
+          </Button>
+        )}
       </div>
 
       <Tabs defaultValue="trainings" className="space-y-4">
