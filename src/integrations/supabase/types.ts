@@ -8773,6 +8773,7 @@ export type Database = {
           description: string | null
           direction_id: string
           end_date: string
+          external_id: string | null
           id: string
           location: string | null
           max_participants: number | null
@@ -8789,6 +8790,7 @@ export type Database = {
           description?: string | null
           direction_id: string
           end_date: string
+          external_id?: string | null
           id?: string
           location?: string | null
           max_participants?: number | null
@@ -8805,6 +8807,7 @@ export type Database = {
           description?: string | null
           direction_id?: string
           end_date?: string
+          external_id?: string | null
           id?: string
           location?: string | null
           max_participants?: number | null
