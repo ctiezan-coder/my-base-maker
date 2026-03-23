@@ -152,7 +152,7 @@ export default function PmeRegistration() {
       if (error) throw error;
 
       toast.success("Entreprise enregistrée avec succès !");
-      navigate("/");
+      navigate("/auth");
     } catch (error) {
       console.error("Error registering PME:", error);
       toast.error("Erreur lors de l'enregistrement de l'entreprise");
