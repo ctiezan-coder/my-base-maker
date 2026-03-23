@@ -5,7 +5,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// External Supabase project (attendee-flow-master)
 const EXTERNAL_SUPABASE_URL = 'https://zztkvexbgvgttiwwfwjg.supabase.co'
 const EXTERNAL_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6dGt2ZXhiZ3ZndHRpd3dmd2pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1MjIwNjUsImV4cCI6MjA4ODA5ODA2NX0.ugrVeefPKHvsXTjcO_GLsKYNlbunBxjK-vX3O5FWg4E'
 
@@ -15,7 +14,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify auth
     const authHeader = req.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return new Response(JSON.stringify({ error: 'Non autorisé' }), {
@@ -40,7 +38,16 @@ Deno.serve(async (req) => {
       })
     }
 
-    const userId = claims.claims.sub
+    const userId = claims.claims.sub as string
+
+    // Parse request body
+    let directionId: string | null = null
+    try {
+      const body = await req.json()
+      directionId = body?.direction_id || null
+    } catch {
+      // No body, that's fine
+    }
 
     // Fetch formations from external project
     const externalSupabase = createClient(EXTERNAL_SUPABASE_URL, EXTERNAL_SUPABASE_ANON_KEY)
@@ -52,13 +59,13 @@ Deno.serve(async (req) => {
 
     if (fetchError) {
       console.error('Error fetching external formations:', fetchError)
-      return new Response(JSON.stringify({ error: 'Erreur lors de la récupération des formations externes', details: fetchError.message }), {
+      return new Response(JSON.stringify({ error: 'Erreur lors de la récupération des formations', details: fetchError.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    // Also fetch inscriptions count per formation
+    // Fetch inscription counts
     const { data: inscriptions } = await externalSupabase
       .from('inscriptions')
       .select('formation_id, statut')
@@ -72,56 +79,57 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Map external formations to local trainings format and upsert
-    const { body } = await req.json().catch(() => ({ body: {} }))
-    const directionId = body?.direction_id
-
     let imported = 0
     let updated = 0
     let skipped = 0
 
     for (const formation of formations || []) {
-      // Check if already exists by title and start_date
+      // Check if already imported by external_id
       const { data: existing } = await localSupabase
         .from('trainings')
-        .select('id, external_id')
-        .eq('title', formation.titre)
+        .select('id')
+        .eq('external_id' as any, formation.id)
         .maybeSingle()
 
-      const trainingData = {
+      const trainingData: Record<string, any> = {
         title: formation.titre,
-        description: `Thème: ${formation.theme}`,
+        description: `Thème: ${formation.theme}${formation.duree ? ' | Durée: ' + formation.duree : ''}`,
         training_type: 'séminaire',
         start_date: formation.date_debut,
         end_date: formation.date_debut,
         location: formation.lieu || 'Non spécifié',
         max_participants: formation.places,
+        current_participants: inscriptionCounts[formation.id] || 0,
         status: formation.statut === 'active' ? 'planifiée' : formation.statut,
         created_by: userId,
-        ...(directionId ? { direction_id: directionId } : {}),
         external_id: formation.id,
       }
 
+      if (directionId) {
+        trainingData.direction_id = directionId
+      }
+
       if (existing) {
-        // Update
         const { error: updateError } = await localSupabase
           .from('trainings')
-          .update(trainingData)
+          .update(trainingData as any)
           .eq('id', existing.id)
 
         if (!updateError) updated++
-        else skipped++
+        else { console.error('Update error:', updateError); skipped++ }
       } else {
-        // Insert
+        if (!directionId) {
+          // Need direction_id for insert, skip
+          console.error('Cannot insert without direction_id')
+          skipped++
+          continue
+        }
         const { error: insertError } = await localSupabase
           .from('trainings')
-          .insert(trainingData)
+          .insert(trainingData as any)
 
         if (!insertError) imported++
-        else {
-          console.error('Insert error:', insertError)
-          skipped++
-        }
+        else { console.error('Insert error:', insertError); skipped++ }
       }
     }
 
@@ -143,6 +151,7 @@ Deno.serve(async (req) => {
           places_restantes: f.places - (inscriptionCounts[f.id] || 0),
           image_url: f.image_url,
           statut: f.statut,
+          duree: f.duree,
         })),
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
