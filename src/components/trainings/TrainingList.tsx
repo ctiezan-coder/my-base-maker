@@ -86,13 +86,13 @@ function ParticipantsList({ trainingId }: { trainingId: string }) {
                   )}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={reg.status === 'confirmé' ? 'default' : 'secondary'} className="text-xs">
-                    {reg.status || 'inscrit'}
+                  <Badge variant={reg.status === 'Confirmée' ? 'default' : 'secondary'} className="text-xs">
+                    {reg.status || 'En attente'}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   {reg.attended ? (
-                    <CheckCircle className="w-4 h-4 text-green-500" />
+                    <CheckCircle className="w-4 h-4 text-primary" />
                   ) : (
                     <XCircle className="w-4 h-4 text-muted-foreground" />
                   )}
