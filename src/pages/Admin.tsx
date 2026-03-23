@@ -63,7 +63,7 @@ export default function Admin() {
     }
     
     if (!isAdmin) {
-      navigate('/');
+      navigate('/dashboard');
       toast({
         variant: 'destructive',
         title: 'Accès refusé',
