@@ -101,9 +101,7 @@ const STEPS = [
 ];
 
 export default function PmeRegistration() {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const { data: userDirection } = useUserDirection();
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,11 +112,6 @@ export default function PmeRegistration() {
   };
 
   const handleSubmit = async () => {
-    if (!user) {
-      toast.error("Vous devez être connecté");
-      return;
-    }
-
     if (!formData.companyName || !formData.compteContribuable || !formData.rccm) {
       toast.error("Veuillez remplir les champs obligatoires : Nom de l'entreprise, N° Compte Contribuable et RCCM");
       return;
