@@ -354,7 +354,7 @@ export default function PmeRegistration() {
                 )}
               </div>
               <div className="flex gap-3">
-                <Button variant="ghost" onClick={() => navigate("/")} className="text-muted-foreground">
+                <Button variant="ghost" onClick={() => navigate("/auth")} className="text-muted-foreground">
                   Passer / Skip
                 </Button>
                 {currentStep < 4 ? (

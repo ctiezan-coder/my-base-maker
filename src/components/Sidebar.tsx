@@ -46,39 +46,39 @@ interface MenuItem {
 }
 
 const dgItems: MenuItem[] = [
-  { icon: LayoutDashboard, labelKey: "sidebar.dashboard", path: "/", module: null },
-  { icon: MessageSquare, labelKey: "sidebar.chat", path: "/chat", module: null },
-  { icon: Building2, labelKey: "sidebar.companies", path: "/companies", module: "companies" },
-  { icon: FolderKanban, labelKey: "sidebar.projects", path: "/projects", module: "projects" },
-  { icon: FileText, labelKey: "sidebar.documents", path: "/documents", module: "documents" },
-  { icon: TrendingUp, labelKey: "sidebar.monitoring", path: "/suivi-evaluation", module: "suivi_evaluation" },
-  { icon: BarChart3, labelKey: "sidebar.kpis", path: "/kpis", module: "kpis" },
+  { icon: LayoutDashboard, labelKey: "sidebar.dashboard", path: "/dashboard", module: null },
+  { icon: MessageSquare, labelKey: "sidebar.chat", path: "/dashboard/chat", module: null },
+  { icon: Building2, labelKey: "sidebar.companies", path: "/dashboard/companies", module: "companies" },
+  { icon: FolderKanban, labelKey: "sidebar.projects", path: "/dashboard/projects", module: "projects" },
+  { icon: FileText, labelKey: "sidebar.documents", path: "/dashboard/documents", module: "documents" },
+  { icon: TrendingUp, labelKey: "sidebar.monitoring", path: "/dashboard/suivi-evaluation", module: "suivi_evaluation" },
+  { icon: BarChart3, labelKey: "sidebar.kpis", path: "/dashboard/kpis", module: "kpis" },
 ];
 
 const dafItems: MenuItem[] = [
-  { icon: ShoppingCart, labelKey: "sidebar.purchases", path: "/achats", module: "achats" },
-  { icon: Headphones, labelKey: "sidebar.support", path: "/support", module: "support" },
-  { icon: UserCheck, labelKey: "sidebar.hr", path: "/rh", module: "rh" },
-  { icon: Plane, labelKey: "sidebar.missions", path: "/missions", module: "missions" },
-  { icon: Wallet, labelKey: "sidebar.budgets", path: "/budgets", module: "comptabilite" },
-  { icon: Calculator, labelKey: "sidebar.accounting", path: "/comptabilite", module: "comptabilite" },
+  { icon: ShoppingCart, labelKey: "sidebar.purchases", path: "/dashboard/achats", module: "achats" },
+  { icon: Headphones, labelKey: "sidebar.support", path: "/dashboard/support", module: "support" },
+  { icon: UserCheck, labelKey: "sidebar.hr", path: "/dashboard/rh", module: "rh" },
+  { icon: Plane, labelKey: "sidebar.missions", path: "/dashboard/missions", module: "missions" },
+  { icon: Wallet, labelKey: "sidebar.budgets", path: "/dashboard/budgets", module: "comptabilite" },
+  { icon: Calculator, labelKey: "sidebar.accounting", path: "/dashboard/comptabilite", module: "comptabilite" },
 ];
 
 const operationalItems: MenuItem[] = [
-  { icon: Globe, labelKey: "sidebar.marketDevelopment", path: "/market-development", module: "market_development" },
-  { icon: Handshake, labelKey: "sidebar.partnerships", path: "/partnerships", module: "partnerships" },
-  { icon: GraduationCap, labelKey: "sidebar.trainings", path: "/trainings", module: "trainings" },
-  { icon: Calendar, labelKey: "sidebar.calendar", path: "/agenda", module: "events" },
-  { icon: Calendar, labelKey: "sidebar.events", path: "/events", module: "events" },
-  { icon: Image, labelKey: "sidebar.media", path: "/media", module: "media" },
-  { icon: ClipboardList, labelKey: "sidebar.imputations", path: "/imputations", module: "imputations" },
-  { icon: Archive, labelKey: "activitiesArchive", path: "/activities-archive", module: null },
-  { icon: UserCircle, labelKey: "sidebar.collaborators", path: "/collaborateurs", module: "collaborators" },
+  { icon: Globe, labelKey: "sidebar.marketDevelopment", path: "/dashboard/market-development", module: "market_development" },
+  { icon: Handshake, labelKey: "sidebar.partnerships", path: "/dashboard/partnerships", module: "partnerships" },
+  { icon: GraduationCap, labelKey: "sidebar.trainings", path: "/dashboard/trainings", module: "trainings" },
+  { icon: Calendar, labelKey: "sidebar.calendar", path: "/dashboard/agenda", module: "events" },
+  { icon: Calendar, labelKey: "sidebar.events", path: "/dashboard/events", module: "events" },
+  { icon: Image, labelKey: "sidebar.media", path: "/dashboard/media", module: "media" },
+  { icon: ClipboardList, labelKey: "sidebar.imputations", path: "/dashboard/imputations", module: "imputations" },
+  { icon: Archive, labelKey: "activitiesArchive", path: "/dashboard/activities-archive", module: null },
+  { icon: UserCircle, labelKey: "sidebar.collaborators", path: "/dashboard/collaborateurs", module: "collaborators" },
 ];
 
 const adminItems: MenuItem[] = [
-  { icon: Shield, labelKey: "sidebar.admin", path: "/admin", module: null },
-  { icon: Shield, labelKey: "permissions", path: "/permissions", module: null },
+  { icon: Shield, labelKey: "sidebar.admin", path: "/dashboard/admin", module: null },
+  { icon: Shield, labelKey: "permissions", path: "/dashboard/permissions", module: null },
 ];
 
 interface MenuSectionProps {
