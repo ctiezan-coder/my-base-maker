@@ -47,7 +47,6 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
-            <Route path="/pme-registration" element={<PmeRegistration />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
             <Route path="/database-export" element={<DatabaseExport />} />
             <Route path="/" element={<Dashboard />}>
