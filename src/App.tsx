@@ -78,6 +78,31 @@ const App = () => (
               <Route path="comptabilite" element={<Comptabilite />} />
               <Route path="trainers" element={<Trainers />} />
             </Route>
+            {/* Redirects for old routes */}
+            <Route path="/trainings" element={<Navigate to="/dashboard/trainings" replace />} />
+            <Route path="/companies" element={<Navigate to="/dashboard/companies" replace />} />
+            <Route path="/events" element={<Navigate to="/dashboard/events" replace />} />
+            <Route path="/projects" element={<Navigate to="/dashboard/projects" replace />} />
+            <Route path="/chat" element={<Navigate to="/dashboard/chat" replace />} />
+            <Route path="/admin" element={<Navigate to="/dashboard/admin" replace />} />
+            <Route path="/missions" element={<Navigate to="/dashboard/missions" replace />} />
+            <Route path="/trainers" element={<Navigate to="/dashboard/trainers" replace />} />
+            <Route path="/partnerships" element={<Navigate to="/dashboard/partnerships" replace />} />
+            <Route path="/documents" element={<Navigate to="/dashboard/documents" replace />} />
+            <Route path="/media" element={<Navigate to="/dashboard/media" replace />} />
+            <Route path="/kpis" element={<Navigate to="/dashboard/kpis" replace />} />
+            <Route path="/rh" element={<Navigate to="/dashboard/rh" replace />} />
+            <Route path="/budgets" element={<Navigate to="/dashboard/budgets" replace />} />
+            <Route path="/comptabilite" element={<Navigate to="/dashboard/comptabilite" replace />} />
+            <Route path="/support" element={<Navigate to="/dashboard/support" replace />} />
+            <Route path="/achats" element={<Navigate to="/dashboard/achats" replace />} />
+            <Route path="/imputations" element={<Navigate to="/dashboard/imputations" replace />} />
+            <Route path="/suivi-evaluation" element={<Navigate to="/dashboard/suivi-evaluation" replace />} />
+            <Route path="/collaborateurs" element={<Navigate to="/dashboard/collaborateurs" replace />} />
+            <Route path="/agenda" element={<Navigate to="/dashboard/agenda" replace />} />
+            <Route path="/market-development" element={<Navigate to="/dashboard/market-development" replace />} />
+            <Route path="/permissions" element={<Navigate to="/dashboard/permissions" replace />} />
+            <Route path="/activities-archive" element={<Navigate to="/dashboard/activities-archive" replace />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
