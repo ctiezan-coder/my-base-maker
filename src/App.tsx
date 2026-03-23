@@ -34,6 +34,7 @@ import Budgets from "./pages/Budgets";
 import DatabaseExport from "./pages/DatabaseExport";
 import NotFound from "./pages/NotFound";
 import Trainers from "./pages/Trainers";
+import PmeRegistration from "./pages/PmeRegistration";
 
 const queryClient = new QueryClient();
 
