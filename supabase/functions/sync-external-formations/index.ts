@@ -170,7 +170,7 @@ Deno.serve(async (req) => {
             participant_phone: participant.telephone || null,
             participant_position: 'Dirigeant',
             attended: participant.present || false,
-            status: participant.statut_inscription === 'confirmé' ? 'confirmé' : 'inscrit',
+            status: participant.statut_inscription === 'confirmé' ? 'Confirmée' : 'En attente',
             registration_date: participant.date_inscription || new Date().toISOString(),
           }
 
