@@ -9,6 +9,7 @@ import { TrainerDialog } from "@/components/trainers/TrainerDialog";
 import { TrainerTable } from "@/components/trainers/TrainerTable";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRole } from "@/hooks/useUserRole";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 export default function Trainers() {
   const { toast } = useToast();
@@ -27,7 +28,7 @@ export default function Trainers() {
         .order("created_at", { ascending: false });
 
       if (search) {
-        query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,specialization.ilike.%${search}%`);
+        query = query.or(`full_name.ilike.%${sanitizeFilterValue(search)}%,email.ilike.%${sanitizeFilterValue(search)}%,specialization.ilike.%${sanitizeFilterValue(search)}%`);
       }
 
       const { data, error } = await query;

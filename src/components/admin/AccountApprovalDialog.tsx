@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -34,6 +34,11 @@ export function AccountApprovalDialog({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [notes, setNotes] = useState('');
+
+  // Reset notes when dialog opens
+  useEffect(() => {
+    if (open) setNotes('');
+  }, [open]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ status, reason }: { status: string; reason?: string }) => {

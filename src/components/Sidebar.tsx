@@ -116,16 +116,40 @@ const colorMap = {
   },
 };
 
-const MenuSection = ({ 
-  title, 
-  items, 
+const MenuItemLink = ({ item, isAdmin }: { item: MenuItem; isAdmin: boolean }) => {
+  const { canAccess } = useCanAccessModule(item.module || 'companies', 'user');
+  const { t } = useTranslation();
+
+  if (!item.module || canAccess || isAdmin) {
+    return (
+      <NavLink
+        to={item.path}
+        className={({ isActive }) =>
+          cn(
+            "flex items-center gap-3 px-4 py-2.5 rounded-lg text-base font-semibold transition-all duration-200",
+            isActive
+              ? "bg-primary text-primary-foreground shadow-md"
+              : "text-foreground/80 hover:text-foreground hover:bg-accent/30"
+          )
+        }
+      >
+        <item.icon className="w-5 h-5" />
+        {t(item.labelKey)}
+      </NavLink>
+    );
+  }
+  return null;
+};
+
+const MenuSection = ({
+  title,
+  items,
   isAdmin,
   defaultOpen = true,
   color,
 }: MenuSectionProps) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const colors = colorMap[color];
-  const { t } = useTranslation();
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
@@ -143,30 +167,9 @@ const MenuSection = ({
         )} />
       </CollapsibleTrigger>
       <CollapsibleContent className="pt-2 space-y-1 pl-2">
-        {items.map((item) => {
-          const { canAccess } = useCanAccessModule(item.module || 'companies', 'user');
-          
-          if (!item.module || canAccess || isAdmin) {
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  cn(
-                    "flex items-center gap-3 px-4 py-2.5 rounded-lg text-base font-semibold transition-all duration-200",
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : "text-foreground/80 hover:text-foreground hover:bg-accent/30"
-                  )
-                }
-              >
-                <item.icon className="w-5 h-5" />
-                {t(item.labelKey)}
-              </NavLink>
-            );
-          }
-          return null;
-        })}
+        {items.map((item) => (
+          <MenuItemLink key={item.path} item={item} isAdmin={isAdmin} />
+        ))}
       </CollapsibleContent>
     </Collapsible>
   );

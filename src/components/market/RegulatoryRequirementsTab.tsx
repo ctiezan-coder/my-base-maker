@@ -31,6 +31,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Search, FileText, Shield, ExternalLink, Clock, DollarSign, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 interface RegulatoryRequirement {
   id: string;
@@ -120,7 +121,7 @@ export function RegulatoryRequirementsTab({ canManage }: RegulatoryRequirementsT
         .order("country", { ascending: true });
 
       if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,country.ilike.%${searchTerm}%,sector.ilike.%${searchTerm}%`);
+        query = query.or(`title.ilike.%${sanitizeFilterValue(searchTerm)}%,country.ilike.%${sanitizeFilterValue(searchTerm)}%,sector.ilike.%${sanitizeFilterValue(searchTerm)}%`);
       }
       if (countryFilter !== "all") {
         query = query.eq("country", countryFilter);

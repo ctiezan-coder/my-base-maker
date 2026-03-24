@@ -29,6 +29,7 @@ import { ProductCatalogsTab } from "@/components/market/ProductCatalogsTab";
 import { RegulatoryRequirementsTab } from "@/components/market/RegulatoryRequirementsTab";
 import { ExportPerformanceTab } from "@/components/market/ExportPerformanceTab";
 import { ExportOpportunity, PotentialMarket, BusinessConnection, MarketRegion } from "@/types/market-development";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 export default function MarketDevelopment() {
   const { toast } = useToast();
@@ -63,7 +64,7 @@ export default function MarketDevelopment() {
         .order("deadline", { ascending: true });
 
       if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%`);
+        query = query.or(`title.ilike.%${sanitizeFilterValue(searchTerm)}%,description.ilike.%${sanitizeFilterValue(searchTerm)}%`);
       }
       if (sectorFilter !== "all") {
         query = query.ilike("sector", sectorFilter);

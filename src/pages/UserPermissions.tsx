@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 export default function UserPermissions() {
   const [search, setSearch] = useState("");
@@ -43,7 +44,7 @@ export default function UserPermissions() {
 
       if (search) {
         query = query.or(
-          `full_name.ilike.%${search}%,email.ilike.%${search}%`
+          `full_name.ilike.%${sanitizeFilterValue(search)}%,email.ilike.%${sanitizeFilterValue(search)}%`
         );
       }
 

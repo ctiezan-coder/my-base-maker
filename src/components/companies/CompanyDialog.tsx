@@ -291,7 +291,6 @@ export function CompanyDialog({ open, onOpenChange, company, onClose }: CompanyD
         toast({ title: "Opérateur créé avec succès" });
       }
       
-      await new Promise(resolve => setTimeout(resolve, 300));
       onClose();
     } catch (error: any) {
       let errorMessage = error.message;

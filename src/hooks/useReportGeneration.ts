@@ -42,6 +42,14 @@ export function useReportGeneration() {
       supabase.from('kpi_tracking').select('*').gte('period', fromStr).lte('period', toStr)
     ]);
 
+    // Check for errors
+    const errors = [events, trainings, partnerships, projects, imputations, kpis]
+      .filter(r => r.error)
+      .map(r => r.error?.message);
+    if (errors.length > 0) {
+      throw new Error(`Erreur lors de la récupération des données: ${errors.join(', ')}`)
+    }
+
     const workbook = XLSX.utils.book_new();
 
     // Feuille Événements
@@ -179,10 +187,12 @@ export function useReportGeneration() {
     XLSX.utils.book_append_sheet(workbook, wsInfo, 'Informations');
 
     // Feuille Événements participés
-    const { data: eventParticipations } = await supabase
+    const { data: eventParticipations, error: epError } = await supabase
       .from('event_participants')
       .select('*, event:events(*)')
       .eq('company_id', companyId);
+
+    if (epError) throw new Error(`Erreur récupération participations: ${epError.message}`);
 
     const eventsData = eventParticipations?.map(ep => ({
       'Événement': ep.event?.title,
@@ -195,10 +205,12 @@ export function useReportGeneration() {
     XLSX.utils.book_append_sheet(workbook, wsEvents, 'Événements');
 
     // Feuille Opportunités
-    const { data: applications } = await supabase
+    const { data: applications, error: appError } = await supabase
       .from('opportunity_applications')
       .select('*, opportunity:export_opportunities(*)')
       .eq('company_id', companyId);
+
+    if (appError) throw new Error(`Erreur récupération candidatures: ${appError.message}`);
 
     const opportunitiesData = applications?.map(app => ({
       'Opportunité': app.opportunity?.title,
@@ -213,10 +225,12 @@ export function useReportGeneration() {
     XLSX.utils.book_append_sheet(workbook, wsOpportunities, 'Opportunités');
 
     // Feuille Tâches
-    const { data: tasks } = await supabase
+    const { data: tasks, error: tasksError } = await supabase
       .from('tasks')
       .select('*')
       .eq('company_id', companyId);
+
+    if (tasksError) throw new Error(`Erreur récupération tâches: ${tasksError.message}`);
 
     const tasksData = tasks?.map(t => ({
       'Titre': t.title,
@@ -236,11 +250,13 @@ export function useReportGeneration() {
     const fromStr = format(dateFrom, "yyyy-MM-dd");
     const toStr = format(dateTo, "yyyy-MM-dd");
 
-    const { data: opportunities } = await supabase
+    const { data: opportunities, error: oppError } = await supabase
       .from('export_opportunities')
       .select('*')
       .gte('created_at', fromStr)
       .lte('created_at', toStr);
+
+    if (oppError) throw new Error(`Erreur récupération opportunités: ${oppError.message}`);
 
     const workbook = XLSX.utils.book_new();
 
@@ -262,11 +278,13 @@ export function useReportGeneration() {
     XLSX.utils.book_append_sheet(workbook, wsOpportunities, 'Opportunités');
 
     // Feuille Candidatures
-    const { data: applications } = await supabase
+    const { data: applications, error: appError2 } = await supabase
       .from('opportunity_applications')
       .select('*, opportunity:export_opportunities(*), company:companies(*)')
       .gte('created_at', fromStr)
       .lte('created_at', toStr);
+
+    if (appError2) throw new Error(`Erreur récupération candidatures: ${appError2.message}`);
 
     const applicationsData = applications?.map(app => ({
       'Opportunité': app.opportunity?.title,
@@ -455,11 +473,13 @@ export function useReportGeneration() {
     const fromStr = format(dateFrom, "yyyy-MM-dd");
     const toStr = format(dateTo, "yyyy-MM-dd");
 
-    const { data: tasks } = await supabase
+    const { data: tasks, error: tasksErr } = await supabase
       .from('tasks')
       .select('*, company:companies(*)')
       .gte('created_at', fromStr)
       .lte('created_at', toStr);
+
+    if (tasksErr) throw new Error(`Erreur récupération tâches: ${tasksErr.message}`);
 
     const workbook = XLSX.utils.book_new();
 

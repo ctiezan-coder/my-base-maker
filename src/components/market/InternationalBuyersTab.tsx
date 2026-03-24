@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { Plus, Search, Building2, Mail, Phone, Globe, Eye, Edit, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 interface InternationalBuyer {
   id: string;
@@ -116,7 +117,7 @@ export function InternationalBuyersTab({ canManage }: InternationalBuyersTabProp
         .order("created_at", { ascending: false });
 
       if (searchTerm) {
-        query = query.or(`organization_name.ilike.%${searchTerm}%,contact_name.ilike.%${searchTerm}%,sector.ilike.%${searchTerm}%`);
+        query = query.or(`organization_name.ilike.%${sanitizeFilterValue(searchTerm)}%,contact_name.ilike.%${sanitizeFilterValue(searchTerm)}%,sector.ilike.%${sanitizeFilterValue(searchTerm)}%`);
       }
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);

@@ -19,6 +19,7 @@ import { AlbumDialog } from "@/components/mediatheque/AlbumDialog";
 import { useMediaFiles, useMediaAlbums, useMediaTags, useDeleteMedia } from "@/hooks/useMediaLibrary";
 import { useToast } from "@/hooks/use-toast";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { sanitizeFilterValue } from "@/lib/utils";
 import type { MediaFile, MediaAlbum, MediaFilters } from "@/types/media";
 
 export default function Media() {
@@ -51,7 +52,7 @@ export default function Media() {
         .order("created_at", { ascending: false });
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%`);
+        query = query.or(`title.ilike.%${sanitizeFilterValue(search)}%`);
       }
 
       const { data, error } = await query;

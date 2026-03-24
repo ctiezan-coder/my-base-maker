@@ -85,14 +85,9 @@ export function UserManagementTable() {
 
   const updateRoleMutation = useMutation({
     mutationFn: async ({ userId, newRole }: { userId: string; newRole: 'admin' | 'manager' | 'user' }) => {
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
-
       const { error } = await supabase
         .from('user_roles')
-        .insert([{ user_id: userId, role: newRole }]);
+        .upsert({ user_id: userId, role: newRole }, { onConflict: 'user_id' });
 
       if (error) throw error;
     },
@@ -329,7 +324,7 @@ export function UserManagementTable() {
                           size="sm"
                           onClick={() => setDeleteUserId(userData.user_id)}
                         >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <Trash2 className="h-4 w-4 text-destructive" aria-label="Supprimer" />
                         </Button>
                       </>
                     )}
@@ -351,9 +346,11 @@ export function UserManagementTable() {
             open={approvalDialogOpen}
             onOpenChange={setApprovalDialogOpen}
           />
-          <RoleAssignmentDialog 
+          <RoleAssignmentDialog
             userId={selectedUser.user_id}
             userEmail={selectedUser.email}
+            open={roleDialogOpen}
+            onOpenChange={setRoleDialogOpen}
           />
           <UserPermissionsDialog
             user={selectedUser}

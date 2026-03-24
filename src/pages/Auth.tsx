@@ -57,7 +57,7 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [directionId, setDirectionId] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { data: userRole } = useUserRole();

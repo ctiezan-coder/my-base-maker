@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.77.0'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') || '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
       }
     );
 
-    console.log(`Admin ${user.email} is resetting password for: ${email}`);
+    // Admin password reset
 
     // First check if user exists in profiles table
     const { data: profile } = await supabaseAdmin
@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
 
     if (!authUser.user) {
       // User exists in profiles but not in auth.users, create it
-      console.log(`Creating auth user for existing profile: ${email}`);
+      // Creating auth user for existing profile
       const { data: newAuthUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
         id: profile.user_id, // Use the existing user_id from profiles
         email,
@@ -119,7 +119,7 @@ Deno.serve(async (req) => {
         );
       }
 
-      console.log(`Auth user created and password set for: ${email}`);
+      // Auth user created successfully
       return new Response(
         JSON.stringify({ 
           success: true,
@@ -143,7 +143,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`Password updated successfully for: ${email}`);
+    // Password updated successfully
 
     return new Response(
       JSON.stringify({ 

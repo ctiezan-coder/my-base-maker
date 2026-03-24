@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.77.0'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') || '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -11,6 +11,43 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Verify caller is authenticated and is admin
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Non autorisé' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user: caller } } = await supabaseClient.auth.getUser();
+    if (!caller) {
+      return new Response(
+        JSON.stringify({ error: 'Non autorisé' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: callerRole } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', caller.id)
+      .eq('role', 'admin')
+      .single();
+
+    if (!callerRole) {
+      return new Response(
+        JSON.stringify({ error: 'Accès refusé - Administrateur requis' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { email, password, fullName, directionId } = await req.json();
 
     // Create Supabase admin client
@@ -25,8 +62,6 @@ Deno.serve(async (req) => {
       }
     );
 
-    console.log(`Creating admin user: ${email}`);
-
     // Check if profile already exists
     const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
@@ -37,7 +72,7 @@ Deno.serve(async (req) => {
     if (existingProfile && existingProfile.user_id) {
       // User exists in profiles, check if exists in auth
       const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(existingProfile.user_id);
-      
+
       if (authUser.user) {
         // Update password
         const { error } = await supabaseAdmin.auth.admin.updateUserById(
@@ -53,7 +88,7 @@ Deno.serve(async (req) => {
         }
 
         return new Response(
-          JSON.stringify({ 
+          JSON.stringify({
             success: true,
             message: `Mot de passe mis à jour pour ${email}`
           }),
@@ -74,7 +109,6 @@ Deno.serve(async (req) => {
     });
 
     if (createError) {
-      console.error('Error creating user:', createError);
       return new Response(
         JSON.stringify({ error: createError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -106,19 +140,17 @@ Deno.serve(async (req) => {
     // Assign admin role
     const { error: roleError } = await supabaseAdmin
       .from('user_roles')
-      .insert({ 
-        user_id: newUser.user.id, 
-        role: 'admin' 
+      .insert({
+        user_id: newUser.user.id,
+        role: 'admin'
       });
 
     if (roleError) {
       console.error('Error assigning role:', roleError);
     }
 
-    console.log(`Admin user created successfully: ${email}`);
-
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         message: `Utilisateur admin créé: ${email}`,
         userId: newUser.user.id
@@ -127,7 +159,6 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Create admin user error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),

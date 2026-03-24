@@ -11,6 +11,7 @@ import { EventList } from "@/components/events/EventList";
 import { EventsStatsCards } from "@/components/events/EventsStatsCards";
 import { useToast } from "@/hooks/use-toast";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 export default function Events() {
   const { toast } = useToast();
@@ -44,7 +45,7 @@ export default function Events() {
         .order("start_date", { ascending: true });
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%,event_type.ilike.%${search}%,location.ilike.%${search}%`);
+        query = query.or(`title.ilike.%${sanitizeFilterValue(search)}%,event_type.ilike.%${sanitizeFilterValue(search)}%,location.ilike.%${sanitizeFilterValue(search)}%`);
       }
       
       if (typeFilter !== "all") {

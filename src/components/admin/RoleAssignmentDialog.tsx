@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -49,10 +49,14 @@ const MODULES: { value: AppModule; label: string }[] = [
 interface RoleAssignmentDialogProps {
   userId: string;
   userEmail: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialogProps) {
-  const [open, setOpen] = useState(false);
+export function RoleAssignmentDialog({ userId, userEmail, open: controlledOpen, onOpenChange }: RoleAssignmentDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [selectedDirection, setSelectedDirection] = useState<string>('');
   const { data: userRole } = useUserRole();
   const isAdmin = userRole === 'admin';
@@ -107,7 +111,7 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
   });
 
   // Update selected modules when assignments are loaded
-  useState(() => {
+  useEffect(() => {
     if (existingAssignments) {
       const newModules = { ...selectedModules };
       existingAssignments.forEach((assignment) => {
@@ -115,7 +119,7 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
       });
       setSelectedModules(newModules);
     }
-  });
+  }, [existingAssignments]);
 
   const saveAssignments = useMutation({
     mutationFn: async () => {
@@ -170,12 +174,6 @@ export function RoleAssignmentDialog({ userId, userEmail }: RoleAssignmentDialog
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          <Settings2 className="h-4 w-4 mr-2" />
-          Gérer permissions
-        </Button>
-      </DialogTrigger>
       <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Gérer les permissions</DialogTitle>

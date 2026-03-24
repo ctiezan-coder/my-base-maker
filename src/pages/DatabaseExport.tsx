@@ -1,14 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, Database, CheckCircle, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export default function DatabaseExport() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportComplete, setExportComplete] = useState(false);
   const { toast } = useToast();
+  const { data: userRole, isLoading: roleLoading } = useUserRole();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!roleLoading && userRole !== 'admin') {
+      navigate('/dashboard');
+    }
+  }, [userRole, roleLoading, navigate]);
+
+  if (roleLoading || userRole !== 'admin') {
+    return null;
+  }
 
   const exportDatabase = async () => {
     setIsExporting(true);
@@ -91,20 +105,10 @@ export default function DatabaseExport() {
     }
   };
 
-  const tableStats = [
-    { name: 'Directions', count: 11 },
-    { name: 'Partenariats', count: 10 },
-    { name: 'Formations', count: 2 },
-    { name: 'Connexions Business', count: 7 },
-    { name: 'Dossiers', count: 5 },
-    { name: 'Documents', count: 4 },
-    { name: 'Médias', count: 5 },
-    { name: 'Entreprises', count: 146 },
-    { name: 'Événements', count: 414 },
-    { name: 'Projets', count: 399 },
-    { name: 'Imputations', count: 398 },
-    { name: 'Opportunités', count: 87 },
-    { name: 'KPIs', count: 27 },
+  const tableNames = [
+    'Directions', 'Partenariats', 'Formations', 'Connexions Business',
+    'Dossiers', 'Documents', 'Médias', 'Entreprises', 'Événements',
+    'Projets', 'Imputations', 'Opportunités', 'KPIs',
   ];
 
   return (
@@ -122,10 +126,9 @@ export default function DatabaseExport() {
         <CardContent className="space-y-6">
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
-            {tableStats.map((stat) => (
-              <div key={stat.name} className="flex justify-between p-2 bg-muted rounded">
-                <span className="text-muted-foreground">{stat.name}</span>
-                <span className="font-medium">{stat.count}</span>
+            {tableNames.map((name) => (
+              <div key={name} className="p-2 bg-muted rounded">
+                <span className="text-muted-foreground">{name}</span>
               </div>
             ))}
           </div>

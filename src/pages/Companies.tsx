@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
 import { useTranslation } from "react-i18next";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 15;
 
@@ -53,7 +54,7 @@ export default function Companies() {
         .range(from, to);
 
       if (search) {
-        query = query.or(`company_name.ilike.%${search}%,rccm_number.ilike.%${search}%,email.ilike.%${search}%`);
+        query = query.or(`company_name.ilike.%${sanitizeFilterValue(search)}%,rccm_number.ilike.%${sanitizeFilterValue(search)}%,email.ilike.%${sanitizeFilterValue(search)}%`);
       }
 
       if (filters.sector !== "all") {

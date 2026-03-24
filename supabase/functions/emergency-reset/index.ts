@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.77.0'
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') || '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -11,6 +11,43 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Verify caller is authenticated and is admin
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Non autorisé' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    const { data: { user: caller } } = await supabaseClient.auth.getUser();
+    if (!caller) {
+      return new Response(
+        JSON.stringify({ error: 'Non autorisé' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { data: callerRole } = await supabaseClient
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', caller.id)
+      .eq('role', 'admin')
+      .single();
+
+    if (!callerRole) {
+      return new Response(
+        JSON.stringify({ error: 'Accès refusé - Administrateur requis' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { email, newPassword } = await req.json();
 
     if (!email || !newPassword) {
@@ -21,9 +58,9 @@ Deno.serve(async (req) => {
     }
 
     // Validate password strength
-    if (newPassword.length < 8) {
+    if (newPassword.length < 8 || !/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
       return new Response(
-        JSON.stringify({ error: 'Le mot de passe doit contenir au moins 8 caractères' }),
+        JSON.stringify({ error: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -40,22 +77,14 @@ Deno.serve(async (req) => {
       }
     );
 
-    console.log(`Emergency password reset for: ${email}`);
+    // Get user by email using profile lookup instead of listing all users
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('user_id')
+      .eq('email', email)
+      .single();
 
-    // Get user by email
-    const { data: targetUser, error: getUserError } = await supabaseAdmin.auth.admin.listUsers();
-    
-    if (getUserError) {
-      console.error('Error listing users:', getUserError);
-      return new Response(
-        JSON.stringify({ error: getUserError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const userToUpdate = targetUser.users.find(u => u.email === email);
-    
-    if (!userToUpdate) {
+    if (!profile) {
       return new Response(
         JSON.stringify({ error: 'Utilisateur non trouvé' }),
         { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -63,23 +92,20 @@ Deno.serve(async (req) => {
     }
 
     // Update user password
-    const { data, error } = await supabaseAdmin.auth.admin.updateUserById(
-      userToUpdate.id,
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(
+      profile.user_id,
       { password: newPassword }
     );
 
     if (error) {
-      console.error('Error updating password:', error);
       return new Response(
         JSON.stringify({ error: error.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Password updated successfully for: ${email}`);
-
     return new Response(
-      JSON.stringify({ 
+      JSON.stringify({
         success: true,
         message: `Mot de passe réinitialisé pour ${email}`,
       }),
@@ -87,7 +113,6 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Reset password error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),
