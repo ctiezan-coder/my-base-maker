@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useEffect } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { toast } from 'sonner';
 
 export interface ChatMessage {
@@ -19,10 +19,17 @@ export interface ChatMessage {
 export const useChatMessages = (selectedCollaborators: string[]) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Stable key that doesn't mutate the original array
+  const collaboratorsKey = useMemo(
+    () => [...selectedCollaborators].sort().join(','),
+    [selectedCollaborators]
+  );
 
   // Fetch messages
   const { data: messages = [], isLoading } = useQuery({
-    queryKey: ['chat-messages', selectedCollaborators.sort().join(',')],
+    queryKey: ['chat-messages', collaboratorsKey],
     queryFn: async () => {
       if (!user || selectedCollaborators.length === 0) return [];
 
@@ -36,10 +43,10 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
       if (messagesError) throw messagesError;
 
       // Filter messages based on selected collaborators
+      const selectedWithUser = [...selectedCollaborators, user.id];
       const filteredMessages = (messagesData || []).filter((msg: any) => {
         const allParticipants = [msg.sender_id, ...msg.receiver_ids];
-        const selectedWithUser = [...selectedCollaborators, user.id];
-        
+
         // Check if message participants match selected collaborators
         return selectedWithUser.every(id => allParticipants.includes(id)) &&
                allParticipants.every(id => selectedWithUser.includes(id));
@@ -47,6 +54,8 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
 
       // Get unique sender IDs
       const senderIds = [...new Set(filteredMessages.map(msg => msg.sender_id))];
+
+      if (senderIds.length === 0) return [];
 
       // Fetch sender profiles
       const { data: profilesData, error: profilesError } = await supabase
@@ -58,7 +67,7 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
 
       // Map profiles to messages
       const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
-      
+
       return filteredMessages.map(msg => ({
         ...msg,
         sender_profile: profilesMap.get(msg.sender_id)
@@ -73,12 +82,15 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
       if (!user) throw new Error('User not authenticated');
       if (selectedCollaborators.length === 0) throw new Error('No recipients selected');
 
+      const trimmed = message.trim();
+      if (!trimmed || trimmed.length > 10000) throw new Error('Message invalide');
+
       const { data, error } = await supabase
         .from('chat_messages')
         .insert({
           sender_id: user.id,
           receiver_ids: selectedCollaborators,
-          message,
+          message: trimmed,
         })
         .select()
         .single();
@@ -96,7 +108,7 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
     },
   });
 
-  // Subscribe to realtime updates
+  // Subscribe to realtime updates with filter
   useEffect(() => {
     if (!user || selectedCollaborators.length === 0) return;
 
@@ -110,17 +122,18 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
           table: 'chat_messages',
         },
         (payload) => {
-          console.log('New message received:', payload);
           const newMessage = payload.new as any;
-          
-          // Invalider les requêtes pour rafraîchir les messages
+
+          // Invalidate queries to refresh messages
           queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-          
-          // Si le message n'est pas de l'utilisateur actuel, jouer un son
+
+          // Play sound for incoming messages from others
           if (newMessage.sender_id !== user.id) {
-            const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0A==');
-            audio.volume = 0.2;
-            audio.play().catch(e => console.log('Could not play message sound:', e));
+            if (!audioRef.current) {
+              audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGWi77eaeSwkNUKfj8LdjHAU7k9jy0A==');
+              audioRef.current.volume = 0.2;
+            }
+            audioRef.current.play().catch(() => {});
           }
         }
       )
@@ -129,7 +142,7 @@ export const useChatMessages = (selectedCollaborators: string[]) => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, selectedCollaborators, queryClient]);
+  }, [user, collaboratorsKey, queryClient]);
 
   return {
     messages,

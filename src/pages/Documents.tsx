@@ -14,6 +14,7 @@ import { ShareDialog } from "@/components/documents/ShareDialog";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 export default function Documents() {
   const { toast } = useToast();
@@ -78,7 +79,7 @@ export default function Documents() {
       }
 
       if (search) {
-        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+        query = query.or(`title.ilike.%${sanitizeFilterValue(search)}%,description.ilike.%${sanitizeFilterValue(search)}%`);
       }
 
       const { data, error } = await query;

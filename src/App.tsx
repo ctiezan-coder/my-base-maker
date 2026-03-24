@@ -36,7 +36,17 @@ import NotFound from "./pages/NotFound";
 import Trainers from "./pages/Trainers";
 import PmeRegistration from "./pages/PmeRegistration";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        // Don't retry on auth errors
+        if (error?.status === 401 || error?.status === 403) return false;
+        return failureCount < 2;
+      },
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -50,7 +60,6 @@ const App = () => (
             <Route path="/pme-registration" element={<PmeRegistration />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/pending-approval" element={<PendingApproval />} />
-            <Route path="/database-export" element={<DatabaseExport />} />
             <Route path="/dashboard" element={<Dashboard />}>
               <Route index element={<Index />} />
               <Route path="chat" element={<Chat />} />
@@ -77,6 +86,7 @@ const App = () => (
               <Route path="budgets" element={<Budgets />} />
               <Route path="comptabilite" element={<Comptabilite />} />
               <Route path="trainers" element={<Trainers />} />
+              <Route path="database-export" element={<DatabaseExport />} />
             </Route>
             {/* Redirects for old routes */}
             <Route path="/trainings" element={<Navigate to="/dashboard/trainings" replace />} />

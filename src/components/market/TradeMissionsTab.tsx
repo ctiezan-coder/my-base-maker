@@ -25,6 +25,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, Plane, Calendar, MapPin, Users, TrendingUp, FileText, Edit, Eye } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 interface TradeMission {
   id: string;
@@ -108,7 +109,7 @@ export function TradeMissionsTab({ canManage }: TradeMissionsTabProps) {
         .order("start_date", { ascending: false });
 
       if (searchTerm) {
-        query = query.or(`mission_name.ilike.%${searchTerm}%,destination_country.ilike.%${searchTerm}%`);
+        query = query.or(`mission_name.ilike.%${sanitizeFilterValue(searchTerm)}%,destination_country.ilike.%${sanitizeFilterValue(searchTerm)}%`);
       }
       if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);

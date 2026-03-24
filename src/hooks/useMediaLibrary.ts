@@ -1,11 +1,18 @@
-import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { MediaFile, MediaAlbum, MediaTag, MediaFilters } from '@/types/media';
+import { sanitizeFilterValue } from '@/lib/utils';
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const ALLOWED_MIME_TYPES = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+  'video/mp4', 'video/webm', 'video/quicktime',
+  'audio/mpeg', 'audio/wav', 'audio/ogg',
+  'application/pdf',
+];
 
 export function useMediaFiles(filters: MediaFilters = {}) {
-  const { toast } = useToast();
 
   return useQuery({
     queryKey: ['media-files', filters],
@@ -22,7 +29,7 @@ export function useMediaFiles(filters: MediaFilters = {}) {
         .order('created_at', { ascending: false });
 
       if (filters.search) {
-        query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+        query = query.or(`title.ilike.%${sanitizeFilterValue(filters.search)}%,description.ilike.%${sanitizeFilterValue(filters.search)}%`);
       }
       if (filters.category) {
         query = query.eq('media_category', filters.category);
@@ -37,7 +44,7 @@ export function useMediaFiles(filters: MediaFilters = {}) {
         query = query.eq('event_id', filters.event_id);
       }
       if (filters.author) {
-        query = query.or(`author.ilike.%${filters.author}%,photographer.ilike.%${filters.author}%`);
+        query = query.or(`author.ilike.%${sanitizeFilterValue(filters.author)}%,photographer.ilike.%${sanitizeFilterValue(filters.author)}%`);
       }
       if (filters.is_featured) {
         query = query.eq('is_featured', true);
@@ -105,6 +112,14 @@ export function useUploadMedia() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non authentifié');
 
+      // Validate file size and type
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error(`Le fichier est trop volumineux (max ${MAX_FILE_SIZE / 1024 / 1024}MB)`);
+      }
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        throw new Error(`Type de fichier non autorisé: ${file.type}`);
+      }
+
       // Upload to storage
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -155,7 +170,11 @@ export function useUploadMedia() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Clean up orphaned file in storage
+        await supabase.storage.from('media-library').remove([filePath]);
+        throw error;
+      }
       return data;
     },
     onSuccess: () => {

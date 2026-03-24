@@ -28,8 +28,12 @@ export default function PendingApproval() {
   useEffect(() => {
     if (profile?.account_status === 'approved') {
       navigate('/dashboard');
-    } else if (profile?.account_status === 'rejected') {
-      // Handle rejected status
+    } else if (profile?.account_status === 'rejected' || profile?.account_status === 'suspended') {
+      // Force sign-out after a delay so user can see the message
+      const timer = setTimeout(() => {
+        signOut().then(() => navigate('/auth'));
+      }, 5000);
+      return () => clearTimeout(timer);
     }
   }, [profile, navigate]);
 

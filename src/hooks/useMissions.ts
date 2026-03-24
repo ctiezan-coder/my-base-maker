@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { MissionOrder, MissionStats, MissionValidation, MissionExpense, MissionReport, PerDiemRate } from "@/types/mission";
@@ -24,7 +25,7 @@ export function useMissions() {
     }
   });
 
-  const stats: MissionStats = {
+  const stats: MissionStats = useMemo(() => ({
     total: missions?.length || 0,
     brouillon: missions?.filter(m => m.extended_status === 'Brouillon').length || 0,
     enValidation: missions?.filter(m => ['En validation N1', 'En validation DAF', 'En validation DG', 'Soumise'].includes(m.extended_status || '')).length || 0,
@@ -37,7 +38,7 @@ export function useMissions() {
     internationales: missions?.filter(m => m.mission_type === 'Internationale').length || 0,
     budgetTotal: missions?.reduce((acc, m) => acc + (m.estimated_budget || 0), 0) || 0,
     budgetConsomme: missions?.reduce((acc, m) => acc + (m.actual_cost || 0), 0) || 0,
-  };
+  }), [missions]);
 
   return { missions, isLoading, stats };
 }

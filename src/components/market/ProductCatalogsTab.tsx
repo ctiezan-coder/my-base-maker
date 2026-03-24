@@ -26,6 +26,7 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Search, BookOpen, Package, Eye, Edit, Trash2, Download, Star } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
+import { sanitizeFilterValue } from "@/lib/utils";
 
 interface ProductCatalog {
   id: string;
@@ -113,7 +114,7 @@ export function ProductCatalogsTab({ canManage }: ProductCatalogsTabProps) {
         .order("created_at", { ascending: false });
 
       if (searchTerm) {
-        query = query.or(`catalog_name.ilike.%${searchTerm}%,sector.ilike.%${searchTerm}%`);
+        query = query.or(`catalog_name.ilike.%${sanitizeFilterValue(searchTerm)}%,sector.ilike.%${sanitizeFilterValue(searchTerm)}%`);
       }
 
       const { data, error } = await query;

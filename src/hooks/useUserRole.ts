@@ -34,8 +34,9 @@ export function useUserRole() {
 
 export function useHasRole(role: AppRole) {
   const { data: userRole } = useUserRole();
-  
+
+  if (!userRole) return false;
   if (role === 'admin') return userRole === 'admin';
   if (role === 'manager') return userRole === 'admin' || userRole === 'manager';
-  return true; // All authenticated users have 'user' role
+  return true; // All authenticated users with a role have 'user' access
 }
