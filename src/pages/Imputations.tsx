@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useUserDirection } from "@/hooks/useUserDirection";
-import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { useIsDirectionGenerale } from "@/hooks/useDirectionAccess";
+import { useUserRole } from "@/hooks/useUserRole";
 import {
   Select,
   SelectContent,
@@ -29,7 +30,9 @@ export default function Imputations() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: userDirection } = useUserDirection();
-  const { canAccess: canManageImputations } = useCanAccessModule("imputations", "manager");
+  const { data: isDG } = useIsDirectionGenerale();
+  const { data: userRole } = useUserRole();
+  const canManageImputations = isDG || userRole === 'admin';
 
   const { data: imputations = [], isLoading } = useQuery({
     queryKey: ['imputations', userDirection?.direction_id],

@@ -15,7 +15,7 @@ import { Plus, FolderKanban, Search } from "lucide-react";
 import { ProjectDialog } from "@/components/projects/ProjectDialog";
 import { ProjectList } from "@/components/projects/ProjectList";
 import { useUserDirection } from "@/hooks/useUserDirection";
-import { useCanAccessModule } from "@/hooks/useCanAccessModule";
+import { useCanManageProjects } from "@/hooks/useDirectionAccess";
 import { useTranslation } from "react-i18next";
 
 export default function Projects() {
@@ -26,7 +26,7 @@ export default function Projects() {
   const [filterDirection, setFilterDirection] = useState<string>("all");
   const [filterYear, setFilterYear] = useState<string>("all");
   const { data: userDirection } = useUserDirection();
-  const { canAccess: canManageProjects } = useCanAccessModule("projects", "manager");
+  const { data: canManageProjects } = useCanManageProjects();
   const { t } = useTranslation();
 
   const { data: projects, isLoading, refetch } = useQuery({
