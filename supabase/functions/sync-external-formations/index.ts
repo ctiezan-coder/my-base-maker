@@ -78,7 +78,7 @@ Deno.serve(async (req) => {
     const externalJWT = await getExternalJWT()
     console.log('External authentication successful')
 
-    // Step 2: Call admin-operations endpoint
+    // Step 2: Call admin-operations endpoint to get participants with event info
     console.log('Calling external admin-operations endpoint...')
     const response = await fetch(
       `${EXTERNAL_SUPABASE_URL}/functions/v1/admin-operations`,
@@ -106,19 +106,66 @@ Deno.serve(async (req) => {
     const participants = externalData?.data || []
     console.log(`Received ${participants.length} participants from external API`)
 
-    // Step 3: Create a default training for imported participants if needed
-    let localTrainingId: string | null = null
+    // Log a sample participant to see available fields
+    if (participants.length > 0) {
+      console.log('Sample participant fields:', JSON.stringify(Object.keys(participants[0])))
+      console.log('Sample participant data:', JSON.stringify(participants[0]))
+    }
 
-    if (directionId) {
+    if (!directionId) {
+      return new Response(
+        JSON.stringify({ error: 'direction_id requis' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Step 3: Group participants by formation/event name
+    // Try to find the formation name from participant data
+    const participantsByFormation = new Map<string, typeof participants>()
+    
+    for (const participant of participants) {
+      // Try various possible field names for the formation/event name
+      const formationName = participant.evenement_nom 
+        || participant.event_name 
+        || participant.formation_nom 
+        || participant.formation_name
+        || participant.evenement?.titre
+        || participant.evenement?.nom
+        || participant.event?.title
+        || participant.event?.name
+        || participant.inscription_evenement?.evenement?.titre
+        || participant.type_formation
+        || null
+
+      const key = formationName || 'Formation importée'
+      
+      if (!participantsByFormation.has(key)) {
+        participantsByFormation.set(key, [])
+      }
+      participantsByFormation.get(key)!.push(participant)
+    }
+
+    console.log(`Grouped into ${participantsByFormation.size} formation(s): ${Array.from(participantsByFormation.keys()).join(', ')}`)
+
+    // Step 4: Create/update trainings and import participants
+    let totalImported = 0
+    let totalUpdated = 0
+    let totalSkipped = 0
+    const trainingIds: string[] = []
+
+    for (const [formationName, formationParticipants] of participantsByFormation) {
       const today = new Date().toISOString().split('T')[0]
-      const trainingTitle = `Import participants externes - ${today}`
+      const trainingTitle = formationName
 
+      // Check if a training with this name already exists for this direction
       const { data: existingTraining } = await localSupabase
         .from('trainings')
         .select('id')
         .eq('title', trainingTitle)
         .eq('direction_id', directionId)
         .maybeSingle()
+
+      let localTrainingId: string
 
       if (existingTraining) {
         localTrainingId = existingTraining.id
@@ -127,12 +174,12 @@ Deno.serve(async (req) => {
           .from('trainings')
           .insert({
             title: trainingTitle,
-            description: `Participants importés depuis le site public le ${today}`,
+            description: `Formation: ${formationName}`,
             training_type: 'Formation',
             start_date: today,
             end_date: today,
             location: 'Import externe',
-            max_participants: participants.length,
+            max_participants: formationParticipants.length,
             created_by: userId,
             direction_id: directionId,
           } as any)
@@ -141,83 +188,68 @@ Deno.serve(async (req) => {
 
         if (insertError) {
           console.error('Error creating training:', insertError)
-          return new Response(
-            JSON.stringify({ error: 'Erreur création formation: ' + insertError.message }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          totalSkipped += formationParticipants.length
+          continue
         }
         localTrainingId = newTraining.id
       }
-    }
 
-    // Step 4: Import participants as training registrations
-    let participantsImported = 0
-    let participantsUpdated = 0
-    let participantsSkipped = 0
+      trainingIds.push(localTrainingId)
 
-    for (const participant of participants) {
-      if (!participant.email) {
-        participantsSkipped++
-        continue
-      }
-
-      if (!localTrainingId) {
-        participantsSkipped++
-        continue
-      }
-
-      const secteurs = (participant.participant_secteurs || [])
-        .map((ps: any) => ps?.secteurs?.nom)
-        .filter(Boolean)
-        .join(', ')
-
-      const { data: existingReg } = await localSupabase
-        .from('training_registrations')
-        .select('id')
-        .eq('training_id', localTrainingId)
-        .eq('participant_email', participant.email)
-        .maybeSingle()
-
-      const regData = {
-        training_id: localTrainingId,
-        participant_name: participant.nom_dirigeant || 'Inconnu',
-        participant_email: participant.email,
-        participant_phone: participant.telephone || null,
-        participant_position: participant.nom_entreprise || 'Non spécifié',
-        attended: false,
-        status: 'Confirmée',
-        registration_date: participant.created_at || new Date().toISOString(),
-      }
-
-      if (existingReg) {
-        const { error: updateError } = await localSupabase
-          .from('training_registrations')
-          .update(regData as any)
-          .eq('id', existingReg.id)
-
-        if (!updateError) participantsUpdated++
-        else {
-          console.error('Reg update error:', updateError)
-          participantsSkipped++
+      // Import participants for this formation
+      for (const participant of formationParticipants) {
+        if (!participant.email) {
+          totalSkipped++
+          continue
         }
-      } else {
-        const { error: regError } = await localSupabase
-          .from('training_registrations')
-          .insert(regData as any)
 
-        if (!regError) participantsImported++
-        else {
-          console.error('Reg insert error:', regError)
-          participantsSkipped++
+        const { data: existingReg } = await localSupabase
+          .from('training_registrations')
+          .select('id')
+          .eq('training_id', localTrainingId)
+          .eq('participant_email', participant.email)
+          .maybeSingle()
+
+        const regData = {
+          training_id: localTrainingId,
+          participant_name: participant.nom_dirigeant || 'Inconnu',
+          participant_email: participant.email,
+          participant_phone: participant.telephone || null,
+          participant_position: participant.nom_entreprise || 'Non spécifié',
+          attended: false,
+          status: 'Confirmée',
+          registration_date: participant.created_at || new Date().toISOString(),
+        }
+
+        if (existingReg) {
+          const { error: updateError } = await localSupabase
+            .from('training_registrations')
+            .update(regData as any)
+            .eq('id', existingReg.id)
+
+          if (!updateError) totalUpdated++
+          else {
+            console.error('Reg update error:', updateError)
+            totalSkipped++
+          }
+        } else {
+          const { error: regError } = await localSupabase
+            .from('training_registrations')
+            .insert(regData as any)
+
+          if (!regError) totalImported++
+          else {
+            console.error('Reg insert error:', regError)
+            totalSkipped++
+          }
         }
       }
-    }
 
-    // Update participant count
-    if (localTrainingId) {
+      // Update participant count
+      const totalParticipants = totalImported + totalUpdated
       await localSupabase
         .from('trainings')
-        .update({ current_participants: participantsImported + participantsUpdated } as any)
+        .update({ current_participants: formationParticipants.length } as any)
         .eq('id', localTrainingId)
     }
 
@@ -225,10 +257,11 @@ Deno.serve(async (req) => {
       JSON.stringify({
         success: true,
         total: participants.length,
-        participantsImported,
-        participantsUpdated,
-        participantsSkipped,
-        trainingId: localTrainingId,
+        participantsImported: totalImported,
+        participantsUpdated: totalUpdated,
+        participantsSkipped: totalSkipped,
+        formations: Array.from(participantsByFormation.keys()),
+        trainingIds,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
