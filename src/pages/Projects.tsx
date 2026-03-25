@@ -40,8 +40,6 @@ export default function Projects() {
 
       if (error) throw error;
       
-      // Exclure les projets auto-générés (événements, formations, partenariats) pour avoir la vue des projets manuels
-      // Ces projets sont toujours accessibles via leurs modules respectifs
       return data || [];
     },
   });

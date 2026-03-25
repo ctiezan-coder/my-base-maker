@@ -121,42 +121,6 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
 
         if (error) throw error;
 
-        // Créer automatiquement un projet associé à l'événement
-        if (newEvent) {
-          const projectData = {
-            name: `Événement: ${formData.title}`,
-            description: formData.description || `Projet lié à l'événement "${formData.title}"`,
-            direction_id: formData.direction_id,
-            status: 'planifié',
-            start_date: formData.start_date || null,
-            end_date: formData.end_date || null,
-            project_type: 'Événement commercial',
-            priority_level: '1' as const,
-          };
-
-          const { data: projectResult, error: projectError } = await supabase
-            .from("projects")
-            .insert([projectData])
-            .select()
-            .single();
-
-          if (projectError) {
-            console.error("Erreur lors de la création du projet associé:", projectError);
-          } else if (projectResult) {
-            // Lier l'événement au projet via event_projects
-            const { error: linkError } = await supabase
-              .from("event_projects")
-              .insert([{
-                event_id: newEvent.id,
-                project_id: projectResult.id,
-              }]);
-
-            if (linkError) {
-              console.error("Erreur lors du lien événement-projet:", linkError);
-            }
-          }
-        }
-
         // Ajouter les participants sélectionnés
         if (selectedCompanies.length > 0 && newEvent) {
           const participants = selectedCompanies.map(companyId => ({
@@ -198,7 +162,7 @@ export function EventDialog({ open, onOpenChange, event, onClose }: EventDialogP
           }
         }
 
-        toast({ title: "Événement créé avec succès (projet associé créé automatiquement)" });
+        toast({ title: "Événement créé avec succès" });
       }
       onClose();
     } catch (error: any) {

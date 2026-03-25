@@ -22,8 +22,6 @@ interface ProjectDialogProps {
 
 const projectTypes = [
   "Accompagnement export",
-  "Événement commercial",
-  "Formation",
   "Étude de marché",
   "Mission commerciale",
   "Partenariat stratégique",
