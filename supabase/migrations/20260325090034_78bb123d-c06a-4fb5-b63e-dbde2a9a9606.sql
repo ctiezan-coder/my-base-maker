@@ -1,0 +1,1 @@
+DELETE FROM training_registrations WHERE id NOT IN (SELECT DISTINCT ON (training_id, participant_email) id FROM training_registrations ORDER BY training_id, participant_email, created_at ASC);
