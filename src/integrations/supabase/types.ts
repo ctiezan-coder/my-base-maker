@@ -8155,6 +8155,54 @@ export type Database = {
           },
         ]
       }
+      shared_modules: {
+        Row: {
+          created_at: string
+          id: string
+          module: Database["public"]["Enums"]["app_module"]
+          notes: string | null
+          shared_by: string | null
+          source_direction_id: string
+          target_direction_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module: Database["public"]["Enums"]["app_module"]
+          notes?: string | null
+          shared_by?: string | null
+          source_direction_id: string
+          target_direction_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module?: Database["public"]["Enums"]["app_module"]
+          notes?: string | null
+          shared_by?: string | null
+          source_direction_id?: string
+          target_direction_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_modules_source_direction_id_fkey"
+            columns: ["source_direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_modules_target_direction_id_fkey"
+            columns: ["target_direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strategic_objectives: {
         Row: {
           created_at: string
@@ -8825,6 +8873,12 @@ export type Database = {
           direction_id: string
           id: string
           module: Database["public"]["Enums"]["app_module"]
+          peut_creer: boolean | null
+          peut_exporter: boolean | null
+          peut_modifier: boolean | null
+          peut_supprimer: boolean | null
+          peut_valider: boolean | null
+          peut_voir: boolean | null
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
           user_id: string
@@ -8834,6 +8888,12 @@ export type Database = {
           direction_id: string
           id?: string
           module: Database["public"]["Enums"]["app_module"]
+          peut_creer?: boolean | null
+          peut_exporter?: boolean | null
+          peut_modifier?: boolean | null
+          peut_supprimer?: boolean | null
+          peut_valider?: boolean | null
+          peut_voir?: boolean | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id: string
@@ -8843,6 +8903,12 @@ export type Database = {
           direction_id?: string
           id?: string
           module?: Database["public"]["Enums"]["app_module"]
+          peut_creer?: boolean | null
+          peut_exporter?: boolean | null
+          peut_modifier?: boolean | null
+          peut_supprimer?: boolean | null
+          peut_valider?: boolean | null
+          peut_voir?: boolean | null
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id?: string
@@ -8883,6 +8949,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_module_action: {
+        Args: {
+          _action: string
+          _module: Database["public"]["Enums"]["app_module"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       check_overdue_mission_reports: { Args: never; Returns: undefined }
       create_notification: {
         Args: {

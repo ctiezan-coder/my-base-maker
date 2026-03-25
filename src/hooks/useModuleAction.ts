@@ -20,7 +20,7 @@ export function useModuleAction(module: AppModule, action: ModuleAction) {
     queryFn: async () => {
       if (!user) return false;
 
-      const { data, error } = await supabase.rpc('check_module_action', {
+      const { data, error } = await supabase.rpc('check_module_action' as any, {
         _user_id: user.id,
         _module: module,
         _action: action,
@@ -66,7 +66,7 @@ export function useModulePermissions(module: AppModule) {
 
       const checks = await Promise.all(
         actions.map(async (action) => {
-          const { data, error } = await supabase.rpc('check_module_action', {
+          const { data, error } = await supabase.rpc('check_module_action' as any, {
             _user_id: user.id,
             _module: module,
             _action: action,

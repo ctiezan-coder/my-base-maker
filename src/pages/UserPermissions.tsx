@@ -66,18 +66,12 @@ export default function UserPermissions() {
           direction_id,
           module,
           role,
-          peut_voir,
-          peut_creer,
-          peut_modifier,
-          peut_supprimer,
-          peut_exporter,
-          peut_valider,
           directions (
             id,
             name
           )
         `)
-        .in("user_id", userIds);
+        .in("user_id", userIds) as any;
 
       // Map roles and assignments to users
       const rolesMap = new Map();
