@@ -8825,6 +8825,12 @@ export type Database = {
           direction_id: string
           id: string
           module: Database["public"]["Enums"]["app_module"]
+          peut_creer: boolean
+          peut_exporter: boolean
+          peut_modifier: boolean
+          peut_supprimer: boolean
+          peut_valider: boolean
+          peut_voir: boolean
           role: Database["public"]["Enums"]["app_role"]
           updated_at: string
           user_id: string
@@ -8834,6 +8840,12 @@ export type Database = {
           direction_id: string
           id?: string
           module: Database["public"]["Enums"]["app_module"]
+          peut_creer?: boolean
+          peut_exporter?: boolean
+          peut_modifier?: boolean
+          peut_supprimer?: boolean
+          peut_valider?: boolean
+          peut_voir?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id: string
@@ -8843,6 +8855,12 @@ export type Database = {
           direction_id?: string
           id?: string
           module?: Database["public"]["Enums"]["app_module"]
+          peut_creer?: boolean
+          peut_exporter?: boolean
+          peut_modifier?: boolean
+          peut_supprimer?: boolean
+          peut_valider?: boolean
+          peut_voir?: boolean
           role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id?: string
@@ -8856,6 +8874,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shared_modules: {
+        Row: {
+          id: string
+          module: Database["public"]["Enums"]["app_module"]
+          source_direction_id: string
+          target_direction_id: string
+          peut_voir: boolean
+          peut_creer: boolean
+          peut_modifier: boolean
+          peut_exporter: boolean
+          shared_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          module: Database["public"]["Enums"]["app_module"]
+          source_direction_id: string
+          target_direction_id: string
+          peut_voir?: boolean
+          peut_creer?: boolean
+          peut_modifier?: boolean
+          peut_exporter?: boolean
+          shared_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          module?: Database["public"]["Enums"]["app_module"]
+          source_direction_id?: string
+          target_direction_id?: string
+          peut_voir?: boolean
+          peut_creer?: boolean
+          peut_modifier?: boolean
+          peut_exporter?: boolean
+          shared_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_modules_source_direction_id_fkey"
+            columns: ["source_direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_modules_target_direction_id_fkey"
+            columns: ["target_direction_id"]
+            isOneToOne: false
+            referencedRelation: "directions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      access_log: {
+        Row: {
+          id: string
+          user_id: string
+          module: Database["public"]["Enums"]["app_module"]
+          action: string
+          details: Json
+          ip_address: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          module: Database["public"]["Enums"]["app_module"]
+          action: string
+          details?: Json
+          ip_address?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          module?: Database["public"]["Enums"]["app_module"]
+          action?: string
+          details?: Json
+          ip_address?: string | null
+          created_at?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -8880,9 +8985,39 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      user_menu_permissions: {
+        Row: {
+          user_id: string
+          module: Database["public"]["Enums"]["app_module"]
+          peut_voir: boolean
+          peut_creer: boolean
+          peut_modifier: boolean
+          peut_supprimer: boolean
+          peut_exporter: boolean
+          peut_valider: boolean
+          direction_name: string
+          access_type: string
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      check_module_action: {
+        Args: {
+          _user_id: string
+          _module: Database["public"]["Enums"]["app_module"]
+          _action: string
+        }
+        Returns: boolean
+      }
+      log_access: {
+        Args: {
+          _module: Database["public"]["Enums"]["app_module"]
+          _action: string
+          _details?: Json
+        }
+        Returns: undefined
+      }
       check_overdue_mission_reports: { Args: never; Returns: undefined }
       create_notification: {
         Args: {
