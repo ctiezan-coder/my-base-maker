@@ -114,7 +114,7 @@ export function UserPermissionsDialog({
     queryKey: ["shared-modules", user?.direction_id],
     queryFn: async () => {
       if (!user?.direction_id) return [];
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("shared_modules")
         .select(`
           *,
