@@ -24,7 +24,7 @@ function ParticipantsList({ trainingId }: { trainingId: string }) {
         .from("training_registrations")
         .select("*")
         .eq("training_id", trainingId)
-        .order("registration_date", { ascending: false });
+        .order("participant_name", { ascending: true });
 
       if (error) throw error;
       return data;
