@@ -58,7 +58,7 @@ export default function UserPermissions() {
         .select("user_id, role")
         .in("user_id", userIds);
 
-      // Get role assignments for each user
+      // Get role assignments for each user (with granular permissions)
       const { data: assignmentsData } = await supabase
         .from("user_role_assignments")
         .select(`
@@ -66,6 +66,12 @@ export default function UserPermissions() {
           direction_id,
           module,
           role,
+          peut_voir,
+          peut_creer,
+          peut_modifier,
+          peut_supprimer,
+          peut_exporter,
+          peut_valider,
           directions (
             id,
             name
