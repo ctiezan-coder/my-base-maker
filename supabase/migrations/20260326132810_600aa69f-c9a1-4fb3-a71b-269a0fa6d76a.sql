@@ -1,0 +1,1 @@
+DELETE FROM companies WHERE rccm_number LIKE 'RCCM-IMP-%';
