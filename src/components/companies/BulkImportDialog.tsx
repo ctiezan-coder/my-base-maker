@@ -13,44 +13,75 @@ interface BulkImportDialogProps {
   onClose: () => void;
 }
 
+const EXPECTED_COLUMNS = ["N°", "Entreprises", "Produits", "Contacts", "Personne Ressource", "Marchés d'exportation", "Dirigeant", "Observations"];
+
 export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<any[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
 
   const downloadSampleFile = () => {
-    // Créer un fichier Excel exemple avec les bonnes colonnes
     const sampleData = [
       {
-        "Entreprise": "EXEMPLE SARL",
-        "Statut juridique": "SARL",
-        "Secteur": "Agroalimentaire",
-        "Produits principaux": "Café, Cacao",
-        "Pays d'exportation": "France, Belgique",
-        "Personne de contact": "M. Jean Dupont",
-        "Email": "contact@exemple.com",
-        "Téléphone": "+225 07 00 00 00 00",
-        "Adresse": "Abidjan, Cocody",
-        "Site web": "www.exemple.com",
-        "Certifications": "ISO 9001",
-        "Code export": "RCCM-001",
-        "Statut": "actif",
-        "Notes": "Client depuis 2020"
+        "N°": 1,
+        "Entreprises": "EXEMPLE SARL",
+        "Produits": "Café, Cacao, Noix de cajou",
+        "Contacts": "contact@exemple.com Tel : 07 07 00 00 00",
+        "Personne Ressource": "M. Jean Dupont",
+        "Marchés d'exportation": "France, Belgique, Sous-région",
+        "Dirigeant": "SELECTIONNER",
+        "Observations": ""
+      },
+      {
+        "N°": 2,
+        "Entreprises": "AGRO EXPORT CI",
+        "Produits": "Fruits tropicaux, Mangues séchées",
+        "Contacts": "info@agroexport.ci Tel : 05 05 00 00 00",
+        "Personne Ressource": "Mme Koné Fatou",
+        "Marchés d'exportation": "Europe, USA",
+        "Dirigeant": "FEMME",
+        "Observations": ""
       }
     ];
 
-    const ws = XLSX.utils.json_to_sheet(sampleData);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Opérateurs");
     
-    // Télécharger le fichier
+    // Create sheets per sector
+    const sectors = ["AGROALIMENTAIRE", "TEXTILES", "COSMÉTIQUES", "ARTISANAT", "BIENS ET SERVICES"];
+    sectors.forEach(sector => {
+      const ws = XLSX.utils.json_to_sheet(sampleData);
+      XLSX.utils.book_append_sheet(wb, ws, sector);
+    });
+
     XLSX.writeFile(wb, "modele-import-operateurs.xlsx");
     
     toast({
       title: "Fichier téléchargé",
-      description: "Le modèle d'import a été téléchargé avec succès",
+      description: "Le modèle d'import a été téléchargé. Chaque onglet correspond à un secteur d'activité.",
     });
+  };
+
+  const extractEmailAndPhone = (contactStr: string | null | undefined): { email: string | null; phone: string | null } => {
+    if (!contactStr) return { email: null, phone: null };
+    const s = String(contactStr).trim();
+    
+    const emailMatch = s.match(/([a-zA-Z0-9._+-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
+    const email = emailMatch ? emailMatch[1] : null;
+    
+    const phoneMatch = s.match(/(?:(?:\+?225\s*)?(?:\d{2}\s*){5}|\(\+?225\)\s*(?:\d{2}\s*){5})/);
+    const phone = phoneMatch ? phoneMatch[0].trim() : null;
+    
+    return { email, phone };
+  };
+
+  const parseMarkets = (val: any): string[] => {
+    if (!val) return [];
+    const s = String(val).trim();
+    if (!s || s === "ND") return [];
+    const parts = s.split(/[,;/]|\bet\b/);
+    return parts.map(p => p.trim()).filter(p => p.length > 1);
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,10 +93,36 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
     try {
       const data = await selectedFile.arrayBuffer();
       const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
       
-      setPreview(jsonData.slice(0, 5));
+      let allRows: any[] = [];
+      
+      for (const sheetName of workbook.SheetNames) {
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        // Detect sector from sheet name or content
+        const sector = sheetName.toUpperCase().includes("AGRO") ? "Agroalimentaire"
+          : sheetName.toUpperCase().includes("TEXT") ? "Textiles et Accessoires"
+          : sheetName.toUpperCase().includes("COSM") ? "Cosmétiques"
+          : sheetName.toUpperCase().includes("ARTIS") ? "Artisanat"
+          : sheetName.toUpperCase().includes("BIEN") ? "Biens et Services"
+          : sheetName;
+        
+        const validRows = jsonData.filter((row: any) => {
+          const name = row["Entreprises"] || row["entreprises"];
+          return name && String(name).trim().length > 0;
+        });
+        
+        validRows.forEach((row: any) => {
+          (row as any).__sector = sector;
+          (row as any).__sheet = sheetName;
+        });
+        
+        allRows = [...allRows, ...validRows];
+      }
+      
+      setTotalCount(allRows.length);
+      setPreview(allRows.slice(0, 10));
     } catch (error) {
       toast({
         variant: "destructive",
@@ -75,101 +132,14 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
     }
   };
 
-  const mapExcelToDatabase = (row: any) => {
-    // Nettoyer les valeurs "ND" et vides
-    const cleanValue = (val: any): string | null => {
-      if (!val || val === "ND" || val === "" || val === " ") return null;
-      return String(val).trim();
-    };
-
-    // Extraire email et téléphone d'une colonne mixte (format: "email Tel : phone")
-    const extractEmailAndPhone = (val: any): { email: string | null; phone: string | null } => {
-      if (!val || val === "ND") return { email: null, phone: null };
-      const strVal = String(val).trim();
-      
-      let email = null;
-      let phone = null;
-      
-      // Extraire l'email (avant "Tel :")
-      const emailMatch = strVal.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/);
-      if (emailMatch) {
-        email = emailMatch[1];
-      }
-      
-      // Extraire le téléphone (après "Tel :")
-      const phoneMatch = strVal.match(/Tel\s*:\s*([+0-9\s\/()-]+)/i);
-      if (phoneMatch) {
-        phone = phoneMatch[1].trim();
-      }
-      
-      return { email, phone };
-    };
-
-    // Mapper la forme juridique aux valeurs acceptées
-    const mapLegalForm = (val: any): "SA" | "SARL" | "SAS" | "SASU" | "EI" | "GIE" | "Autre" | null => {
-      const clean = cleanValue(val);
-      if (!clean) return null;
-      const upper = clean.toUpperCase();
-      if (upper === "SA") return "SA";
-      if (upper === "SARL") return "SARL";
-      if (upper === "SAS") return "SAS";
-      if (upper === "SASU") return "SASU";
-      if (upper === "EI") return "EI";
-      if (upper === "GIE") return "GIE";
-      return "Autre";
-    };
-
-    // Générer un RCCM unique basé sur le nom de l'entreprise
-    const generateRCCM = (companyName: string, codeExport: any) => {
-      const cleanCode = cleanValue(codeExport);
-      if (cleanCode && cleanCode !== "ND") return cleanCode;
-      
-      const sanitized = companyName.replace(/[^A-Z0-9]/gi, "").toUpperCase().substring(0, 10);
-      return `RCCM-${sanitized}-${Date.now().toString().slice(-6)}`;
-    };
-
-    const companyName = row["Entreprise"] || "Entreprise sans nom";
-    
-    // Extraire email et téléphone de la colonne "Email" qui peut contenir les deux
-    const { email: emailFromEmailCol, phone: phoneFromEmailCol } = extractEmailAndPhone(row["Email"]);
-    
-    // Utiliser le téléphone de la colonne "Téléphone" ou celui extrait de "Email"
-    const finalPhone = cleanValue(row["Téléphone"]) || phoneFromEmailCol;
-    
-    // Extraire aussi le contact et son téléphone de "Personne de contact"
-    const { email: contactEmail, phone: contactPhone } = extractEmailAndPhone(row["Personne de contact"]);
-    const contactName = cleanValue(row["Personne de contact"])?.replace(/Tel\s*:.*$/i, '').trim() || null;
-    
-    return {
-      // Onglet Identité
-      company_name: companyName,
-      legal_form: mapLegalForm(row["Statut juridique"]) || "Autre",
-      rccm_number: generateRCCM(companyName, row["Code export"]),
-      dfe_number: `DFE-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      headquarters_location: cleanValue(row["Adresse"]) || "Abidjan, Côte d'Ivoire",
-      email: emailFromEmailCol,
-      phone: finalPhone || "+225 00 00 00 00 00",
-      city: cleanValue(row["Adresse"])?.split(",")[0] || "Abidjan",
-      
-      // Représentant légal / Contact
-      legal_representative_name: contactName || "Non spécifié",
-      legal_representative_email: contactEmail || emailFromEmailCol,
-      legal_representative_phone: contactPhone || finalPhone,
-      
-      // Onglet Activité
-      activity_sector: cleanValue(row["Secteur"]) || "Non spécifié",
-      exported_products: cleanValue(row["Produits principaux"]) || "À définir",
-      commercial_events_participation: "Jamais" as const,
-      
-      // Champs additionnels de la base
-      website: cleanValue(row["Site web"]),
-      certifications: cleanValue(row["Certifications"]) ? [row["Certifications"]] : [],
-      current_export_markets: cleanValue(row["Pays d'exportation"]) ? 
-        row["Pays d'exportation"].split(/[,;]/).map((m: string) => m.trim()).filter(Boolean) : 
-        [],
-      accompaniment_status: cleanValue(row["Statut"]) || "En cours",
-      aciex_interaction_history: cleanValue(row["Notes"]),
-    };
+  const generateHash = (name: string): string => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      const char = name.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash).toString(16).toUpperCase().substring(0, 8);
   };
 
   const handleImport = async () => {
@@ -179,20 +149,77 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      const companies = jsonData.map(mapExcelToDatabase).filter(c => c.company_name);
+      const seenNames = new Set<string>();
+      const companies: any[] = [];
 
-      const { error } = await supabase
-        .from("companies")
-        .insert(companies);
+      for (const sheetName of workbook.SheetNames) {
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+        
+        const sector = sheetName.toUpperCase().includes("AGRO") ? "Agroalimentaire"
+          : sheetName.toUpperCase().includes("TEXT") ? "Textiles et Accessoires"
+          : sheetName.toUpperCase().includes("COSM") ? "Cosmétiques"
+          : sheetName.toUpperCase().includes("ARTIS") ? "Artisanat"
+          : sheetName.toUpperCase().includes("BIEN") ? "Biens et Services"
+          : sheetName;
 
-      if (error) throw error;
+        for (const row of jsonData as any[]) {
+          const name = (row["Entreprises"] || row["entreprises"] || "").toString().trim();
+          if (!name) continue;
+          
+          const nameUpper = name.toUpperCase();
+          if (seenNames.has(nameUpper)) continue;
+          seenNames.add(nameUpper);
+
+          const { email, phone } = extractEmailAndPhone(row["Contacts"] || row["contacts"]);
+          const markets = parseMarkets(row["Marchés d'exportation"] || row["marchés d'exportation"] || row["Marché d'exportation"]);
+          const contactName = (row["Personne Ressource"] || row["Personnes Ressources"] || row["personne ressource"] || "").toString().trim() || null;
+          const products = (row["Produits"] || row["produits"] || "").toString().trim() || null;
+          const observations = (row["Observations"] || row["observations"] || row["Observation"] || "").toString().trim() || null;
+          
+          const hash = generateHash(nameUpper + Date.now().toString());
+          
+          companies.push({
+            company_name: name,
+            activity_sector: sector,
+            exported_products: products,
+            email: email,
+            phone: phone,
+            legal_representative_name: contactName,
+            current_export_markets: markets.length > 0 ? markets : [],
+            rccm_number: `RCCM-IMP-${hash}`,
+            dfe_number: `DFE-IMP-${hash}`,
+            headquarters_location: "Abidjan, Côte d'Ivoire",
+            legal_form: "Autre" as const,
+            accompaniment_status: "Actif",
+            aciex_interaction_history: observations && observations !== "SELECTIONNER" ? observations : null,
+          });
+        }
+      }
+
+      if (companies.length === 0) {
+        toast({
+          variant: "destructive",
+          title: "Aucune donnée",
+          description: "Aucun opérateur valide trouvé dans le fichier",
+        });
+        return;
+      }
+
+      // Insert in batches of 50
+      const batchSize = 50;
+      let inserted = 0;
+      for (let i = 0; i < companies.length; i += batchSize) {
+        const batch = companies.slice(i, i + batchSize);
+        const { error } = await supabase.from("companies").insert(batch);
+        if (error) throw error;
+        inserted += batch.length;
+      }
 
       toast({
         title: "Import réussi",
-        description: `${companies.length} opérateurs ont été importés avec succès`,
+        description: `${inserted} opérateurs ont été importés avec succès`,
       });
       
       onClose();
@@ -213,7 +240,7 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileSpreadsheet className="w-5 h-5" />
-            Import en masse
+            Import en masse des opérateurs
           </DialogTitle>
         </DialogHeader>
 
@@ -222,16 +249,19 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-2">
-                <p>Téléchargez un fichier Excel (.xlsx) contenant les colonnes : Entreprise, Statut juridique, Secteur, Produits principaux, Pays d'exportation, Personne de contact, Email, Téléphone, Adresse, Site web, Certifications, Code export, Statut, Notes.</p>
+                <p className="font-medium">Format attendu :</p>
+                <p className="text-sm">Fichier Excel (.xlsx) avec <strong>un onglet par secteur</strong> (Agroalimentaire, Textiles, Cosmétiques, etc.).</p>
+                <p className="text-sm">Colonnes requises : <strong>N°, Entreprises, Produits, Contacts, Personne Ressource, Marchés d'exportation, Dirigeant, Observations</strong></p>
+                <p className="text-sm text-muted-foreground">La colonne Contacts peut contenir email et téléphone ensemble (ex: "contact@email.com Tel : 07 07 00 00 00")</p>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={downloadSampleFile}
                   type="button"
-                  className="w-full sm:w-auto"
+                  className="w-full sm:w-auto mt-2"
                 >
                   <Download className="w-4 h-4 mr-2" />
-                  Télécharger le fichier exemple
+                  Télécharger le fichier modèle
                 </Button>
               </div>
             </AlertDescription>
@@ -260,26 +290,26 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
 
           {preview.length > 0 && (
             <div className="space-y-2">
-              <h3 className="font-medium">Aperçu (5 premières lignes)</h3>
+              <h3 className="font-medium">Aperçu ({totalCount} opérateurs trouvés, 10 premiers affichés)</h3>
               <div className="border rounded-lg overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-muted">
                     <tr>
                       <th className="p-2 text-left">Entreprise</th>
-                      <th className="p-2 text-left">Forme juridique</th>
                       <th className="p-2 text-left">Secteur</th>
+                      <th className="p-2 text-left">Produits</th>
                       <th className="p-2 text-left">Contact</th>
-                      <th className="p-2 text-left">Statut</th>
+                      <th className="p-2 text-left">Marchés</th>
                     </tr>
                   </thead>
                   <tbody>
                     {preview.map((row, idx) => (
                       <tr key={idx} className="border-t">
-                        <td className="p-2 font-medium">{row["Entreprise"]}</td>
-                        <td className="p-2 text-xs">{row["Statut juridique"] !== "ND" ? row["Statut juridique"] : "-"}</td>
-                        <td className="p-2">{row["Secteur"] || "-"}</td>
-                        <td className="p-2 text-xs">{row["Personne de contact"] || "-"}</td>
-                        <td className="p-2 text-xs">{row["Statut"] || "-"}</td>
+                        <td className="p-2 font-medium text-xs">{row["Entreprises"] || row["entreprises"] || "-"}</td>
+                        <td className="p-2 text-xs">{row.__sector || "-"}</td>
+                        <td className="p-2 text-xs max-w-[200px] truncate">{row["Produits"] || row["produits"] || "-"}</td>
+                        <td className="p-2 text-xs">{row["Personne Ressource"] || row["Personnes Ressources"] || "-"}</td>
+                        <td className="p-2 text-xs max-w-[150px] truncate">{row["Marchés d'exportation"] || row["Marché d'exportation"] || "-"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -293,7 +323,7 @@ export function BulkImportDialog({ open, onOpenChange, onClose }: BulkImportDial
               Annuler
             </Button>
             <Button onClick={handleImport} disabled={!file || loading}>
-              {loading ? "Import en cours..." : "Importer"}
+              {loading ? "Import en cours..." : `Importer${totalCount > 0 ? ` (${totalCount})` : ""}`}
             </Button>
           </div>
         </div>
