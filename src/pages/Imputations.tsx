@@ -141,6 +141,17 @@ export default function Imputations() {
     return matchesSearch && matchesEtat && matchesDirection && matchesYear;
   });
 
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterEtat, filterDirection, filterYear]);
+
+  const totalPages = Math.ceil(filteredImputations.length / ITEMS_PER_PAGE);
+  const paginatedImputations = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredImputations.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredImputations, currentPage]);
+
   const stats = {
     total: imputations.length,
     enAttente: imputations.filter((i) => i.etat === "En attente").length,
