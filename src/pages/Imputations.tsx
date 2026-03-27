@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImputationDialog } from "@/components/imputations/ImputationDialog";
 import { ImputationTable } from "@/components/imputations/ImputationTable";
-import { Plus, Search, Download, FileText, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Search, Download, FileText, Clock, CheckCircle, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Imputation } from "@/types/imputation";
 
 export default function Imputations() {
@@ -26,6 +26,8 @@ export default function Imputations() {
   const [filterDirection, setFilterDirection] = useState<string>("all");
   const [filterYear, setFilterYear] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
   const [selectedImputation, setSelectedImputation] = useState<Imputation | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -138,6 +140,17 @@ export default function Imputations() {
 
     return matchesSearch && matchesEtat && matchesDirection && matchesYear;
   });
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterEtat, filterDirection, filterYear]);
+
+  const totalPages = Math.ceil(filteredImputations.length / ITEMS_PER_PAGE);
+  const paginatedImputations = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredImputations.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredImputations, currentPage]);
 
   const stats = {
     total: imputations.length,
@@ -329,10 +342,63 @@ export default function Imputations() {
       <Card>
         <CardContent className="pt-6">
           <ImputationTable
-            imputations={filteredImputations}
+            imputations={paginatedImputations}
             onEdit={handleEdit}
             canManage={canManageImputations}
           />
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-4 pt-4 border-t">
+              <p className="text-sm text-muted-foreground">
+                Affichage {((currentPage - 1) * ITEMS_PER_PAGE) + 1} - {Math.min(currentPage * ITEMS_PER_PAGE, filteredImputations.length)} sur {filteredImputations.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Précédent
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                    let page: number;
+                    if (totalPages <= 7) {
+                      page = i + 1;
+                    } else if (currentPage <= 4) {
+                      page = i + 1;
+                    } else if (currentPage >= totalPages - 3) {
+                      page = totalPages - 6 + i;
+                    } else {
+                      page = currentPage - 3 + i;
+                    }
+                    return (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        className="w-9"
+                        onClick={() => setCurrentPage(page)}
+                      >
+                        {page}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Suivant
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
