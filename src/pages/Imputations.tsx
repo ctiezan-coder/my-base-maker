@@ -17,7 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ImputationDialog } from "@/components/imputations/ImputationDialog";
 import { ImputationTable } from "@/components/imputations/ImputationTable";
-import { Plus, Search, Download, FileText, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Plus, Search, Download, FileText, Clock, CheckCircle, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import type { Imputation } from "@/types/imputation";
 
 export default function Imputations() {
