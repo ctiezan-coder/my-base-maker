@@ -26,6 +26,8 @@ export default function Imputations() {
   const [filterDirection, setFilterDirection] = useState<string>("all");
   const [filterYear, setFilterYear] = useState<string>("all");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
   const [selectedImputation, setSelectedImputation] = useState<Imputation | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
