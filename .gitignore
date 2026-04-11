@@ -17,6 +17,10 @@ dist-ssr
 .env.local
 .env.*.local
 
+# Sensitive data files
+public/database-export.sql
+*.sql.bak
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

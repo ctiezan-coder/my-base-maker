@@ -49,6 +49,9 @@ const signupSchema = z.object({
   path: ["confirmPassword"],
 });
 
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 60_000; // 1 minute
+
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -57,6 +60,8 @@ export default function Auth() {
   const [fullName, setFullName] = useState('');
   const [directionId, setDirectionId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockoutUntil, setLockoutUntil] = useState<number | null>(null);
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -90,7 +95,18 @@ export default function Auth() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Rate limiting: check lockout
+    if (lockoutUntil && Date.now() < lockoutUntil) {
+      const secondsLeft = Math.ceil((lockoutUntil - Date.now()) / 1000);
+      toast({
+        variant: "destructive",
+        title: "Trop de tentatives",
+        description: `Veuillez patienter ${secondsLeft} secondes avant de réessayer.`,
+      });
+      return;
+    }
+
     try {
       loginSchema.parse({ email, password });
     } catch (error) {
@@ -109,14 +125,29 @@ export default function Auth() {
     setLoading(false);
 
     if (error) {
-      toast({
-        variant: "destructive",
-        title: "Erreur de connexion",
-        description: error.message === "Invalid login credentials" 
-          ? "Email ou mot de passe incorrect"
-          : "Une erreur s'est produite lors de la connexion",
-      });
+      const newAttempts = loginAttempts + 1;
+      setLoginAttempts(newAttempts);
+
+      if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+        setLockoutUntil(Date.now() + LOCKOUT_DURATION_MS);
+        setLoginAttempts(0);
+        toast({
+          variant: "destructive",
+          title: "Compte temporairement verrouillé",
+          description: "Trop de tentatives. Veuillez patienter 1 minute.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erreur de connexion",
+          description: error.message === "Invalid login credentials"
+            ? "Email ou mot de passe incorrect"
+            : "Une erreur s'est produite lors de la connexion",
+        });
+      }
     } else {
+      setLoginAttempts(0);
+      setLockoutUntil(null);
       toast({
         title: "Connexion réussie",
         description: "Bienvenue sur ACIEX !",
