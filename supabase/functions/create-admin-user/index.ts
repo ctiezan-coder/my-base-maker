@@ -1,7 +1,12 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.77.0'
 
+const ALLOWED_ORIGIN = Deno.env.get('ALLOWED_ORIGIN');
+if (!ALLOWED_ORIGIN) {
+  console.warn('ALLOWED_ORIGIN is not set — CORS will reject requests without a configured origin.');
+}
+
 const corsHeaders = {
-  'Access-Control-Allow-Origin': Deno.env.get('ALLOWED_ORIGIN') || '*',
+  'Access-Control-Allow-Origin': ALLOWED_ORIGIN || 'https://abbxntdwuvduagjtlyri.supabase.co',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
@@ -48,7 +53,32 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { email, password, fullName, directionId } = await req.json();
+    const body = await req.json();
+    const { email, password, fullName, directionId } = body;
+
+    // Validate required fields
+    if (!email || !password || !fullName) {
+      return new Response(
+        JSON.stringify({ error: 'Email, mot de passe et nom complet sont requis' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return new Response(
+        JSON.stringify({ error: 'Format email invalide' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Validate password strength
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      return new Response(
+        JSON.stringify({ error: 'Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule et un chiffre' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Create Supabase admin client
     const supabaseAdmin = createClient(
