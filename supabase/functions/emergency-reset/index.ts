@@ -109,6 +109,18 @@ Deno.serve(async (req) => {
       );
     }
 
+    const { error: auditError } = await supabaseAdmin
+      .from('access_log')
+      .insert({
+        user_id: caller.id,
+        module: 'admin',
+        action: 'emergency_reset_password',
+        details: { target_email: email, target_user_id: profile.user_id },
+      });
+    if (auditError) {
+      console.error('Failed to write audit log:', auditError);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,

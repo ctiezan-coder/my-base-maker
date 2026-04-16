@@ -81,6 +81,13 @@ serve(async (req) => {
     const validated = deleteUserSchema.parse(body)
     const { userId } = validated
 
+    if (user.id === userId) {
+      return new Response(
+        JSON.stringify({ error: 'Administrators cannot delete their own account' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Before deleting the user, reassign all their created data to NULL
     // This preserves data integrity while removing user attribution
     
