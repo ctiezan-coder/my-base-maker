@@ -5,21 +5,25 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   // Check account status
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading, error: profileError } = useQuery({
     queryKey: ['profile', user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('account_status')
         .eq('user_id', user.id)
         .single();
+
+      if (error) throw error;
+
       return data;
     },
     enabled: !!user,
@@ -47,7 +51,32 @@ export default function Dashboard() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="text-center space-y-4">
+          <p className="text-muted-foreground">Redirection vers la connexion…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (profileError || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="max-w-md text-center space-y-4">
+          <h1 className="text-2xl font-semibold">Impossible d’afficher cette page</h1>
+          <p className="text-muted-foreground">
+            Le profil utilisateur est introuvable ou inaccessible pour le moment.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Button onClick={() => navigate('/auth')}>Retour à la connexion</Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

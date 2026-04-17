@@ -9,6 +9,7 @@ import logo from "@/assets/ci-export-logo.png";
 import { MonthlyActivityChart, SectorDistributionChart, OpportunitiesChart, ConnectionsEvolutionChart } from "@/components/dashboard/DashboardCharts";
 import { Progress } from "@/components/ui/progress";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -141,8 +142,31 @@ const Index = () => {
     );
   }
 
-  if (!user || profileError) {
-    return null;
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <p className="text-muted-foreground">Redirection vers la connexion…</p>
+      </div>
+    );
+  }
+
+  if (profileError || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
+        <div className="max-w-md text-center space-y-4">
+          <h1 className="text-2xl font-semibold">Tableau de bord indisponible</h1>
+          <p className="text-muted-foreground">
+            Le profil utilisateur n’a pas pu être chargé, ce qui provoquait l’écran blanc.
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Button onClick={() => navigate('/auth')}>Retour à la connexion</Button>
+            <Button variant="outline" onClick={() => window.location.reload()}>
+              Réessayer
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const formatCurrency = (value: number) => {
