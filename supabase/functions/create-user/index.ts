@@ -102,10 +102,10 @@ serve(async (req) => {
       )
     }
 
-    // Update profile with direction
+    // Update profile with direction and ensure account is approved
     await supabaseClient
       .from('profiles')
-      .update({ direction_id: directionId })
+      .update({ direction_id: directionId, account_status: 'approved' })
       .eq('user_id', newUser.user.id)
 
     // Assign role
